@@ -1,0 +1,96 @@
+basePath: /
+definitions:
+  handler.EmailCredentials:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  handler.RegisterData:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      password:
+        type: string
+    type: object
+  handler.accessTokenResponse:
+    properties:
+      accessToken:
+        type: string
+    type: object
+  handler.errResponse:
+    properties:
+      error:
+        type: string
+    type: object
+host: api.larek.tech
+info:
+  contact:
+    email: fiber@swagger.io
+    name: API Support
+  description: This is a sample swagger for Fiber
+  license:
+    name: BSD 3-Clause License
+    url: https://raw.githubusercontent.com/EgorTarasov/true-tech/main/LICENSE
+  termsOfService: http://swagger.io/terms/
+  title: lct api
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: auth with email + password
+      parameters:
+      - description: user creds
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/handler.EmailCredentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.accessTokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errResponse'
+      summary: Auth with email creds
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: creating email account with FirstName and LastName
+      parameters:
+      - description: User Email
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/handler.RegisterData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.accessTokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errResponse'
+      summary: creating email account
+      tags:
+      - auth
+swagger: "2.0"

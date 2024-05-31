@@ -1,0 +1,51 @@
+version: "3"
+
+networks:
+  telemetry:
+    driver: bridge
+
+services:
+  jaeger:
+    image: jaegertracing/all-in-one
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "5775:5775"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"
+      - "9411:9411"
+      - "4317:4317"
+      - "4318:4318"
+    networks:
+      - telemetry
+
+  # prometheus:
+  #   image: prom/prometheus:v2.28.0
+  #   volumes:
+  #     - ./prometheus:/etc/prometheus/
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yaml'
+  #   ports:
+  #     - "9090:9090"
+  #   networks:
+  #     - telemetry
+
+
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   depends_on:
+  #     - prometheus
+  #   ports:
+  #     - "3000:3000"
+  #   networks:
+  #     - telemetry
+  #   volumes:
+  #     - grafana-storage:/var/lib/grafana
+  #   env_file:
+  #     - ../.env # stores credentials
+  #   environment:
+  #     - GF_USERS_ALLOW_SIGN_UP=false

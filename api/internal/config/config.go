@@ -1,0 +1,42 @@
+package config
+
+import (
+	"github.com/EgorTarasov/lct-2024/api/pkg/postgres"
+	"github.com/EgorTarasov/lct-2024/api/pkg/redis"
+	"github.com/EgorTarasov/lct-2024/api/pkg/s3"
+	"github.com/EgorTarasov/lct-2024/api/pkg/telemetry"
+	"github.com/ilyakaznacheev/cleanenv"
+)
+
+type server struct {
+	Port        int      `yaml:"port"`
+	Domain      string   `yaml:"domain"`
+	CorsOrigins []string `yaml:"cors-origins"`
+}
+
+// TODO: add comments
+type vkAuth struct {
+	VkTokenUrl     string `yaml:"vk-token-url"`
+	VkClientId     string `yaml:"vk-client-id"`
+	VkSecureToken  string `yaml:"vk-secure-token"`
+	VkServiceToken string `yaml:"vk_service_token"`
+	VkRedirectUri  string `yaml:"vk-redirect-uri"`
+}
+
+type Config struct {
+	Server    *server           `yaml:"http-server"`
+	Telemetry *telemetry.Config `yaml:"telemetry"`
+	Database  *postgres.Config  `yaml:"postgres"`
+	Redis     *redis.Config     `yaml:"redis"`
+	VkAuth    *vkAuth           `yaml:"vk-auth"`
+	S3        *s3.Config        `yaml:"s3"`
+}
+
+// MustNew создает новый конфиг из файла и завершает программу в случае ошибки
+func MustNew(path string) *Config {
+	cfg := &Config{}
+	if err := cleanenv.ReadConfig(path, cfg); err != nil {
+		panic(err)
+	}
+	return cfg
+}
