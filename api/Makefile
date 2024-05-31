@@ -51,7 +51,7 @@ ifeq (,$(wildcard .env))
     POSTGRES_USER := 'SuperPuperUser'
     POSTGRES_PASSWORD := 'SuperStrongPassword'
     POSTGRES_DB := 'dev'
-    POSTGRES_HOST := '192.168.1.70'
+    POSTGRES_HOST := '127.0.0.1'
     POSTGRES_PORT := 5432
 else
     # Иначе, подключаем переменные из файла .env
@@ -83,3 +83,6 @@ docker-build:
 .PHONY: docker-push
 docker-push:
 	docker push ghcr.io/egortarasov/lct-2024/api:latest
+
+.PHONY: push
+push: docker-build docker-push

@@ -1,0 +1,15 @@
+version: "3"
+
+
+networks:
+  data:
+    driver: bridge
+
+services:
+  backend:
+    image: ghcr.io/egortarasov/lct-2024/api:latest
+    command: ./main
+    volumes:
+      - ./config.yaml:/root/config.yaml
+    ports:
+      - "9999:9999" # container port defined in config.yaml
