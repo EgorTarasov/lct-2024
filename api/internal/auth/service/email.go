@@ -5,19 +5,19 @@ import (
 	"errors"
 	"fmt"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/EgorTarasov/lct-2024/api/internal/auth/models"
 	"github.com/EgorTarasov/lct-2024/api/internal/auth/token"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
-type EmailUserRepo interface {
+type emailUserRepo interface {
 	Create(ctx context.Context, user models.UserCreate) (int64, error)
-	GetById(ctx context.Context, id int64) (models.UserDao, error)
-	CreateEmail(ctx context.Context, userId int64, email, password, ip string) error
+	GetByID(ctx context.Context, id int64) (models.UserDao, error)
+	CreateEmail(ctx context.Context, userID int64, email, password, ip string) error
 	GetPasswordHash(ctx context.Context, email string) (int64, string, error)
-	UpdateEmailUsage(ctx context.Context, userId int64, ip string) error
-	GetUserId(ctx context.Context, email string) (int64, error)
+	UpdateEmailUsage(ctx context.Context, userID int64, ip string) error
+	GetUserID(ctx context.Context, email string) (int64, error)
 }
 
 // CreateUserEmail создание аккаунта пользователя с использованием email + паролю
@@ -25,7 +25,7 @@ func (s *service) CreateUserEmail(ctx context.Context, data models.UserCreate, e
 	ctx, span := s.tracer.Start(ctx, "service.CreateUserEmail")
 	defer span.End()
 
-	id, err := s.ur.GetUserId(ctx, email)
+	id, err := s.ur.GetUserID(ctx, email)
 	if err != nil || id != 0 {
 		return "", fmt.Errorf("user with given email already exists")
 	}
@@ -47,13 +47,13 @@ func (s *service) CreateUserEmail(ctx context.Context, data models.UserCreate, e
 	}
 
 	//// создание токена по id пользователя
-	user, err := s.ur.GetById(ctx, id)
+	user, err := s.ur.GetByID(ctx, id)
 	if err != nil {
 		return "", err
 	}
 
 	accessToken, err := token.Encode(ctx, token.UserPayload{
-		UserId:   user.Id,
+		UserID:   user.ID,
 		AuthType: "email",
 		Role:     user.Role,
 	})
@@ -82,13 +82,13 @@ func (s *service) AuthorizeEmail(ctx context.Context, email, password, ip string
 	}
 
 	// создание jwt payload
-	user, err := s.ur.GetById(ctx, id)
+	user, err := s.ur.GetByID(ctx, id)
 	if err != nil {
 		return "", err
 	}
 
 	accessToken, err := token.Encode(ctx, token.UserPayload{
-		UserId:   user.Id,
+		UserID:   user.ID,
 		AuthType: "email",
 		Role:     user.Role,
 	})

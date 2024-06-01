@@ -17,8 +17,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type VkUserRepo interface {
-	GetVkUserData(ctx context.Context, vkId int64) (models.UserDao, error)
+type vkUserRepo interface {
+	GetVkUserData(ctx context.Context, vkID int64) (models.UserDao, error)
 	SaveVkUserData(ctx context.Context, userData models.VkUserData) error
 	UpdateVkUserData(ctx context.Context, userData models.VkUserData) error
 }
@@ -27,7 +27,7 @@ type VkUserRepo interface {
 type vkCodeResponse struct {
 	AccessToken string `json:"access_token"`
 	ExpiresIn   int64  `json:"expires_in"`
-	UserId      int64  `json:"user_id"`
+	UserID      int64  `json:"user_id"`
 }
 
 type vkUserResponse struct {
@@ -87,8 +87,8 @@ func (s *service) AuthorizeVk(ctx context.Context, accessCode string) (string, e
 		//D.M.YYYY
 
 		vkErr = s.ur.SaveVkUserData(ctx, models.VkUserData{
-			UserId:    id,
-			VkId:      vkUserData.ID,
+			UserID:    id,
+			VkID:      vkUserData.ID,
 			FirstName: vkUserData.FirstName,
 			LastName:  vkUserData.LastName,
 			BirthDate: parseBirthDate(vkUserData.Bdate),
@@ -96,21 +96,25 @@ func (s *service) AuthorizeVk(ctx context.Context, accessCode string) (string, e
 			Photo:     vkUserData.Photo200,
 			Sex:       vkUserData.Sex,
 		})
+		if vkErr != nil {
+			return "", vkErr
+		}
 		user, vkErr = s.ur.GetVkUserData(ctx, vkUserData.ID)
 		if vkErr != nil {
 			return "", vkErr
 		}
 	} else if err != nil {
 		return "", err
-	} else {
-
 	}
 
 	accessToken, err := token.Encode(ctx, token.UserPayload{
-		UserId:   user.Id,
+		UserID:   user.ID,
 		AuthType: "vk",
 		Role:     user.Role,
 	})
+	if err != nil {
+		return accessToken, err
+	}
 
 	return accessToken, nil
 }
@@ -141,20 +145,20 @@ func parseBirthDate(bDate string) time.Time {
 // для получения информации для аккаунта в системе
 // https://oauth.vk.com/access_token?client_id=%s&client_secret=%s&redirect_uri=%s&code=%s
 func (s *service) getVkUserData(ctx context.Context, accessCode string) (vkUserResponse, error) {
-	ctx, span := s.tracer.Start(ctx, "service.getVkUserData")
+	_, span := s.tracer.Start(ctx, "service.getVkUserData")
 	defer span.End()
 
 	client := http.Client{
 		Timeout: 0,
 	}
-	vkAccessTokenUrl := fmt.Sprintf(s.cfg.VkAuth.VkTokenUrl, s.cfg.VkAuth.VkClientId, s.cfg.VkAuth.VkSecureToken, s.cfg.VkAuth.VkRedirectUri, accessCode)
-	log.Info().Str("vk url", vkAccessTokenUrl).Msg("vk url")
+	vkAccessTokenURL := fmt.Sprintf(s.cfg.VkAuth.VkTokenURL, s.cfg.VkAuth.VkClientID, s.cfg.VkAuth.VkSecureToken, s.cfg.VkAuth.VkRedirectURI, accessCode)
+	log.Info().Str("vk url", vkAccessTokenURL).Msg("vk url")
 	var (
 		response vkCodeResponse
 		userData vkUserResponse
 	)
 
-	resp, err := client.Get(vkAccessTokenUrl)
+	resp, err := client.Get(vkAccessTokenURL)
 	if err != nil {
 
 		return userData, fmt.Errorf("err during vk auth %v", err)
@@ -174,10 +178,9 @@ func (s *service) getVkUserData(ctx context.Context, accessCode string) (vkUserR
 		return userData, fmt.Errorf("err during vk decoding json %v", err.Error())
 	}
 
-	rawBytes = nil
-	requestUrl := "https://api.vk.ru/method/users.get?fields=photo_200,sex,city,bdate,schools&v=5.199"
+	requestURL := "https://api.vk.ru/method/users.get?fields=photo_200,sex,city,bdate,schools&v=5.199"
 
-	req, err := http.NewRequest(http.MethodGet, requestUrl, nil)
+	req, err := http.NewRequest(http.MethodGet, requestURL, nil)
 	if err != nil {
 		return userData, fmt.Errorf("err during vk encoding url %v", err.Error())
 	}

@@ -9,8 +9,8 @@ import (
 // VkUserData данные для авторизации по вк
 // используется для передачи данных от сервиса к бд
 type VkUserData struct {
-	UserId    int64
-	VkId      int64
+	UserID    int64
+	VkID      int64
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
 	BirthDate time.Time
@@ -19,9 +19,10 @@ type VkUserData struct {
 	Sex       constants.Sex
 }
 
+// VkUserDataDao запись о пользователе в бд
 type VkUserDataDao struct {
-	UserId    int64         `db:"user_id"`
-	VkId      int64         `db:"vk_id"`
+	UserID    int64         `db:"user_id"`
+	VkID      int64         `db:"vk_id"`
 	FirstName string        `db:"first_name"`
 	LastName  string        `db:"last_name"`
 	BirthDate time.Time     `db:"birth_date"`

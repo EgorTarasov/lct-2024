@@ -3,9 +3,10 @@ package redis
 import (
 	"context"
 
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/EgorTarasov/lct-2024/api/internal/auth/models"
 	"github.com/EgorTarasov/lct-2024/api/pkg/redis"
-	"go.opentelemetry.io/otel/trace"
 )
 
 type tokenRepo struct {

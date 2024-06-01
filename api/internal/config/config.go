@@ -16,13 +16,14 @@ type server struct {
 
 // TODO: add comments
 type vkAuth struct {
-	VkTokenUrl     string `yaml:"vk-token-url"`
-	VkClientId     string `yaml:"vk-client-id"`
+	VkTokenURL     string `yaml:"vk-token-url"`
+	VkClientID     string `yaml:"vk-client-id"`
 	VkSecureToken  string `yaml:"vk-secure-token"`
 	VkServiceToken string `yaml:"vk_service_token"`
-	VkRedirectUri  string `yaml:"vk-redirect-uri"`
+	VkRedirectURI  string `yaml:"vk-redirect-uri"`
 }
 
+// Config для работы приложения
 type Config struct {
 	Server    *server           `yaml:"http-server"`
 	Telemetry *telemetry.Config `yaml:"telemetry"`

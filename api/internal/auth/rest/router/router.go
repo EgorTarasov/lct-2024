@@ -15,6 +15,7 @@ type handler interface {
 	AuthWithVk(c *fiber.Ctx) error
 }
 
+// InitAuthRouter подключение путей для авторизации через RestAPI
 func InitAuthRouter(_ context.Context, app *fiber.App, authHandler handler) error {
 
 	auth := app.Group("/auth")
@@ -22,7 +23,7 @@ func InitAuthRouter(_ context.Context, app *fiber.App, authHandler handler) erro
 	auth.Post("/register", authHandler.CreateAccountWithEmail)
 	auth.Get("/me", middleware.UserClaimsMiddleware, authHandler.GetUserData)
 	auth.Post("/vk", authHandler.AuthWithVk)
-	auth.Post("/password-code", func(ctx *fiber.Ctx) error {
+	auth.Post("/password-code", func(_ *fiber.Ctx) error {
 		return nil
 	})
 	return nil

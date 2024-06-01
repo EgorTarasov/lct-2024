@@ -14,6 +14,8 @@ import (
 	authRouter "github.com/EgorTarasov/lct-2024/api/internal/auth/rest/router"
 	auth "github.com/EgorTarasov/lct-2024/api/internal/auth/service"
 	"github.com/EgorTarasov/lct-2024/api/internal/config"
+
+	// подключение swagger для документации api
 	_ "github.com/EgorTarasov/lct-2024/api/internal/docs"
 	"github.com/EgorTarasov/lct-2024/api/pkg/postgres"
 	"github.com/EgorTarasov/lct-2024/api/pkg/redis"
@@ -24,6 +26,7 @@ import (
 	fiberSwagger "github.com/swaggo/fiber-swagger"
 )
 
+// Run запуск приложения
 func Run(ctx context.Context, _ *sync.WaitGroup) error {
 	var dockerMode bool
 
@@ -84,7 +87,9 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 	authService := auth.New(ctx, cfg, userRepo, tokenRepo, tracer)
 	authHandlers := authHandler.NewAuthController(ctx, authService, tracer)
 
-	authRouter.InitAuthRouter(ctx, app, authHandlers)
+	if err := authRouter.InitAuthRouter(ctx, app, authHandlers); err != nil {
+		return err
+	}
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Server.Port)); err != nil {
 		return err

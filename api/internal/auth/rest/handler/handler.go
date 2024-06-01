@@ -3,11 +3,12 @@ package handler
 import (
 	"context"
 
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/EgorTarasov/lct-2024/api/internal/auth/models"
 	"github.com/EgorTarasov/lct-2024/api/internal/auth/token"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"go.opentelemetry.io/otel/trace"
 )
 
 type authService interface {
@@ -29,6 +30,7 @@ func NewAuthController(_ context.Context, s authService, tracer trace.Tracer) *a
 	}
 }
 
+// RegisterData данные необходимые для регистрации пользователя с помощью email
 type RegisterData struct {
 	Email     string `json:"email"`
 	Password  string `json:"password"`
@@ -46,10 +48,6 @@ type accessTokenResponse struct {
 
 type errResponse struct {
 	Err string `json:"error"`
-}
-
-type createEmailAccount struct {
-	Email string `json:"email"`
 }
 
 // CreateAccountWithEmail godoc
@@ -73,9 +71,7 @@ func (ac *authController) CreateAccountWithEmail(c *fiber.Ctx) error {
 	err := c.BodyParser(&payload)
 
 	if err != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(errResponse{Err: err.Error()})
 	}
 
 	accessToken, err := ac.s.CreateUserEmail(ctx, models.UserCreate{
@@ -84,15 +80,13 @@ func (ac *authController) CreateAccountWithEmail(c *fiber.Ctx) error {
 	}, payload.Email, payload.Password, c.IP())
 
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"err": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(errResponse{Err: err.Error()})
 	}
 
 	return c.Status(fiber.StatusOK).JSON(accessTokenResponse{AccessToken: accessToken})
 }
 
-type EmailCredentials struct {
+type emailCredentials struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
@@ -106,7 +100,7 @@ type EmailCredentials struct {
 // @Tags auth
 // @Accept  json
 // @Produce  json
-// @Param data body EmailCredentials true "user creds"
+// @Param data body emailCredentials true "user creds"
 // @Success 200 {object} accessTokenResponse
 // @Failure 400 {object} errResponse
 // @Router /auth/login [post]
@@ -114,11 +108,9 @@ func (ac *authController) AuthWithEmail(c *fiber.Ctx) error {
 	ctx, span := ac.tracer.Start(c.Context(), "fiber.AuthWithEmail")
 	defer span.End()
 
-	var credentials EmailCredentials
+	var credentials emailCredentials
 	if err := c.BodyParser(&credentials); err != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(errResponse{Err: err.Error()})
 	}
 	// Used in nginx config
 	host := c.GetRespHeader("Host")
@@ -147,8 +139,6 @@ func (ac *authController) GetUserData(c *fiber.Ctx) error {
 	return c.JSON(claims.UserPayload)
 }
 
-
-
 func (ac *authController) AuthWithVk(c *fiber.Ctx) error {
 	ctx, span := ac.tracer.Start(c.Context(), "fiber.GetUserData")
 	defer span.End()
@@ -157,7 +147,7 @@ func (ac *authController) AuthWithVk(c *fiber.Ctx) error {
 
 	accessToken, err := ac.s.AuthorizeVk(ctx, accessCode)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"err": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(errResponse{Err: err.Error()})
 	}
 
 	return c.JSON(fiber.Map{"accessToken": accessToken})
