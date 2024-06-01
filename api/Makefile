@@ -1,7 +1,7 @@
 LOCAL_BIN:=$(CURDIR)/bin
 
 GOLANGCI_BIN:=$(LOCAL_BIN)/golangci-lint
-GOLANGCI_TAG:=1.56.2
+GOLANGCI_TAG:=1.59.0
 MOCKGEN_TAG:=latest
 SMART_IMPORTS := ${LOCAL_BIN}/smartimports
 

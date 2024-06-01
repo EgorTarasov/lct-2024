@@ -20,7 +20,7 @@ type emailUserRepo interface {
 	GetUserID(ctx context.Context, email string) (int64, error)
 }
 
-// CreateUserEmail создание аккаунта пользователя с использованием email + паролю
+// CreateUserEmail создание аккаунта пользователя с использованием email + паролю.
 func (s *service) CreateUserEmail(ctx context.Context, data models.UserCreate, email, password, ip string) (string, error) {
 	ctx, span := s.tracer.Start(ctx, "service.CreateUserEmail")
 	defer span.End()
@@ -64,7 +64,7 @@ func (s *service) CreateUserEmail(ctx context.Context, data models.UserCreate, e
 	return accessToken, nil
 }
 
-// AuthorizeEmail авторизация в приложении с использованием email + пароль
+// AuthorizeEmail авторизация в приложении с использованием email + пароль.
 func (s *service) AuthorizeEmail(ctx context.Context, email, password, ip string) (string, error) {
 	ctx, span := s.tracer.Start(ctx, "service.AuthorizeEmail")
 	defer span.End()

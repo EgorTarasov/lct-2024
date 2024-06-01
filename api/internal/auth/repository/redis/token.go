@@ -14,7 +14,7 @@ type tokenRepo struct {
 	tracer trace.Tracer
 }
 
-// New создание репозитория для токенов авторизации
+// New создание репозитория для токенов авторизации.
 func New(_ context.Context, redisClient *redis.Redis[models.UserDao], tracer trace.Tracer) *tokenRepo {
 	return &tokenRepo{
 		r:      redisClient,
@@ -22,14 +22,14 @@ func New(_ context.Context, redisClient *redis.Redis[models.UserDao], tracer tra
 	}
 }
 
-// Set сохраняет данные пользователя с токеном
+// Set сохраняет данные пользователя с токеном.
 func (tr *tokenRepo) Set(ctx context.Context, token string, data models.UserDao) error {
 	ctx, span := tr.tracer.Start(ctx, "webAuthSessionRepo.Set")
 	defer span.End()
 	return tr.r.Set(ctx, token, data)
 }
 
-// Get получения данных по токену
+// Get получения данных по токену.
 func (tr *tokenRepo) Get(ctx context.Context, token string) (models.UserDao, error) {
 	ctx, span := tr.tracer.Start(ctx, "webAuthSessionRepo.Get")
 	defer span.End()

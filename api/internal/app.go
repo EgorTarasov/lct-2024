@@ -15,7 +15,7 @@ import (
 	auth "github.com/EgorTarasov/lct-2024/api/internal/auth/service"
 	"github.com/EgorTarasov/lct-2024/api/internal/config"
 
-	// подключение swagger для документации api
+	// подключение swagger для документации api.
 	_ "github.com/EgorTarasov/lct-2024/api/internal/docs"
 	"github.com/EgorTarasov/lct-2024/api/pkg/postgres"
 	"github.com/EgorTarasov/lct-2024/api/pkg/redis"
@@ -26,7 +26,7 @@ import (
 	fiberSwagger "github.com/swaggo/fiber-swagger"
 )
 
-// Run запуск приложения
+// Run запуск приложения.
 func Run(ctx context.Context, _ *sync.WaitGroup) error {
 	var dockerMode bool
 
@@ -55,7 +55,7 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 	tracer := traceProvider.Tracer("http-application")
 
 	// pg
-	pg, err := postgres.NewDb(ctx, cfg.Database)
+	pg, err := postgres.NewDB(ctx, cfg.Database)
 	if err != nil {
 		return fmt.Errorf("can't establish connection with postgres: %v", err)
 	}

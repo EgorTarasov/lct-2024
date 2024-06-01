@@ -5,7 +5,7 @@ import (
 	jwtware "github.com/gofiber/contrib/jwt"
 )
 
-// UserClaimsMiddleware - middleware для получение данных из jwt token
+// UserClaimsMiddleware - middleware для получение данных из jwt token.
 var UserClaimsMiddleware = jwtware.New(jwtware.Config{
 	SigningKey: jwtware.SigningKey{Key: []byte(token.Key)},
 	ContextKey: "userClaims",

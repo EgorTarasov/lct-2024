@@ -3,21 +3,52 @@ run:
   timeout: 1m
   issues-exit-code: 1
   tests: false
-  skip-dirs:
+
+output:
+  formats:
+    - format: colored-line-number
+      print-issued-lines: true
+      print-linter-name: true
+
+
+issues:
+  max-issues-per-linter: 1000
+  max-same-issues: 1000
+  exclude-use-default: false
+  exclude-dirs:
     - bin
     - var
     - tmp
     - mocks
     - test
+  exclude:
+    - G104
+    - exported func .* returns unexported type .*, which can be annoying to use
+    - (comment on exported (method|function|type|constants)|should have( a package)? comment|comment should be of the form)
+    - should have a package comment
+    - don't use an underscore in package name
+    - Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*print(f|ln)?|os\.(Un)?Setenv). is not checked
+    - should check returned error before deferring
 
-output:
-  format: colored-line-number
-  print-issued-lines: true
-  print-linter-name: true
 
 linters-settings:
+  prealloc:
+    for-loops: true
+
+  stylecheck:
+    checks: ["all"]
+
+  staticcheck:
+    checks: ["all"]
+
+  funlen:
+    lines: 70
+    statements: 60
+    ignore-comments: true
+
   govet:
-    check-shadowing: true
+    shadow: true
+    # check-shadowing: true
   dupl:
     threshold: 100
   goconst:
@@ -27,30 +58,36 @@ linters-settings:
 linters:
   disable-all: true
   enable:
-    # - dupl - it's very slow, enable if you really know why you need it
+    - bodyclose
+    - dogsled
+    - dupl
+    - decorder
     - errcheck
+    - forbidigo
+    - funlen
+    - gochecknoinits
     - goconst
-    - goimports
-    - gosec
-    - govet
-    - ineffassign
-    - megacheck # (staticcheck + gosimple + unused in one linter)
+    - gocritic
+    - gocyclo
+    - gofmt
+    - gomodguard
     - revive
+    - gosec
+    - gosimple
+    - govet
+    - godot
+    - ineffassign
+    - misspell
+    - nakedret
+    - nolintlint
+    - exportloopref
+    - prealloc
+    - staticcheck
+    - stylecheck
     - typecheck
-    - unused # will be used insted of varcheck + deadcode + structcheck. More info https://github.com/golangci/golangci-lint/issues/1841
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
 
-issues:
-  exclude-use-default: false
-  exclude:
-    # _ instead of err checks
-    - G104
-    # for "public interface + private struct implementation" cases only!
-    - exported func .* returns unexported type .*, which can be annoying to use
-    # can be removed in the development phase
-    # - (comment on exported (method|function|type|const)|should have( a package)? comment|comment should be of the form)
-    # not for the active development - can be removed in the stable phase
-    - should have a package comment
-    - don't use an underscore in package name
-    # EXC0001 errcheck: Almost all programs ignore errors on these functions and in most cases it's ok
-    - Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*print(f|ln)?|os\.(Un)?Setenv). is not checked
-    - should check returned error before deferring
+

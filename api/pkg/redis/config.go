@@ -1,6 +1,6 @@
 package redis
 
-// Config конфигурация для Redis
+// Config конфигурация для Redis.
 type Config struct {
 	Host     string `yaml:"host"`
 	Port     int    `yaml:"port"`

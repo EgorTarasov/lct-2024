@@ -2,14 +2,14 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log"
+
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 
 	"github.com/EgorTarasov/lct-2024/api/internal"
+	"github.com/rs/zerolog/log"
 )
 
 // @title			lct api
@@ -21,13 +21,13 @@ import (
 // @license.name	BSD 3-Clause License
 // @license.url	https://raw.githubusercontent.com/EgorTarasov/true-tech/main/LICENSE
 // @host			api.larek.tech
-// @BasePath		/
+// @BasePath		/ //no-lint.
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	var wg sync.WaitGroup
 	go func() {
 		if err := internal.Run(ctx, &wg); err != nil {
-			log.Fatal(err)
+			panic(err)
 		}
 		os.Exit(0)
 	}()
@@ -38,11 +38,10 @@ func main() {
 func waitForExitSignal(cancel context.CancelFunc, wg *sync.WaitGroup) {
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
-	fmt.Println("SIGINT signal")
+	log.Info().Msg("SIGINT signal")
 	<-sigCh
-	fmt.Println("\nWaiting tasks for shutdown")
+	log.Info().Msg("\nWaiting tasks for shutdown")
 	wg.Wait()
-	fmt.Println("\nAll tasks finished")
+	log.Info().Msg("\nAll tasks finished")
 	cancel()
-
 }

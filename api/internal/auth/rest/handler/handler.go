@@ -22,7 +22,7 @@ type authController struct {
 	tracer trace.Tracer
 }
 
-// NewAuthController создание контроллера для авторизации
+// NewAuthController создание контроллера для авторизации.
 func NewAuthController(_ context.Context, s authService, tracer trace.Tracer) *authController {
 	return &authController{
 		s:      s,
@@ -30,7 +30,7 @@ func NewAuthController(_ context.Context, s authService, tracer trace.Tracer) *a
 	}
 }
 
-// RegisterData данные необходимые для регистрации пользователя с помощью email
+// RegisterData данные необходимые для регистрации пользователя с помощью email.
 type RegisterData struct {
 	Email     string `json:"email"`
 	Password  string `json:"password"`
@@ -62,7 +62,7 @@ type errResponse struct {
 // @Param data body RegisterData true "User Email"
 // @Success 200 {object} accessTokenResponse
 // @Failure 400 {object} errResponse
-// @Router /auth/register [post]
+// @Router /auth/register [post].
 func (ac *authController) CreateAccountWithEmail(c *fiber.Ctx) error {
 	ctx, span := ac.tracer.Start(c.Context(), "fiber.CreateAccountWithEmail")
 	defer span.End()
@@ -103,7 +103,7 @@ type emailCredentials struct {
 // @Param data body emailCredentials true "user creds"
 // @Success 200 {object} accessTokenResponse
 // @Failure 400 {object} errResponse
-// @Router /auth/login [post]
+// @Router /auth/login [post].
 func (ac *authController) AuthWithEmail(c *fiber.Ctx) error {
 	ctx, span := ac.tracer.Start(c.Context(), "fiber.AuthWithEmail")
 	defer span.End()
@@ -133,9 +133,6 @@ func (ac *authController) GetUserData(c *fiber.Ctx) error {
 
 	claims := user.Claims.(*token.UserClaims)
 
-	//if err != nil {
-	//	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"err": err.Response()})
-	//}
 	return c.JSON(claims.UserPayload)
 }
 

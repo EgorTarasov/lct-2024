@@ -10,23 +10,23 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// UserPayload пользовательские данные в jwt token
+// UserPayload пользовательские данные в jwt token.
 type UserPayload struct {
 	UserID   int64          `json:"user_id"`
 	AuthType string         `json:"auth_type"`
 	Role     constants.Role `json:"role"`
 }
 
-// UserClaims jwt token с пользовательскими данными
+// UserClaims jwt token с пользовательскими данными.
 type UserClaims struct {
 	UserPayload
 	jwt.RegisteredClaims
 }
 
-// Key - для подписывания jwt
+// Key - для подписывания jwt.
 const Key = "supersecretkey"
 
-// Encode создание jwt токена
+// Encode создание jwt токена.
 func Encode(_ context.Context, data UserPayload) (string, error) {
 	payload := UserClaims{
 		UserPayload: data,
@@ -54,7 +54,7 @@ func Encode(_ context.Context, data UserPayload) (string, error) {
 	return t, nil
 }
 
-// Decode получение данных из jwt токена
+// Decode получение данных из jwt токена.
 func Decode(_ context.Context, tokenString string) (UserPayload, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &UserClaims{}, func(_ *jwt.Token) (interface{}, error) {
 		return []byte(Key), nil

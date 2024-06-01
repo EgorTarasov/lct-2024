@@ -23,7 +23,7 @@ type vkUserRepo interface {
 	UpdateVkUserData(ctx context.Context, userData models.VkUserData) error
 }
 
-// TODO: вынести структуры вк
+// TODO: вынести структуры вк.
 type vkCodeResponse struct {
 	AccessToken string `json:"access_token"`
 	ExpiresIn   int64  `json:"expires_in"`
@@ -60,14 +60,13 @@ type vkUserResponse struct {
 
 // AuthorizeVk авторизация через vk mini apps
 // https://dev.vk.com/ru/mini-apps/getting-started
-// использует старое API с возможностью получения ФИО + групп пользователя
+// использует старое API с возможностью получения ФИО + групп пользователя.
 func (s *service) AuthorizeVk(ctx context.Context, accessCode string) (string, error) {
 	ctx, span := s.tracer.Start(ctx, "service.AuthorizeVk")
 	defer span.End()
 
 	vkResponse, err := s.getVkUserData(ctx, accessCode)
 	if err != nil {
-
 		return "", fmt.Errorf("err during vk auth: %v", err.Error())
 	}
 	log.Info().Str("vk response", fmt.Sprintf("%+v", vkResponse)).Msg("vk response")
@@ -84,7 +83,7 @@ func (s *service) AuthorizeVk(ctx context.Context, accessCode string) (string, e
 		if vkErr != nil {
 			return "", vkErr
 		}
-		//D.M.YYYY
+		// D.M.YYYY
 
 		vkErr = s.ur.SaveVkUserData(ctx, models.VkUserData{
 			UserID:    id,
@@ -131,13 +130,12 @@ func parseBirthDate(bDate string) time.Time {
 	if len(strings.Split(bDate, ".")) == 3 {
 		birthDate, _ = time.Parse("02-01-2006", bDate)
 	} else {
-		//d.m
+		// d.m
 		bDate += ".1970"
 		birthDate, _ = time.Parse("02-01-2006", bDate)
 	}
 
 	return birthDate
-
 }
 
 //	getVkUserData обработка flow для авторизации вк и получения access_token
@@ -160,7 +158,6 @@ func (s *service) getVkUserData(ctx context.Context, accessCode string) (vkUserR
 
 	resp, err := client.Get(vkAccessTokenURL)
 	if err != nil {
-
 		return userData, fmt.Errorf("err during vk auth %v", err)
 	}
 

@@ -6,8 +6,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// NewDb создает новое подключение к базе данных
-func NewDb(ctx context.Context, cfg *Config) (*Database, error) {
+// NewDB создает новое подключение к базе данных.
+func NewDB(ctx context.Context, cfg *Config) (*Database, error) {
 	pool, err := pgxpool.New(ctx, createDsn(cfg))
 	if err != nil {
 		return nil, err

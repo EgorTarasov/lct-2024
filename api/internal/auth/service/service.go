@@ -26,7 +26,7 @@ type service struct {
 	tr     tokenRepo
 }
 
-// New конструктор сервиса для работы с аккаунтами пользователей
+// New конструктор сервиса для работы с аккаунтами пользователей.
 func New(_ context.Context, cfg *config.Config, userRepo userRepo, tokenRepo tokenRepo, tracer trace.Tracer) *service {
 	return &service{
 		cfg:    cfg,

@@ -4,6 +4,10 @@ networks:
   telemetry:
     driver: bridge
 
+
+volumes:
+  grafana-storage:
+
 services:
   jaeger:
     image: jaegertracing/all-in-one
@@ -23,6 +27,23 @@ services:
     networks:
       - telemetry
 
+  grafana:
+    image: grafana/grafana:latest
+    depends_on:
+      - prometheus
+    ports:
+      - "55000:3000"
+    networks:
+      - telemetry
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    env_file:
+      - ../.env # stores credentials
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+
   # prometheus:
   #   image: prom/prometheus:v2.28.0
   #   volumes:
@@ -34,18 +55,3 @@ services:
   #   networks:
   #     - telemetry
 
-
-  # grafana:
-  #   image: grafana/grafana:latest
-  #   depends_on:
-  #     - prometheus
-  #   ports:
-  #     - "3000:3000"
-  #   networks:
-  #     - telemetry
-  #   volumes:
-  #     - grafana-storage:/var/lib/grafana
-  #   env_file:
-  #     - ../.env # stores credentials
-  #   environment:
-  #     - GF_USERS_ALLOW_SIGN_UP=false

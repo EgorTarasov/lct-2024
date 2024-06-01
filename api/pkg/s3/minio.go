@@ -94,7 +94,6 @@ func (s3 S3) PresignedPutObject(ctx context.Context, bucketName, objectName stri
 
 // PutObject uploads an object to a bucket.
 func (s3 S3) PutObject(ctx context.Context, bucket, obj string, reader io.Reader, size int64, opts minio.PutObjectOptions) (minio.UploadInfo, error) {
-
 	return s3.conn.PutObject(ctx, bucket, obj, reader, size, opts)
 }
 

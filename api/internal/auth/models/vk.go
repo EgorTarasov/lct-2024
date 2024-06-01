@@ -7,7 +7,7 @@ import (
 )
 
 // VkUserData данные для авторизации по вк
-// используется для передачи данных от сервиса к бд
+// используется для передачи данных от сервиса к бд.
 type VkUserData struct {
 	UserID    int64
 	VkID      int64
@@ -19,7 +19,7 @@ type VkUserData struct {
 	Sex       constants.Sex
 }
 
-// VkUserDataDao запись о пользователе в бд
+// VkUserDataDao запись о пользователе в бд.
 type VkUserDataDao struct {
 	UserID    int64         `db:"user_id"`
 	VkID      int64         `db:"vk_id"`

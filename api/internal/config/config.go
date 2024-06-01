@@ -14,7 +14,7 @@ type server struct {
 	CorsOrigins []string `yaml:"cors-origins"`
 }
 
-// TODO: add comments
+// TODO: add comments.
 type vkAuth struct {
 	VkTokenURL     string `yaml:"vk-token-url"`
 	VkClientID     string `yaml:"vk-client-id"`
@@ -23,7 +23,7 @@ type vkAuth struct {
 	VkRedirectURI  string `yaml:"vk-redirect-uri"`
 }
 
-// Config для работы приложения
+// Config для работы приложения.
 type Config struct {
 	Server    *server           `yaml:"http-server"`
 	Telemetry *telemetry.Config `yaml:"telemetry"`
@@ -33,7 +33,7 @@ type Config struct {
 	S3        *s3.Config        `yaml:"s3"`
 }
 
-// MustNew создает новый конфиг из файла и завершает программу в случае ошибки
+// MustNew создает новый конфиг из файла и завершает программу в случае ошибки.
 func MustNew(path string) *Config {
 	cfg := &Config{}
 	if err := cleanenv.ReadConfig(path, cfg); err != nil {

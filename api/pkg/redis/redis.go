@@ -8,12 +8,12 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-// Redis реализация кеша с Redis
+// Redis реализация кеша с Redis.
 type Redis[T any] struct {
 	client *redis.Client
 }
 
-// NewClient создание клиента для подключения к redis
+// NewClient создание клиента для подключения к redis.
 func NewClient(cfg *Config) *redis.Client {
 	return redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
@@ -22,12 +22,12 @@ func NewClient(cfg *Config) *redis.Client {
 	})
 }
 
-// New создает новый экземпляр Redis
+// New создает новый экземпляр Redis.
 func New[T any](client *redis.Client) *Redis[T] {
 	return &Redis[T]{client: client}
 }
 
-// Set добавляет значение в кеш
+// Set добавляет значение в кеш.
 func (cache *Redis[T]) Set(ctx context.Context, key string, value T) error {
 	jsonString, err := json.Marshal(value)
 	if err != nil {
@@ -41,7 +41,7 @@ func (cache *Redis[T]) Set(ctx context.Context, key string, value T) error {
 	return nil
 }
 
-// Get возвращает значение из кеша
+// Get возвращает значение из кеша.
 func (cache *Redis[T]) Get(ctx context.Context, key string) (T, error) {
 	var value T
 	val, err := cache.client.Get(ctx, key).Result()
@@ -57,7 +57,7 @@ func (cache *Redis[T]) Get(ctx context.Context, key string) (T, error) {
 	return value, nil
 }
 
-// Delete удаляет значение из кеша
+// Delete удаляет значение из кеша.
 func (cache *Redis[T]) Delete(ctx context.Context, key string) error {
 	err := cache.client.Del(ctx, key).Err()
 	if err != nil {

@@ -16,7 +16,7 @@ type userAccountRepo struct {
 	tracer trace.Tracer
 }
 
-// NewAccountRepo конструктор репозитория для работы с данными пользовательских аккаунтов
+// NewAccountRepo конструктор репозитория для работы с данными пользовательских аккаунтов.
 func NewAccountRepo(pg *postgres.Database, tracer trace.Tracer) *userAccountRepo {
 	return &userAccountRepo{
 		pg:     pg,
@@ -24,7 +24,7 @@ func NewAccountRepo(pg *postgres.Database, tracer trace.Tracer) *userAccountRepo
 	}
 }
 
-// Create сохраняет запись о пользователе в бд
+// Create сохраняет запись о пользователе в бд.
 func (ur *userAccountRepo) Create(ctx context.Context, user models.UserCreate) (int64, error) {
 	ctx, span := ur.tracer.Start(ctx, "postgres.CreateUser")
 	defer span.End()
@@ -39,7 +39,7 @@ func (ur *userAccountRepo) Create(ctx context.Context, user models.UserCreate) (
 	return newID, nil
 }
 
-// GetByID получение данных пользователя по id
+// GetByID получение данных пользователя по id.
 func (ur *userAccountRepo) GetByID(ctx context.Context, id int64) (models.UserDao, error) {
 	ctx, span := ur.tracer.Start(ctx, "postgres.GetByID")
 	defer span.End()
@@ -61,7 +61,7 @@ where deleted_at is null and id = $1;`
 
 // CreateEmail создание записи для входа по email
 // password - закодировано представление пароля
-// ip - адрес пользователя в сети с которого был создан аккаунт
+// ip - адрес пользователя в сети с которого был создан аккаунт.
 func (ur *userAccountRepo) CreateEmail(ctx context.Context, userID int64, email, password, ip string) error {
 	ctx, span := ur.tracer.Start(ctx, "postgres.CreateEmail")
 	defer span.End()
@@ -76,7 +76,7 @@ func (ur *userAccountRepo) CreateEmail(ctx context.Context, userID int64, email,
 	return nil
 }
 
-// GetPasswordHash для авторизации пользователя в системе
+// GetPasswordHash для авторизации пользователя в системе.
 func (ur *userAccountRepo) GetPasswordHash(ctx context.Context, email string) (int64, string, error) {
 	ctx, span := ur.tracer.Start(ctx, "postgres.GetPasswordHash")
 	defer span.End()
@@ -99,7 +99,7 @@ where deleted_at is null and email = $1;
 	return userID, hashedPassword, nil
 }
 
-// UpdateEmailUsage обновление об авторизации в системе
+// UpdateEmailUsage обновление об авторизации в системе.
 func (ur *userAccountRepo) UpdateEmailUsage(ctx context.Context, userID int64, ip string) error {
 	ctx, span := ur.tracer.Start(ctx, "postgres.GetPasswordHash")
 	defer span.End()
@@ -120,7 +120,7 @@ where user_id = $2;`
 	return nil
 }
 
-// GetVkUserData Получение данных аккаунта пользователя по vk id
+// GetVkUserData Получение данных аккаунта пользователя по vk id.
 func (ur *userAccountRepo) GetVkUserData(ctx context.Context, vkID int64) (models.UserDao, error) {
 	ctx, span := ur.tracer.Start(ctx, "postgres.GetVkUserData")
 	defer span.End()
@@ -151,7 +151,7 @@ where
 	return user, nil
 }
 
-// SaveVkUserData сохранение данных от вк
+// SaveVkUserData сохранение данных от вк.
 func (ur *userAccountRepo) SaveVkUserData(ctx context.Context, userData models.VkUserData) error {
 	ctx, span := ur.tracer.Start(ctx, "postgres.SaveVkUserData")
 	defer span.End()
@@ -168,7 +168,7 @@ values ($1, $2, $3, $4, $5, $6, $7, $8);
 	return nil
 }
 
-// UpdateVkUserData обновление данных от вк
+// UpdateVkUserData обновление данных от вк.
 func (ur *userAccountRepo) UpdateVkUserData(ctx context.Context, userData models.VkUserData) error {
 	ctx, span := ur.tracer.Start(ctx, "postgres.UpdateVkUserData")
 	defer span.End()
@@ -192,7 +192,7 @@ where vk_id = $1 and deleted_at is null;
 	return nil
 }
 
-// GetUserID получение записи о регистрации через email
+// GetUserID получение записи о регистрации через email.
 func (ur *userAccountRepo) GetUserID(ctx context.Context, email string) (int64, error) {
 	ctx, span := ur.tracer.Start(ctx, "postgres.GetUserID")
 	defer span.End()

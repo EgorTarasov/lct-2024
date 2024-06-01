@@ -1,11 +1,11 @@
 package constants
 
-// Role пользователя в системе
+// Role пользователя в системе.
 type Role int
 
 // User - пользователь
 // Admin - администратор платформы
-// Moderator - модератор платформы
+// Moderator - модератор платформы.
 const (
 	User Role = iota
 	Admin
@@ -18,7 +18,7 @@ type Sex int
 
 // Undefined - не указан
 // Female - женский
-// Male - мужской
+// Male - мужской.
 const (
 	Undefined Sex = iota
 	Female
