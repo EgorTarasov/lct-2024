@@ -1,0 +1,8 @@
+.leaflet-control-attribution {
+  display: none;
+}
+
+.leaflet-top.leaflet-right {
+  top: 50%;
+  transform: translateY(-50%);
+}

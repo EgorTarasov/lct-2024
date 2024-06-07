@@ -1,0 +1,105 @@
+import { Link, createLazyFileRoute, useNavigate } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { zz } from "@/utils/zz";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from "@/components/ui/form";
+import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { AuthService } from "@/stores/auth.service";
+
+const loginSchema = zz.object({
+  email: zz.string().email(),
+  password: zz.string().min(6)
+});
+
+export const Page = () => {
+  const navigate = useNavigate();
+  const form = useForm<zz.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: ""
+    }
+  });
+
+  const onSubmit = async (v: zz.infer<typeof loginSchema>) => {
+    const res = await AuthService.login(v);
+    if (res) {
+      navigate({
+        to: "/"
+      });
+    }
+  };
+
+  const disabled = form.formState.isSubmitting;
+
+  return (
+    <Card className="m-auto max-w-sm w-full appear">
+      <CardHeader>
+        <CardTitle className="text-2xl">Вход</CardTitle>
+        <CardDescription>Введите вашу почту чтобы войти в аккаунт</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Почта</FormLabel>
+                  <FormControl>
+                    <Input {...field} disabled={disabled} placeholder="m@example.com" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex">
+                    Пароль
+                    <Link
+                      onClick={() => toast.info("Обратитесь к администратору системы")}
+                      className="ml-auto inline-block text-sm underline text-foreground">
+                      Забыли пароль?
+                    </Link>
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} disabled={disabled} type="password" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="w-full" disabled={disabled}>
+              Войти
+            </Button>
+          </form>
+          <div className="mt-4 text-center text-sm">
+            Нет аккаунта?{" "}
+            <Link to="/register" className="underline">
+              Регистрация
+            </Link>
+          </div>
+        </Form>
+      </CardContent>
+    </Card>
+  );
+};
+
+export const Route = createLazyFileRoute("/_base/login")({
+  component: () => <Page />
+});

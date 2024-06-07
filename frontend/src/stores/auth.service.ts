@@ -1,6 +1,6 @@
 import { AuthEndpoint } from "@/api/endpoints/auth.endpoint";
 import { UserEndpoint } from "@/api/endpoints/user.endpoint";
-import { toast } from "@/components/ui/use-toast";
+import { authToken } from "@/api/utils/authToken";
 import { Auth } from "@/types/auth.type";
 import { makeAutoObservable } from "mobx";
 
@@ -13,6 +13,11 @@ class AuthServiceViewModel {
   }
 
   private async init() {
+    if (!authToken.get()) {
+      this.auth = { state: "anonymous" };
+      return;
+    }
+
     try {
       const user = await UserEndpoint.current();
       this.auth = { state: "authenticated", user };
@@ -21,9 +26,9 @@ class AuthServiceViewModel {
     }
   }
 
-  login = async (username: string, password: string): Promise<boolean> => {
+  login = async (v: AuthEndpoint.LoginTemplate): Promise<boolean> => {
     try {
-      await AuthEndpoint.login(username, password);
+      await AuthEndpoint.login(v);
 
       const user = await UserEndpoint.current();
       this.auth = { state: "authenticated", user };
@@ -33,22 +38,22 @@ class AuthServiceViewModel {
     }
   };
 
-  loginViaVk = async (code: unknown): Promise<boolean> => {
-    try {
-      await AuthEndpoint.loginViaVk(code);
+  // loginViaVk = async (code: unknown): Promise<boolean> => {
+  //   try {
+  //     await AuthEndpoint.loginViaVk(code);
 
-      const user = await UserEndpoint.current();
-      this.auth = { state: "authenticated", user };
-      return true;
-    } catch {
-      toast({
-        variant: "destructive",
-        description: "Не удалось войти через ВКонтакте",
-        title: "Ошибка входа"
-      });
-      return false;
-    }
-  };
+  //     const user = await UserEndpoint.current();
+  //     this.auth = { state: "authenticated", user };
+  //     return true;
+  //   } catch {
+  //     toast({
+  //       variant: "destructive",
+  //       description: "Не удалось войти через ВКонтакте",
+  //       title: "Ошибка входа"
+  //     });
+  //     return false;
+  //   }
+  // };
 
   register = async (v: AuthEndpoint.RegisterTemplate): Promise<boolean> => {
     try {

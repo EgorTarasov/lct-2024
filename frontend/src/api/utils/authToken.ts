@@ -1,10 +1,25 @@
 const tokenKey = "authToken";
 
-const get = () => localStorage.getItem(tokenKey);
+let token: string | null = null;
 
-const set = (token: string) => localStorage.setItem(tokenKey, token);
+const get = () => {
+  if (token) {
+    return token;
+  }
+  token = localStorage.getItem(tokenKey);
+  return token;
+};
 
-const remove = () => localStorage.removeItem(tokenKey);
+const set = (newToken: string) => {
+  localStorage.setItem(tokenKey, newToken);
+  token = newToken;
+  return token;
+};
+
+const remove = () => {
+  localStorage.removeItem(tokenKey);
+  token = null;
+};
 
 export const authToken = Object.assign(
   {},

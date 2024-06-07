@@ -10,8 +10,6 @@ import {
 import { Input } from "../ui/input";
 import { useState } from "react";
 import { Button } from "../ui/button";
-import { AuthEndpoint } from "@/api/endpoints/auth.endpoint";
-import { toast } from "../ui/use-toast";
 
 export const ForgotPassword = observer(() => {
   const [open, setOpen] = useState(false);
