@@ -2,5 +2,5 @@
 
 interface ImportMetaEnv {
   VITE_API_URL: string;
-  VITE_YMAPS_API_KEY: string;
+  VITE_MAPBOX_API_KEY: string;
 }
