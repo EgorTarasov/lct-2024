@@ -8,7 +8,12 @@ import (
 
 // NewDB создает новое подключение к базе данных.
 func NewDB(ctx context.Context, cfg *Config) (*Database, error) {
-	pool, err := pgxpool.New(ctx, createDsn(cfg))
+	config, err := pgxpool.ParseConfig(createDsn(cfg))
+	if err != nil {
+		return nil, err
+	}
+
+	pool, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
 		return nil, err
 	}

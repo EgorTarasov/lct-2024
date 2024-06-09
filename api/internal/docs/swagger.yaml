@@ -1,12 +1,5 @@
-basePath: /
+basePath: / //no-lint.
 definitions:
-  handler.EmailCredentials:
-    properties:
-      email:
-        type: string
-      password:
-        type: string
-    type: object
   handler.RegisterData:
     properties:
       email:
@@ -23,10 +16,43 @@ definitions:
       accessToken:
         type: string
     type: object
+  handler.emailCredentials:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
   handler.errResponse:
     properties:
       error:
         type: string
+    type: object
+  models.MoekDTO:
+    properties:
+      loadActual:
+        type: number
+      loadAvg:
+        type: number
+      loadHeating:
+        type: number
+      loadVent:
+        type: number
+      number:
+        type: string
+      point: {}
+      polygon: {}
+      src:
+        type: string
+      type:
+        type: string
+    type: object
+  models.PropertyDTO:
+    properties:
+      globalID:
+        type: integer
+      point: {}
+      polygon: {}
     type: object
 host: api.larek.tech
 info:
@@ -52,7 +78,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/handler.EmailCredentials'
+          $ref: '#/definitions/handler.emailCredentials'
       produces:
       - application/json
       responses:
@@ -93,4 +119,82 @@ paths:
       summary: creating email account
       tags:
       - auth
+  /geo/moek:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: longitude
+        in: query
+        name: longitude
+        required: true
+        type: number
+      - description: latitude
+        in: query
+        name: latitude
+        required: true
+        type: number
+      - description: radius
+        in: query
+        name: radius
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.MoekDTO'
+            type: array
+      summary: третья тестовая ручка
+      tags:
+      - geo
+  /geo/property:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: longitude
+        in: query
+        name: longitude
+        required: true
+        type: number
+      - description: latitude
+        in: query
+        name: latitude
+        required: true
+        type: number
+      - description: radius
+        in: query
+        name: radius
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.PropertyDTO'
+            type: array
+      summary: вторая тестовая ручка
+      tags:
+      - geo
+  /geo/property/id/:object:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PropertyDTO'
+      summary: тестовая ручка на проверку postgis
+      tags:
+      - geo
 swagger: "2.0"

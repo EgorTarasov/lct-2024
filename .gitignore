@@ -25,4 +25,4 @@ config.yaml
 .vscode/
 .idea/
 bin/
-venv/
+.venv/

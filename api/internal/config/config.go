@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/EgorTarasov/lct-2024/api/pkg/mongo"
 	"github.com/EgorTarasov/lct-2024/api/pkg/postgres"
 	"github.com/EgorTarasov/lct-2024/api/pkg/redis"
 	"github.com/EgorTarasov/lct-2024/api/pkg/s3"
@@ -31,6 +32,7 @@ type Config struct {
 	Redis     *redis.Config     `yaml:"redis"`
 	VkAuth    *vkAuth           `yaml:"vk-auth"`
 	S3        *s3.Config        `yaml:"s3"`
+	Mongo     *mongo.Config     `yaml:"mongo"`
 }
 
 // MustNew создает новый конфиг из файла и завершает программу в случае ошибки.

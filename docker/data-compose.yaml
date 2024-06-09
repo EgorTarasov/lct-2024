@@ -3,6 +3,8 @@ version: "3"
 volumes:
   postgres-data:
   redis-data:
+  elasticsearch-data:
+  mongo-data:
 
 networks:
   data:
@@ -24,6 +26,17 @@ services:
     networks:
       - data
 
+  mongo:
+    image: mongo:5.0.27
+    restart: always
+    env_file:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - "mongo-data:/data/db"
+    ports:
+      - "27017:27017"
+
   redis:
     image: 'redis:7.2.4'
     container_name: 'redis'
@@ -34,3 +47,23 @@ services:
       - 'redis-data:/root/redis'
     networks:
       - data
+
+  # elasticsearch:
+  #   image: elasticsearch:8.13.4
+  #   restart: unless-stopped
+  #   container_name: elasticsearch
+  #   environment:
+  #     - discovery.type=single-node
+  #   volumes:
+  #     - elasticsearch-data:/usr/share/elasticsearch/data
+  #   ports:
+  #     - "9200:9200"
+  #     - "9300:9300"
+
+  # kibana:
+  #   image: docker.elastic.co/kibana/kibana:8.13.4
+  #   restart: unless-stopped
+  #   environment:
+  #     - elasticsearch.hosts=http://elasticsearch:9200
+  #   ports:
+  #     - "54004:5601"

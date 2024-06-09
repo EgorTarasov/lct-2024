@@ -2,14 +2,19 @@ version: "3"
 
 
 networks:
-  data:
-    driver: bridge
+    data_data:
+        external: true
+    telemetry_telemetry:
+        external: true
 
 services:
   backend:
-    image: ghcr.io/egortarasov/lct-2024/api:latest
+    image:  ghcr.io/egortarasov/lct-2024/api:amd64-latest
     command: ./main
     volumes:
-      - ./config.yaml:/root/config.yaml
+      - /home/etarasov/lct.yaml:/root/config.yaml
     ports:
       - "9999:9999" # container port defined in config.yaml
+    networks:
+      - data_data
+      - telemetry_telemetry

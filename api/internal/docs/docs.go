@@ -43,7 +43,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/handler.EmailCredentials"
+                            "$ref": "#/definitions/handler.emailCredentials"
                         }
                     }
                 ],
@@ -102,20 +102,127 @@ const docTemplate = `{
                     }
                 }
             }
-        }
-    },
-    "definitions": {
-        "handler.EmailCredentials": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
+        },
+        "/geo/moek": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "geo"
+                ],
+                "summary": "третья тестовая ручка",
+                "parameters": [
+                    {
+                        "type": "number",
+                        "description": "longitude",
+                        "name": "longitude",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "latitude",
+                        "name": "latitude",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "radius",
+                        "name": "radius",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.MoekDTO"
+                            }
+                        }
+                    }
                 }
             }
         },
+        "/geo/property": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "geo"
+                ],
+                "summary": "вторая тестовая ручка",
+                "parameters": [
+                    {
+                        "type": "number",
+                        "description": "longitude",
+                        "name": "longitude",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "latitude",
+                        "name": "latitude",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "radius",
+                        "name": "radius",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.PropertyDTO"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/geo/property/id/:object": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "geo"
+                ],
+                "summary": "тестовая ручка на проверку postgis",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.PropertyDTO"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
         "handler.RegisterData": {
             "type": "object",
             "properties": {
@@ -141,12 +248,61 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.emailCredentials": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
         "handler.errResponse": {
             "type": "object",
             "properties": {
                 "error": {
                     "type": "string"
                 }
+            }
+        },
+        "models.MoekDTO": {
+            "type": "object",
+            "properties": {
+                "loadActual": {
+                    "type": "number"
+                },
+                "loadAvg": {
+                    "type": "number"
+                },
+                "loadHeating": {
+                    "type": "number"
+                },
+                "loadVent": {
+                    "type": "number"
+                },
+                "number": {
+                    "type": "string"
+                },
+                "point": {},
+                "polygon": {},
+                "src": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.PropertyDTO": {
+            "type": "object",
+            "properties": {
+                "globalID": {
+                    "type": "integer"
+                },
+                "point": {},
+                "polygon": {}
             }
         }
     }
@@ -156,7 +312,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "api.larek.tech",
-	BasePath:         "/",
+	BasePath:         "/ //no-lint.",
 	Schemes:          []string{},
 	Title:            "lct api",
 	Description:      "This is a sample swagger for Fiber",

@@ -25,12 +25,12 @@ func (s *service) CreateUserEmail(ctx context.Context, data models.UserCreate, e
 	ctx, span := s.tracer.Start(ctx, "service.CreateUserEmail")
 	defer span.End()
 
-	id, err := s.ur.GetUserID(ctx, email)
-	if err != nil || id != 0 {
+	id, _ := s.ur.GetUserID(ctx, email)
+	if id != 0 {
 		return "", fmt.Errorf("user with given email already exists")
 	}
 
-	id, err = s.ur.Create(ctx, data)
+	id, err := s.ur.Create(ctx, data)
 	if err != nil {
 		return "", err
 	}

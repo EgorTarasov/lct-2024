@@ -14,7 +14,12 @@ import (
 	authRouter "github.com/EgorTarasov/lct-2024/api/internal/auth/rest/router"
 	auth "github.com/EgorTarasov/lct-2024/api/internal/auth/service"
 	"github.com/EgorTarasov/lct-2024/api/internal/config"
-
+	geoMongo "github.com/EgorTarasov/lct-2024/api/internal/geo/repository/mongo"
+	mapHandler "github.com/EgorTarasov/lct-2024/api/internal/geo/rest/handler"
+	mapRouter "github.com/EgorTarasov/lct-2024/api/internal/geo/rest/router"
+	geo "github.com/EgorTarasov/lct-2024/api/internal/geo/service"
+	mongoDB "github.com/EgorTarasov/lct-2024/api/pkg/mongo"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	// подключение swagger для документации api.
 	_ "github.com/EgorTarasov/lct-2024/api/internal/docs"
 	"github.com/EgorTarasov/lct-2024/api/pkg/postgres"
@@ -30,17 +35,21 @@ import (
 func Run(ctx context.Context, _ *sync.WaitGroup) error {
 	var dockerMode bool
 
-	flag.BoolVar(&dockerMode, "docker", false, "changes hosts names to map docker compose ")
+	flag.BoolVar(&dockerMode, "docker", false, "changes hosts names to geo docker compose ")
 
 	flag.Parse()
 
 	app := fiber.New(fiber.Config{
 		ServerHeader: "larek.tech",
 	})
-	appName := "api-dev"
+	appName := "api-local"
 	if dockerMode {
 		appName = "api-prod"
 	}
+
+	app.Use(logger.New(logger.Config{
+		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
+	}))
 
 	// TODO: make choice for docker.yaml
 	cfg := config.MustNew("config.yaml")
@@ -60,26 +69,26 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 		return fmt.Errorf("can't establish connection with postgres: %v", err)
 	}
 
-	// redis
+	// mongo
+	mongo, err := mongoDB.MustNew(cfg.Mongo)
+	if err != nil {
+		return fmt.Errorf("can't establish connection with mongo: %v", err)
+	}
+	if err = mongoDB.Ping(ctx, mongo); err != nil {
+		return fmt.Errorf("can't establish connection with mongo: %v", err)
+	}
 	redisClient := redis.NewClient(cfg.Redis)
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: strings.Join(cfg.Server.CorsOrigins, ","),
-		AllowMethods: strings.Join([]string{
-			fiber.MethodGet,
-			fiber.MethodPost,
-			fiber.MethodHead,
-			fiber.MethodPut,
-			fiber.MethodDelete,
-			fiber.MethodPatch,
-		}, ","),
-		AllowHeaders:     "*",
+		AllowOrigins:     strings.Join(cfg.Server.CorsOrigins, ","),
 		AllowCredentials: true,
 	}))
 
-	// swagger
-	app.Get("/swagger/*", fiberSwagger.WrapHandler)
+	//TODO: добавить swagger для документации api.
+	docs := app.Group("/docs")
+	docs.Get("/*", fiberSwagger.WrapHandler)
 
+	// auth.
 	tokenRedisClient := redis.New[authModels.UserDao](redisClient)
 	tokenRepo := authRedisRepo.New(ctx, tokenRedisClient, tracer)
 	userRepo := authPgRepo.NewAccountRepo(pg, tracer)
@@ -87,13 +96,22 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 	authService := auth.New(ctx, cfg, userRepo, tokenRepo, tracer)
 	authHandlers := authHandler.NewAuthController(ctx, authService, tracer)
 
-	if err := authRouter.InitAuthRouter(ctx, app, authHandlers); err != nil {
+	if err = authRouter.InitAuthRouter(ctx, app, authHandlers); err != nil {
 		return err
 	}
 
-	if err := app.Listen(fmt.Sprintf(":%d", cfg.Server.Port)); err != nil {
+	// geo.
+	// objectRepo := mapRepo.NewObjectRepo(pg, tracer)
+	propertyRepo := geoMongo.NewPropertyRepository(&mongo, tracer)
+	moeksRepo := geoMongo.NewMoekRepository(&mongo, tracer)
+	mapService := geo.New(ctx, cfg, propertyRepo, moeksRepo, tracer)
+	mapController := mapHandler.NewMapController(ctx, mapService, tracer)
+
+	if err = mapRouter.InitMapRouter(ctx, app, mapController); err != nil {
 		return err
 	}
-
+	if err = app.Listen(fmt.Sprintf(":%d", cfg.Server.Port)); err != nil {
+		return err
+	}
 	return nil
 }

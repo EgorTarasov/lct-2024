@@ -92,13 +92,28 @@ migration-up:
 migration-down:
 	goose -dir "$(MIGRATION_FOLDER)" postgres "$(POSTGRES_SETUP_TEST)" down
 
-.PHONY: docker-build
-docker-build:
-	docker build . -t ghcr.io/egortarasov/lct-2024/api
+.PHONY: docker-build-amd64
+docker-build-amd64:
+	docker build \
+		--tag ghcr.io/egortarasov/lct-2024/api:amd64-latest \
+		--platform linux/amd64 .
 
-.PHONY: docker-push
-docker-push:
-	docker push ghcr.io/egortarasov/lct-2024/api:latest
+.PHONY: docker-build-arm64
+docker-build-arm64:
+	docker build \
+		--tag ghcr.io/egortarasov/lct-2024/api:arm64-latest \
+		--platform linux/arm64 .
 
-.PHONY: push
-push: docker-build docker-push
+.PHONY: docker-push-amd64
+docker-push-amd64:
+	docker push ghcr.io/egortarasov/lct-2024/api:amd64-latest
+
+.PHONY: docker-push-arm64
+docker-push-arm64:
+	docker push ghcr.io/egortarasov/lct-2024/api:arm64-latest
+
+.PHONY: docker-publish-amd64
+docker-publish-amd64: docker-build-amd64 docker-push-amd64
+
+.PHONY: docker-publish-arm64
+docker-publish-arm64: docker-build-arm64 docker-push-arm64
