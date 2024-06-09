@@ -10,7 +10,7 @@ type keys =
   | "SubtleSemi"
   | "Subtle"
   | "Small"
-  | "UI"
+  | "p"
   | "Detail"
   | "Error";
 
@@ -23,7 +23,7 @@ export const Text: Record<keys, (p: HTMLProps<HTMLHeadingElement>) => JSX.Elemen
   SubtleSemi: (p) => <p {...p} className={cn("text-sm font-semibold", p.className)}></p>,
   Subtle: (p) => <p {...p} className={cn("text-sm", p.className)}></p>,
   Small: (p) => <p {...p} className={cn("text-sm leading-4 font-medium", p.className)}></p>,
-  UI: (p) => <p {...p} className={cn("text-base", p.className)}></p>,
+  p: (p) => <p {...p} className={cn("text-base", p.className)}></p>,
   Detail: (p) => <p {...p} className={cn("text-xs leading-5 font-medium", p.className)}></p>,
   Error: (p) => <p {...p} className={cn("text-sm text-red-500 text-center", p.className)}></p>
 };

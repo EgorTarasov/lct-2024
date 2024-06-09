@@ -1,6 +1,5 @@
 import { Text } from "@/components/typography/Text";
 import { cn } from "@/utils/cn";
-import { NoInfer } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 
 interface TabsProps<T extends string> {

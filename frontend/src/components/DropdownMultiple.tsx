@@ -1,3 +1,5 @@
+// legacy
+
 import {
   Combobox,
   Transition,
@@ -7,12 +9,12 @@ import {
   Label,
   ComboboxInput
 } from "@headlessui/react";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { CheckIcon, ChevronDownIcon } from "@radix-ui/react-icons";
 import { cn } from "@/utils/cn";
 
-interface ComboboxMultipleProps<T> {
+export interface ComboboxMultipleProps<T> {
   value: T[];
   onChange: (value: T[]) => void;
   options: readonly T[];
@@ -23,6 +25,7 @@ interface ComboboxMultipleProps<T> {
 }
 
 const DropdownMultiple = observer(<T,>(p: ComboboxMultipleProps<T>) => {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const [inputFocused, setInputFocused] = useState(false);
 
@@ -36,13 +39,14 @@ const DropdownMultiple = observer(<T,>(p: ComboboxMultipleProps<T>) => {
             .replace(/\s+/g, "")
             .includes(query.toLowerCase().replace(/\s+/g, ""))
         );
-  const placeholder = p.value.map((v) => p.compare(v)).join(", ");
+  const placeholder = p.value.map((v) => p.compare(v)).join(", ") || (p.placeholder ?? "");
 
   useEffect(() => {
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         if (inputFocused) {
           event.stopPropagation();
+          inputRef.current?.blur();
           setInputFocused(false);
         }
       }
@@ -58,10 +62,11 @@ const DropdownMultiple = observer(<T,>(p: ComboboxMultipleProps<T>) => {
   return (
     <Combobox value={p.value} multiple onChange={p.onChange}>
       <div className="relative text-sm">
-        {p.label && <Label className="text-text-primary/60 text-base">{p.label}</Label>}
-        <div className={cn("relative h-fit flex items-center w-full", p.label && "mt-3")}>
+        {p.label && <Label className="text-sm">{p.label}</Label>}
+        <div className={cn("relative h-fit flex items-center w-full", p.label && "mt-2")}>
           <ComboboxInput
-            className="whitespace-nowrap w-full cursor-pointer pr-8 text-ellipsis border-2 border-text-primary/20 rounded-lg p-3"
+            ref={inputRef}
+            className="whitespace-nowrap w-full bg-card text-card-foreground cursor-pointer pr-8 text-ellipsis border rounded-lg p-2"
             placeholder={placeholder}
             onFocus={(e) => {
               e.preventDefault();
@@ -73,42 +78,41 @@ const DropdownMultiple = observer(<T,>(p: ComboboxMultipleProps<T>) => {
 
               setInputFocused(false);
             }}
-            displayValue={(value: T[]) => (inputFocused ? "" : placeholder)}
+            displayValue={() => (inputFocused ? "" : placeholder)}
             onChange={(event) => setQuery(event.target.value)}
           />
-          <ComboboxButton className="h-5 w-5 absolute right-2 text-text-primary/60">
+          <ComboboxButton className="h-5 w-5 absolute right-2 text-accent-foreground">
             <ChevronDownIcon />
           </ComboboxButton>
         </div>
         <Transition
           as={Fragment}
-          leave="transition ease-in duration-100 delay-100"
+          leave="transition ease-in duration-100"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
           show={inputFocused}
           afterLeave={() => setQuery("")}>
           <ComboboxOptions
-            className="absolute z-10 mt-1 max-h-60 w-full border border-border overflow-auto rounded-xl py-2 bg-white"
+            className="absolute z-10 mt-1 max-h-60 w-full border overflow-auto rounded-xl py-2 bg-card text-card-foreground"
             style={{
               scrollbarWidth: "thin"
             }}>
             {filteredOptions.length === 0 && query !== "" ? (
-              <div className="px-4 py-2 text-text-secondary">Ничего не найдено</div>
+              <div className="px-4 py-2 text-accent-foreground">Ничего не найдено</div>
             ) : (
               filteredOptions.map((option, index) => (
                 <ComboboxOption
                   key={index}
                   value={option}
-                  className={({ active }) =>
+                  className={({ focus }) =>
                     cn(
-                      "p-2 cursor-pointer flex justify-between hover:bg-text-primary/5 items-center",
-                      active && "bg-primary/5"
+                      "p-2 cursor-pointer flex justify-between hover:bg-accent items-center",
+                      focus && "bg-accent"
                     )
                   }>
-                  {({ selected, active }) => (
+                  {({ selected }) => (
                     <>
                       <span>{p.render(option)}</span>
-                      {/* {active && "актив"} */}
                       {selected && <CheckIcon className="w-5 h-5" />}
                     </>
                   )}

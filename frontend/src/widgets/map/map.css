@@ -5,4 +5,13 @@
 .leaflet-top.leaflet-right {
   top: 50%;
   transform: translateY(-50%);
+  z-index: 3;
+}
+
+.leaflet-pane {
+  z-index: 2;
+}
+
+.dark .leaflet-container {
+  filter: invert(1) hue-rotate(180deg) grayscale(0.7)
 }

@@ -1,13 +1,17 @@
 import { observer } from "mobx-react-lite";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useMap } from "react-leaflet";
-import { MapViewModel } from "./map.vm";
+import { MapStore } from "../../stores/map.store";
 
 export const MapInitializer = observer(() => {
   const map = useMap();
+  const initialized = useRef(false);
 
   useEffect(() => {
-    MapViewModel.setMap(map);
+    if (!initialized.current) {
+      initialized.current = true;
+      MapStore.setMap(map);
+    }
   }, [map]);
 
   return null;

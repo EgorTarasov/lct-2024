@@ -60,7 +60,7 @@ export const Page = () => {
                   <FormItem>
                     <FormLabel>Имя</FormLabel>
                     <FormControl>
-                      <Input {...field} disabled={disabled} placeholder="Max" />
+                      <Input {...field} disabled={disabled} placeholder="Иван" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -73,7 +73,7 @@ export const Page = () => {
                   <FormItem>
                     <FormLabel>Фамилия</FormLabel>
                     <FormControl>
-                      <Input {...field} disabled={disabled} placeholder="Robinson" />
+                      <Input {...field} disabled={disabled} placeholder="Иванов" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -87,7 +87,7 @@ export const Page = () => {
                 <FormItem>
                   <FormLabel>Почта</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={disabled} placeholder="m@example.com" />
+                    <Input {...field} disabled={disabled} placeholder="me@example.com" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

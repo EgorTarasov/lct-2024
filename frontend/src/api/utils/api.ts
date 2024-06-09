@@ -4,21 +4,21 @@ import { ZodObject, z } from "zod";
 import { authToken } from "./authToken";
 import { toast } from "sonner";
 
-axios.defaults.baseURL = "/api/";
+axios.defaults.baseURL = "https://api.lct.larek.tech/";
 
 const getConfig = (config?: AxiosRequestConfig<unknown>) => ({
   ...config,
   headers: {
-    Authorization: `Bearer channel/${authToken.get()}`,
+    Authorization: `Bearer ${authToken.get()}`,
     "Access-Control-Allow-Origin": "*",
     ...config?.headers
   }
 });
 
-const handleRequest = async <T extends z.ZodRawShape>(
+const handleRequest = async <T extends ZodObject<any> | z.ZodArray<ZodObject<any>>>(
   req: () => Promise<AxiosResponse>,
-  schema: ZodObject<T>
-): Promise<z.infer<typeof schema>> => {
+  schema: T
+): Promise<z.infer<T>> => {
   try {
     const res = await req();
 
@@ -41,8 +41,11 @@ const handleRequest = async <T extends z.ZodRawShape>(
         authToken.remove();
         window.location.replace("/login");
       } else if (error.response?.status === 500) {
-        toast.error("Внутренняя ошибка сервера", {
-          description: "Мы все узнаем и починим, попробуйте позже"
+        const errorData = error.response.data as any;
+        toast.error("Ошибка", {
+          description: errorData?.error
+            ? errorData.error
+            : "Мы все узнаем и починим, попробуйте позже"
         });
       } else {
         toast.error("Неизвестная ошибка при выполнении запроса");
@@ -56,35 +59,33 @@ const handleRequest = async <T extends z.ZodRawShape>(
   }
 };
 
-const get = <T extends z.ZodRawShape>(
+const get = <T extends ZodObject<any> | z.ZodArray<ZodObject<any>>>(
   path: string,
-  schema: ZodObject<T>,
+  schema: T,
   config?: AxiosRequestConfig<unknown>
-): Promise<z.infer<typeof schema>> =>
-  handleRequest(() => axios.get(path, getConfig(config)), schema) as any;
+): Promise<z.infer<T>> => handleRequest(() => axios.get(path, getConfig(config)), schema) as any;
 
-const post = <T extends z.ZodRawShape>(
+const post = <T extends ZodObject<any> | z.ZodArray<ZodObject<any>>>(
   path: string,
-  schema: ZodObject<T>,
+  schema: T,
   variables?: unknown,
   config?: AxiosRequestConfig<unknown>
-): Promise<z.infer<typeof schema>> =>
+): Promise<z.infer<T>> =>
   handleRequest(() => axios.post(path, variables, getConfig(config)), schema) as any;
 
-const put = <T extends z.ZodRawShape>(
+const put = <T extends ZodObject<any> | z.ZodArray<ZodObject<any>>>(
   path: string,
-  schema: ZodObject<T>,
+  schema: T,
   variables?: unknown,
   config?: AxiosRequestConfig<unknown>
-): Promise<z.infer<typeof schema>> =>
+): Promise<z.infer<T>> =>
   handleRequest(() => axios.put(path, variables, getConfig(config)), schema);
 
-const del = <T extends z.ZodRawShape>(
+const del = <T extends ZodObject<any> | z.ZodArray<ZodObject<any>>>(
   path: string,
-  schema: ZodObject<T>,
+  schema: T,
   config?: AxiosRequestConfig<unknown>
-): Promise<z.infer<typeof schema>> =>
-  handleRequest(() => axios.delete(path, getConfig(config)), schema) as any;
+): Promise<z.infer<T>> => handleRequest(() => axios.delete(path, getConfig(config)), schema) as any;
 
 export default {
   get,

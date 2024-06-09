@@ -1,9 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { AuthService } from "./auth.service";
-import { Auth } from "@/types/auth.type";
-
-const isLoggedIn = (state: Auth.State): state is Auth.Authenticated =>
-  state.state === "authenticated";
+import { isLoggedIn } from "@/utils/auth";
 
 class grantService {
   constructor() {
@@ -15,6 +12,12 @@ class grantService {
 
     return true;
   }
+
+  get canReadMap() {
+    if (!isLoggedIn(AuthService.auth)) return false;
+
+    return true;
+  }
 }
 
-export const GrantService = new grantService();
+export const GrantsService = new grantService();

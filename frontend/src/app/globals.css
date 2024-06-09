@@ -56,9 +56,9 @@
   * {
     @apply border-border;
   }
-  body,
   #app {
     @apply bg-background text-foreground;
+    transition: background-color 150ms, color 150ms;
   }
 }
 

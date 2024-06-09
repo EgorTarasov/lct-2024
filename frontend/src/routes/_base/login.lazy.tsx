@@ -18,7 +18,7 @@ import { AuthService } from "@/stores/auth.service";
 
 const loginSchema = zz.object({
   email: zz.string().email(),
-  password: zz.string().min(6)
+  password: zz.string()
 });
 
 export const Page = () => {
@@ -58,7 +58,7 @@ export const Page = () => {
                 <FormItem>
                   <FormLabel>Почта</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={disabled} placeholder="m@example.com" />
+                    <Input {...field} disabled={disabled} placeholder="me@example.com" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -69,14 +69,14 @@ export const Page = () => {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="flex">
-                    Пароль
+                  <div className="flex justify-between items-center">
+                    <FormLabel className="flex">Пароль</FormLabel>
                     <Link
                       onClick={() => toast.info("Обратитесь к администратору системы")}
                       className="ml-auto inline-block text-sm underline text-foreground">
                       Забыли пароль?
                     </Link>
-                  </FormLabel>
+                  </div>
                   <FormControl>
                     <Input {...field} disabled={disabled} type="password" />
                   </FormControl>

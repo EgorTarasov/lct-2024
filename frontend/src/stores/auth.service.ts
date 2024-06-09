@@ -2,14 +2,21 @@ import { AuthEndpoint } from "@/api/endpoints/auth.endpoint";
 import { UserEndpoint } from "@/api/endpoints/user.endpoint";
 import { authToken } from "@/api/utils/authToken";
 import { Auth } from "@/types/auth.type";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, when } from "mobx";
 
 class AuthServiceViewModel {
   public auth: Auth.State = { state: "loading" };
 
   constructor() {
     makeAutoObservable(this);
-    void this.init();
+    // void this.init();
+    this.auth = {
+      state: "authenticated",
+      user: {
+        firstName: "John",
+        lastName: "Doe"
+      }
+    };
   }
 
   private async init() {
@@ -37,6 +44,10 @@ class AuthServiceViewModel {
       return false;
     }
   };
+
+  async waitInit() {
+    await when(() => this.auth.state !== "loading");
+  }
 
   // loginViaVk = async (code: unknown): Promise<boolean> => {
   //   try {
@@ -69,6 +80,7 @@ class AuthServiceViewModel {
 
   logout() {
     this.auth = { state: "anonymous" };
+    authToken.remove();
   }
 
   // async updatePassword(token: string, newPassword: string) {

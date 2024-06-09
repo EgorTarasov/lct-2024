@@ -4,15 +4,12 @@ import "./map.css";
 import { observer } from "mobx-react-lite";
 import { MapContainer, TileLayer, Marker, Popup, ZoomControl } from "react-leaflet";
 import { MapInitializer } from "./map-initializer";
-import { MapViewModel } from "./map.vm";
 
 const Map = observer(() => {
-  const vm = MapViewModel;
-
   return (
     <MapContainer
       className="w-full h-screen absolute"
-      center={[51.505, -0.09]}
+      center={[55.751244, 37.618423]}
       zoom={13}
       zoomControl={false}>
       <TileLayer

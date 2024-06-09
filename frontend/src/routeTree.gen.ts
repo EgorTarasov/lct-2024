@@ -20,6 +20,7 @@ import { Route as MapWithfiltersImport } from './routes/_map/_with_filters'
 // Create Virtual Routes
 
 const BaseRegisterLazyImport = createFileRoute('/_base/register')()
+const BaseProfileLazyImport = createFileRoute('/_base/profile')()
 const BaseLoginLazyImport = createFileRoute('/_base/login')()
 const MapWithfiltersIndexLazyImport = createFileRoute('/_map/_with_filters/')()
 
@@ -41,6 +42,11 @@ const BaseRegisterLazyRoute = BaseRegisterLazyImport.update({
 } as any).lazy(() =>
   import('./routes/_base/register.lazy').then((d) => d.Route),
 )
+
+const BaseProfileLazyRoute = BaseProfileLazyImport.update({
+  path: '/profile',
+  getParentRoute: () => BaseRoute,
+} as any).lazy(() => import('./routes/_base/profile.lazy').then((d) => d.Route))
 
 const BaseLoginLazyRoute = BaseLoginLazyImport.update({
   path: '/login',
@@ -64,26 +70,51 @@ const MapWithfiltersIndexLazyRoute = MapWithfiltersIndexLazyImport.update({
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
     '/_base': {
+      id: '/_base'
+      path: ''
+      fullPath: ''
       preLoaderRoute: typeof BaseImport
       parentRoute: typeof rootRoute
     }
     '/_map': {
+      id: '/_map'
+      path: ''
+      fullPath: ''
       preLoaderRoute: typeof MapImport
       parentRoute: typeof rootRoute
     }
     '/_map/_with_filters': {
+      id: '/_map/_with_filters'
+      path: ''
+      fullPath: ''
       preLoaderRoute: typeof MapWithfiltersImport
       parentRoute: typeof MapImport
     }
     '/_base/login': {
+      id: '/_base/login'
+      path: '/login'
+      fullPath: '/login'
       preLoaderRoute: typeof BaseLoginLazyImport
       parentRoute: typeof BaseImport
     }
+    '/_base/profile': {
+      id: '/_base/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof BaseProfileLazyImport
+      parentRoute: typeof BaseImport
+    }
     '/_base/register': {
+      id: '/_base/register'
+      path: '/register'
+      fullPath: '/register'
       preLoaderRoute: typeof BaseRegisterLazyImport
       parentRoute: typeof BaseImport
     }
     '/_map/_with_filters/': {
+      id: '/_map/_with_filters/'
+      path: '/'
+      fullPath: '/'
       preLoaderRoute: typeof MapWithfiltersIndexLazyImport
       parentRoute: typeof MapWithfiltersImport
     }
@@ -92,11 +123,68 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren([
-  BaseRoute.addChildren([BaseLoginLazyRoute, BaseRegisterLazyRoute]),
-  MapRoute.addChildren([
-    MapWithfiltersRoute.addChildren([MapWithfiltersIndexLazyRoute]),
-  ]),
-])
+export const routeTree = rootRoute.addChildren({
+  BaseRoute: BaseRoute.addChildren({
+    BaseLoginLazyRoute,
+    BaseProfileLazyRoute,
+    BaseRegisterLazyRoute,
+  }),
+  MapRoute: MapRoute.addChildren({
+    MapWithfiltersRoute: MapWithfiltersRoute.addChildren({
+      MapWithfiltersIndexLazyRoute,
+    }),
+  }),
+})
 
 /* prettier-ignore-end */
+
+/* ROUTE_MANIFEST_START
+{
+  "routes": {
+    "__root__": {
+      "filePath": "__root.tsx",
+      "children": [
+        "/_base",
+        "/_map"
+      ]
+    },
+    "/_base": {
+      "filePath": "_base.tsx",
+      "children": [
+        "/_base/login",
+        "/_base/profile",
+        "/_base/register"
+      ]
+    },
+    "/_map": {
+      "filePath": "_map.tsx",
+      "children": [
+        "/_map/_with_filters"
+      ]
+    },
+    "/_map/_with_filters": {
+      "filePath": "_map/_with_filters.tsx",
+      "parent": "/_map",
+      "children": [
+        "/_map/_with_filters/"
+      ]
+    },
+    "/_base/login": {
+      "filePath": "_base/login.lazy.tsx",
+      "parent": "/_base"
+    },
+    "/_base/profile": {
+      "filePath": "_base/profile.lazy.tsx",
+      "parent": "/_base"
+    },
+    "/_base/register": {
+      "filePath": "_base/register.lazy.tsx",
+      "parent": "/_base"
+    },
+    "/_map/_with_filters/": {
+      "filePath": "_map/_with_filters/index.lazy.tsx",
+      "parent": "/_map/_with_filters"
+    }
+  }
+}
+ROUTE_MANIFEST_END */
