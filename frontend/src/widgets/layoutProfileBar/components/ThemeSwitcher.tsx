@@ -11,6 +11,7 @@ export const ThemeSwitcher = () => {
       <TooltipTrigger asChild>
         <Button
           variant="outline"
+          className="bg-card"
           size="icon"
           onClick={() => theme.setTheme(theme.theme === "light" ? "dark" : "light")}>
           {theme.theme === "light" ? <SunIcon /> : <MoonIcon />}

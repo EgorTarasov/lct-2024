@@ -1,10 +1,12 @@
 import { ComboboxMultipleProps } from "@/components/DropdownMultiple";
+import { LocaleWithIcon } from "@/constants/map-filters";
 import { makeAutoObservable } from "mobx";
 
 export class Filter<T extends string> {
   constructor(
-    public readonly options: T[],
-    public readonly locale: Record<T, string>
+    readonly options: T[],
+    readonly locale: Record<T, string>,
+    private onChange?: () => void
   ) {
     makeAutoObservable(this);
   }
@@ -26,6 +28,8 @@ export class Filter<T extends string> {
           v = [];
         }
         this._value = v;
+
+        this.onChange?.();
       },
       render: (v: T) => this.locale[v]
     };

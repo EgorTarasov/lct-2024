@@ -8,6 +8,7 @@ type keys =
   | "Large"
   | "UiMedium"
   | "SubtleSemi"
+  | "SubtleMedium"
   | "Subtle"
   | "Small"
   | "p"
@@ -21,7 +22,8 @@ export const Text: Record<keys, (p: HTMLProps<HTMLHeadingElement>) => JSX.Elemen
   Large: (p) => <h2 {...p} className={cn("text-lg", p.className)}></h2>,
   UiMedium: (p) => <p {...p} className={cn("text-base font-medium", p.className)}></p>,
   SubtleSemi: (p) => <p {...p} className={cn("text-sm font-semibold", p.className)}></p>,
-  Subtle: (p) => <p {...p} className={cn("text-sm", p.className)}></p>,
+  Subtle: (p) => <p {...p} className={cn("text-sm font-normal", p.className)}></p>,
+  SubtleMedium: (p) => <p {...p} className={cn("text-sm font-medium", p.className)}></p>,
   Small: (p) => <p {...p} className={cn("text-sm leading-4 font-medium", p.className)}></p>,
   p: (p) => <p {...p} className={cn("text-base", p.className)}></p>,
   Detail: (p) => <p {...p} className={cn("text-xs leading-5 font-medium", p.className)}></p>,

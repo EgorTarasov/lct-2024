@@ -66,7 +66,7 @@ const DropdownMultiple = observer(<T,>(p: ComboboxMultipleProps<T>) => {
         <div className={cn("relative h-fit flex items-center w-full", p.label && "mt-2")}>
           <ComboboxInput
             ref={inputRef}
-            className="whitespace-nowrap w-full bg-card text-card-foreground cursor-pointer pr-8 text-ellipsis border rounded-lg p-2"
+            className="whitespace-nowrap w-full bg-background border-input text-card-foreground cursor-pointer pr-8 text-ellipsis border rounded-lg px-3 py-2"
             placeholder={placeholder}
             onFocus={(e) => {
               e.preventDefault();

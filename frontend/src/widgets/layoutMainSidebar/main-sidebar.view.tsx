@@ -5,12 +5,13 @@ import { ELEVATION } from "@/constants/elevation";
 import { cn } from "@/utils/cn";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, CrossIcon, FilterIcon, SearchIcon, XIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { IconInput, Input } from "@/components/ui/input";
 import { Filters } from "./filters";
 import { AnimatePresence } from "framer-motion";
 import { useIsPresent, motion } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { throttle } from "@/utils/debounce";
 
 const transitionProps = {
   initial: { opacity: 0, translateY: 20 },
@@ -19,8 +20,15 @@ const transitionProps = {
 };
 
 export const MainSidebarView = observer(() => {
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [filtersOpen, _setFiltersOpen] = useState(false);
   const ctx = useSidebar();
+
+  const setFiltersOpen = useCallback(
+    throttle((v: boolean) => {
+      _setFiltersOpen(v);
+    }, 350),
+    []
+  );
 
   return (
     <>
@@ -75,14 +83,14 @@ export const MainSidebarView = observer(() => {
           (ctx.isOpen || filtersOpen) && "translate-x-0"
         )}
         style={{ zIndex: ELEVATION.SIDEBAR }}>
-        <div className={"w-96 flex h-full bg-card shadow-md p-4 pt-[72px]"}>
+        <div className={"w-96 flex h-full bg-card text-card-foreground shadow-md p-4 pt-[72px]"}>
           <AnimatePresence mode="popLayout">
             {filtersOpen ? (
               <motion.div className="w-full" key="filters" {...transitionProps}>
                 <Filters />
               </motion.div>
             ) : (
-              <motion.div className="w-full" key="content" {...transitionProps}>
+              <motion.div className={"w-full"} key="content" {...transitionProps}>
                 {ctx.content?.content}
               </motion.div>
             )}

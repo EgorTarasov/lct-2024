@@ -21,7 +21,7 @@ export const UserNav = observer(() => {
   };
 
   return (
-    <div className="shadow py-2 px-3 bg-background text-card-foreground rounded-xl flex items-center gap-2">
+    <div className="shadow py-2 px-3 bg-card text-card-foreground rounded-xl flex items-center gap-2">
       <Tooltip>
         <TooltipTrigger asChild>
           <Link

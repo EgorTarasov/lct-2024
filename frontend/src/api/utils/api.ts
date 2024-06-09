@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse, CanceledError } from "axios";
 import { ZodObject, z } from "zod";
 import { authToken } from "./authToken";
 import { toast } from "sonner";
 
 axios.defaults.baseURL = "https://api.lct.larek.tech/";
+
+type Schema = ZodObject<any> | z.ZodArray<ZodObject<any> | z.ZodAny>;
 
 const getConfig = (config?: AxiosRequestConfig<unknown>) => ({
   ...config,
@@ -15,7 +17,7 @@ const getConfig = (config?: AxiosRequestConfig<unknown>) => ({
   }
 });
 
-const handleRequest = async <T extends ZodObject<any> | z.ZodArray<ZodObject<any>>>(
+const handleRequest = async <T extends Schema>(
   req: () => Promise<AxiosResponse>,
   schema: T
 ): Promise<z.infer<T>> => {
@@ -47,6 +49,8 @@ const handleRequest = async <T extends ZodObject<any> | z.ZodArray<ZodObject<any
             ? errorData.error
             : "Мы все узнаем и починим, попробуйте позже"
         });
+      } else if (error instanceof CanceledError) {
+        console.debug("Запрос отменен");
       } else {
         toast.error("Неизвестная ошибка при выполнении запроса");
       }
@@ -59,13 +63,13 @@ const handleRequest = async <T extends ZodObject<any> | z.ZodArray<ZodObject<any
   }
 };
 
-const get = <T extends ZodObject<any> | z.ZodArray<ZodObject<any>>>(
+const get = <T extends Schema>(
   path: string,
   schema: T,
   config?: AxiosRequestConfig<unknown>
 ): Promise<z.infer<T>> => handleRequest(() => axios.get(path, getConfig(config)), schema) as any;
 
-const post = <T extends ZodObject<any> | z.ZodArray<ZodObject<any>>>(
+const post = <T extends Schema>(
   path: string,
   schema: T,
   variables?: unknown,
@@ -73,7 +77,7 @@ const post = <T extends ZodObject<any> | z.ZodArray<ZodObject<any>>>(
 ): Promise<z.infer<T>> =>
   handleRequest(() => axios.post(path, variables, getConfig(config)), schema) as any;
 
-const put = <T extends ZodObject<any> | z.ZodArray<ZodObject<any>>>(
+const put = <T extends Schema>(
   path: string,
   schema: T,
   variables?: unknown,
@@ -81,7 +85,7 @@ const put = <T extends ZodObject<any> | z.ZodArray<ZodObject<any>>>(
 ): Promise<z.infer<T>> =>
   handleRequest(() => axios.put(path, variables, getConfig(config)), schema);
 
-const del = <T extends ZodObject<any> | z.ZodArray<ZodObject<any>>>(
+const del = <T extends Schema>(
   path: string,
   schema: T,
   config?: AxiosRequestConfig<unknown>
