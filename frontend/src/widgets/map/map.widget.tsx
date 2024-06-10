@@ -7,6 +7,7 @@ import { MapInitializer } from "./map-initializer";
 import { MapStore } from "@/stores/map.store";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { ConsumerPolygon } from "./polygon";
 
 const vm = MapStore;
 
@@ -24,6 +25,10 @@ const Map = observer(() => {
     } else {
       toast.dismiss("map-zoom-notifier");
     }
+
+    return () => {
+      toast.dismiss("map-zoom-notifier");
+    };
   }, [vm.shouldZoomIn]);
 
   return (
@@ -38,8 +43,8 @@ const Map = observer(() => {
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         />
         <ZoomControl position="topright" />
-        {vm.polygons.map((v, i) => (
-          <Polygon key={i} positions={v} color="blue" />
+        {vm.consumers.map((v) => (
+          <ConsumerPolygon key={v.id} data={v} />
         ))}
         <Polygon
           positions={[

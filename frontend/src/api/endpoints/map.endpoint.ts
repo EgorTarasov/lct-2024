@@ -11,6 +11,6 @@ export namespace MapEndpoint {
   ) =>
     api.get("/geo/property", MapDto.Property, {
       params: { latitude, longitude, radius },
-      signal: signal
+      signal
     });
 }

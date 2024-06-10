@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { useSidebar } from "./sidebar.context";
+import { useSidebar } from "./main-sidebar.context";
 import { twMerge } from "tailwind-merge";
 import { ELEVATION } from "@/constants/elevation";
 import { cn } from "@/utils/cn";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, CrossIcon, FilterIcon, SearchIcon, XIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { IconInput, Input } from "@/components/ui/input";
-import { Filters } from "./filters";
+import { MainSidebarFilters } from "./filters";
 import { AnimatePresence } from "framer-motion";
 import { useIsPresent, motion } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -79,15 +79,15 @@ export const MainSidebarView = observer(() => {
       </div>
       <aside
         className={cn(
-          "absolute transition-transform flex left-0 bottom-0 top-0 -translate-x-96",
+          "absolute transition-transform flex left-0 bottom-0 top-0 -translate-x-96 overflow-hidden",
           (ctx.isOpen || filtersOpen) && "translate-x-0"
         )}
         style={{ zIndex: ELEVATION.SIDEBAR }}>
-        <div className={"w-96 flex h-full bg-card text-card-foreground shadow-md p-4 pt-[72px]"}>
+        <div className={"w-96 flex h-full bg-card text-card-foreground shadow-md pt-[72px]"}>
           <AnimatePresence mode="popLayout">
             {filtersOpen ? (
-              <motion.div className="w-full" key="filters" {...transitionProps}>
-                <Filters />
+              <motion.div className="w-full p-4" key="filters" {...transitionProps}>
+                <MainSidebarFilters />
               </motion.div>
             ) : (
               <motion.div className={"w-full"} key="content" {...transitionProps}>

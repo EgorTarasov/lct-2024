@@ -11,10 +11,6 @@ const Toaster = React.lazy(() =>
   import("@/components/ui/sonner").then((m) => ({ default: m.Toaster }))
 );
 
-const ProfileBar = React.lazy(() =>
-  import("@/widgets/layoutProfileBar/profile-bar.widget").then((m) => ({ default: m.ProfileBar }))
-);
-
 const AnimatedOutlet = React.lazy(() =>
   import("@/components/router/animated-outlet").then((m) => ({ default: m.AnimatedOutlet }))
 );
@@ -33,7 +29,6 @@ const Page = () => {
             <AnimatedOutlet key={nextMatch.id} />
           </AnimatePresence>
           <Toaster richColors />
-          <ProfileBar />
         </React.Suspense>
       </TooltipProvider>
     </ThemeProvider>
@@ -44,7 +39,5 @@ export const Route = createRootRoute({
   component: Page,
   pendingComponent: LoadingWrapper,
   notFoundComponent: NotFoundPage,
-  beforeLoad: async () => {
-    await AuthService.waitInit();
-  }
+  beforeLoad: () => AuthService.waitInit
 });

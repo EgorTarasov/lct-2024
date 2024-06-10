@@ -15,14 +15,13 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRoute } from './routes/__root'
 import { Route as MapImport } from './routes/_map'
 import { Route as BaseImport } from './routes/_base'
-import { Route as MapWithfiltersImport } from './routes/_map/_with_filters'
 
 // Create Virtual Routes
 
+const MapIndexLazyImport = createFileRoute('/_map/')()
 const BaseRegisterLazyImport = createFileRoute('/_base/register')()
 const BaseProfileLazyImport = createFileRoute('/_base/profile')()
 const BaseLoginLazyImport = createFileRoute('/_base/login')()
-const MapWithfiltersIndexLazyImport = createFileRoute('/_map/_with_filters/')()
 
 // Create/Update Routes
 
@@ -35,6 +34,11 @@ const BaseRoute = BaseImport.update({
   id: '/_base',
   getParentRoute: () => rootRoute,
 } as any)
+
+const MapIndexLazyRoute = MapIndexLazyImport.update({
+  path: '/',
+  getParentRoute: () => MapRoute,
+} as any).lazy(() => import('./routes/_map/index.lazy').then((d) => d.Route))
 
 const BaseRegisterLazyRoute = BaseRegisterLazyImport.update({
   path: '/register',
@@ -53,18 +57,6 @@ const BaseLoginLazyRoute = BaseLoginLazyImport.update({
   getParentRoute: () => BaseRoute,
 } as any).lazy(() => import('./routes/_base/login.lazy').then((d) => d.Route))
 
-const MapWithfiltersRoute = MapWithfiltersImport.update({
-  id: '/_with_filters',
-  getParentRoute: () => MapRoute,
-} as any)
-
-const MapWithfiltersIndexLazyRoute = MapWithfiltersIndexLazyImport.update({
-  path: '/',
-  getParentRoute: () => MapWithfiltersRoute,
-} as any).lazy(() =>
-  import('./routes/_map/_with_filters/index.lazy').then((d) => d.Route),
-)
-
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -82,13 +74,6 @@ declare module '@tanstack/react-router' {
       fullPath: ''
       preLoaderRoute: typeof MapImport
       parentRoute: typeof rootRoute
-    }
-    '/_map/_with_filters': {
-      id: '/_map/_with_filters'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof MapWithfiltersImport
-      parentRoute: typeof MapImport
     }
     '/_base/login': {
       id: '/_base/login'
@@ -111,12 +96,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BaseRegisterLazyImport
       parentRoute: typeof BaseImport
     }
-    '/_map/_with_filters/': {
-      id: '/_map/_with_filters/'
+    '/_map/': {
+      id: '/_map/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof MapWithfiltersIndexLazyImport
-      parentRoute: typeof MapWithfiltersImport
+      preLoaderRoute: typeof MapIndexLazyImport
+      parentRoute: typeof MapImport
     }
   }
 }
@@ -129,11 +114,7 @@ export const routeTree = rootRoute.addChildren({
     BaseProfileLazyRoute,
     BaseRegisterLazyRoute,
   }),
-  MapRoute: MapRoute.addChildren({
-    MapWithfiltersRoute: MapWithfiltersRoute.addChildren({
-      MapWithfiltersIndexLazyRoute,
-    }),
-  }),
+  MapRoute: MapRoute.addChildren({ MapIndexLazyRoute }),
 })
 
 /* prettier-ignore-end */
@@ -159,14 +140,7 @@ export const routeTree = rootRoute.addChildren({
     "/_map": {
       "filePath": "_map.tsx",
       "children": [
-        "/_map/_with_filters"
-      ]
-    },
-    "/_map/_with_filters": {
-      "filePath": "_map/_with_filters.tsx",
-      "parent": "/_map",
-      "children": [
-        "/_map/_with_filters/"
+        "/_map/"
       ]
     },
     "/_base/login": {
@@ -181,9 +155,9 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "_base/register.lazy.tsx",
       "parent": "/_base"
     },
-    "/_map/_with_filters/": {
-      "filePath": "_map/_with_filters/index.lazy.tsx",
-      "parent": "/_map/_with_filters"
+    "/_map/": {
+      "filePath": "_map/index.lazy.tsx",
+      "parent": "/_map"
     }
   }
 }

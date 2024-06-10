@@ -1,13 +1,6 @@
+import { LocaleWithIcon } from "@/types/locale.type";
 import { AlertTriangleIcon, CalendarClockIcon, NetworkIcon, ThermometerIcon } from "lucide-react";
 import React, { ReactNode } from "react";
-
-export type LocaleWithIcon<T extends string> = Record<
-  T,
-  {
-    icon: ReactNode;
-    locale: string;
-  }
->;
 
 export namespace MapFilters {
   export enum HeatNetwork {
@@ -16,10 +9,6 @@ export namespace MapFilters {
     Consumers = "consumers"
   }
 
-  // Все объекты без аварий
-  // Аварийные ситуации
-  // Прогноз аварийных ситуаций
-  // Карта остывания
   export enum Layer {
     AllObjects = "all-objects",
     Emergencies = "emergencies",

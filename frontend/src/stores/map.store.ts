@@ -1,60 +1,21 @@
 import { DisposableVm } from "@/utils/vm";
 import { makeAutoObservable } from "mobx";
-import L, { LatLngExpression, Map } from "leaflet";
-import { MapFilters, MapFiltersLocale } from "@/constants/map-filters";
-import { Filter } from "./filter.vm";
+import L, { Map } from "leaflet";
 import { MapEndpoint } from "@/api/endpoints/map.endpoint";
-import geojsonvt from "geojson-vt";
 import { debounceAsync } from "@/utils/debounce";
+import { FiltersViewModel } from "@/widgets/map/vm/filters.vm";
+import { Consumer } from "@/types/consumer.type";
+import { Priority } from "@/types/priority.type";
+import { HeatSource } from "@/types/heat.type";
+import { Issue } from "@/types/issue.type";
 
-class FiltersViewModel implements DisposableVm {
-  constructor(private parent: mapStore) {
-    makeAutoObservable(this);
-  }
-
-  search = "";
-
-  heatNetworks = new Filter(
-    Object.values(MapFilters.HeatNetwork),
-    MapFiltersLocale.HeatNetwork,
-    () => this.updateFilters()
-  );
-  _layer: MapFilters.Layer = MapFilters.Layer.AllObjects;
-  setLayer(layer: MapFilters.Layer) {
-    this._layer = layer;
-    this.updateFilters();
-  }
-  get layer() {
-    return this._layer;
-  }
-
-  updateFilters() {
-    const filters = {
-      search: this.search,
-      heatNetworks: this.heatNetworks.value,
-      layer: this._layer
-    };
-
-    console.log(filters);
-  }
-
-  reset() {
-    this.search = "";
-    this.heatNetworks.reset();
-  }
-
-  dispose(): void {
-    this.reset();
-  }
-}
-
-class mapStore implements DisposableVm {
-  private map: Map | null = null;
+export class mapStore implements DisposableVm {
   filters = new FiltersViewModel(this);
   constructor() {
     makeAutoObservable(this);
   }
 
+  private map: Map | null = null;
   setMap(m: Map) {
     if (this.map) {
       this.dispose();
@@ -65,7 +26,18 @@ class mapStore implements DisposableVm {
   }
 
   shouldZoomIn = true;
-  polygons: LatLngExpression[][][] = [];
+  consumers: Consumer.Item[] = [];
+  heatSources: HeatSource.Item[] = [
+    {
+      address: "ул. Ленина, 1",
+      consumerCount: 10,
+      id: 1,
+      issue: Issue.EMERGENCY,
+      issues: [Issue.EMERGENCY, Issue.REPAIR],
+      number: "ТЭЦ-1",
+      priority: Priority.Item.HIGH
+    }
+  ];
   moveEnd = debounceAsync(async (signal) => {
     if (!this.map) return;
 
@@ -73,23 +45,27 @@ class mapStore implements DisposableVm {
     const center = this.map.getCenter();
 
     const radiusKm = 0.5 * Math.pow(2, 14 - zoom);
-    if (radiusKm > 0.2) {
+    if (radiusKm > 0.4) {
       this.shouldZoomIn = true;
       return;
     }
     this.shouldZoomIn = false;
     const res = await MapEndpoint.getProperty(center.lat, center.lng, radiusKm, signal);
-    const polygons: LatLngExpression[][][] = [];
+    const polygons: Consumer.Item[] = [];
     res.forEach((v) => {
       const coords = v.polygon.find((p) => p.Key === "coordinates")?.Value as
-        | LatLngExpression[][][]
+        | number[][][]
         | undefined;
       if (!coords) return;
 
-      polygons.push(coords[0].map((v) => [v[1], v[0]]));
+      polygons.push({
+        id: v.globalID,
+        position: coords[0].map((v) => [v[1], v[0]]),
+        priority: Priority.Item.LOW
+      });
     });
 
-    this.polygons = polygons;
+    this.consumers = polygons;
   }, 500);
 
   dispose(): void {

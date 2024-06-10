@@ -1,18 +1,23 @@
 import { GrantsService } from "@/stores/grant.service";
 import { MapLoading } from "@/widgets/map/map-loading";
-import {
-  MainSidebarContent,
-  MainSidebarContext
-} from "@/widgets/layoutMainSidebar/sidebar.context";
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 import React, { Suspense, useState } from "react";
 import { MainSidebarView } from "@/widgets/layoutMainSidebar/main-sidebar.view";
+import {
+  MainSidebarContent,
+  MainSidebarContext
+} from "@/widgets/layoutMainSidebar/main-sidebar.context";
+import { checkGrant } from "@/utils/check-grant";
 
 const Map = React.lazy(() => import("@/widgets/map/map.widget"));
 const BottomRightBar = React.lazy(() =>
   import("@/widgets/layoutBottomRight/bottom-right-bar").then((x) => ({
     default: x.BottomRightBar
   }))
+);
+
+const ProfileBar = React.lazy(() =>
+  import("@/widgets/layoutProfileBar/profile-bar.widget").then((m) => ({ default: m.ProfileBar }))
 );
 
 const Page = () => {
@@ -40,6 +45,9 @@ const Page = () => {
         <Suspense fallback={null}>
           <BottomRightBar />
         </Suspense>
+        <Suspense fallback={null}>
+          <ProfileBar />
+        </Suspense>
         <Outlet />
       </div>
     </MainSidebarContext.Provider>
@@ -47,14 +55,6 @@ const Page = () => {
 };
 
 export const Route = createFileRoute("/_map")({
-  component: () => <Page />,
-  beforeLoad: async (x) => {
-    if (GrantsService.canReadMap) {
-      return;
-    }
-
-    x.navigate({
-      to: "/login"
-    });
-  }
+  component: Page,
+  beforeLoad: (x) => checkGrant(x, GrantsService.canReadMap)
 });

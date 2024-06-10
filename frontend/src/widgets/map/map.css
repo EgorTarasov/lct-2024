@@ -12,6 +12,23 @@
   z-index: 2;
 }
 
-.dark .leaflet-container {
+.dark .leaflet-tile-container.leaflet-zoom-animated img {
   filter: invert(1) hue-rotate(180deg) grayscale(0.7)
+}
+
+.leaflet-popup-content-wrapper {
+  background: hsl(var(--secondary));
+  color: hsl(var(--secondary-foreground));
+  border-radius: 6px;
+  padding: 16px 12px;
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  margin-top: 6px;
+}
+
+.leaflet-popup-tip {
+  background: hsl(var(--secondary));
+  border: 0;
 }

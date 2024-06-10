@@ -27,7 +27,7 @@ const handleRequest = async <T extends Schema>(
     if (schema) {
       const validatedData = schema.parse(res.data);
 
-      return validatedData as any;
+      return validatedData;
     }
 
     return res as any;
@@ -45,19 +45,15 @@ const handleRequest = async <T extends Schema>(
       } else if (error.response?.status === 500) {
         const errorData = error.response.data as any;
         toast.error("Ошибка", {
-          description: errorData?.error
-            ? errorData.error
-            : "Мы все узнаем и починим, попробуйте позже"
+          description: errorData?.error ?? "Мы все узнаем и починим, попробуйте позже"
         });
       } else if (error instanceof CanceledError) {
         console.debug("Запрос отменен");
       } else {
         toast.error("Неизвестная ошибка при выполнении запроса");
       }
-      console.error("Axios error:", error.message, error.status);
     } else {
       toast.error("Неизвестная ошибка при выполнении запроса");
-      console.error("Unexpected error:", error);
     }
     throw error;
   }
@@ -67,7 +63,7 @@ const get = <T extends Schema>(
   path: string,
   schema: T,
   config?: AxiosRequestConfig<unknown>
-): Promise<z.infer<T>> => handleRequest(() => axios.get(path, getConfig(config)), schema) as any;
+): Promise<z.infer<T>> => handleRequest(() => axios.get(path, getConfig(config)), schema);
 
 const post = <T extends Schema>(
   path: string,
@@ -75,7 +71,7 @@ const post = <T extends Schema>(
   variables?: unknown,
   config?: AxiosRequestConfig<unknown>
 ): Promise<z.infer<T>> =>
-  handleRequest(() => axios.post(path, variables, getConfig(config)), schema) as any;
+  handleRequest(() => axios.post(path, variables, getConfig(config)), schema);
 
 const put = <T extends Schema>(
   path: string,
@@ -89,7 +85,7 @@ const del = <T extends Schema>(
   path: string,
   schema: T,
   config?: AxiosRequestConfig<unknown>
-): Promise<z.infer<T>> => handleRequest(() => axios.delete(path, getConfig(config)), schema) as any;
+): Promise<z.infer<T>> => handleRequest(() => axios.delete(path, getConfig(config)), schema);
 
 export default {
   get,

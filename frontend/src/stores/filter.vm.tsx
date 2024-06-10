@@ -1,5 +1,4 @@
 import { ComboboxMultipleProps } from "@/components/DropdownMultiple";
-import { LocaleWithIcon } from "@/constants/map-filters";
 import { makeAutoObservable } from "mobx";
 
 export class Filter<T extends string> {
