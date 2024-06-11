@@ -14,6 +14,7 @@ type mapService interface {
 	GetObjectByID(ctx context.Context, globalID int64) (*models.PropertyDTO, error)
 	GetObjectsInRadius(ctx context.Context, longitude, latitude, radius float64) ([]*models.PropertyDTO, error)
 	GetMoeksInRadius(ctx context.Context, longitude, latitude, radius float64) ([]*models.MoekDTO, error)
+	GetAllCPH(ctx context.Context) ([]string, error)
 }
 
 type mapController struct {
@@ -29,7 +30,7 @@ func NewMapController(_ context.Context, s mapService, tracer trace.Tracer) *map
 	}
 }
 
-// GetObjectById godoc
+// GetObjectByID godoc
 //
 //	получения объекта по global_id
 //

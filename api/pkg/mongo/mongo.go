@@ -108,3 +108,8 @@ func (m Mongo) DeleteOne(ctx context.Context, coll string, filter interface{}, o
 	}
 	return res, nil
 }
+
+// Distinct returns distinct values for the given field name.
+func (m Mongo) Distinct(ctx context.Context, coll string, fieldName string, filter interface{}, opts ...*options.DistinctOptions) ([]interface{}, error) {
+	return m.mongo.Database(m.db).Collection(coll).Distinct(ctx, fieldName, filter, opts...)
+}

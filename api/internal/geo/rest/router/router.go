@@ -11,6 +11,7 @@ type handler interface {
 	GetObjectByID(c *fiber.Ctx) error
 	GetPropertiesInRadius(c *fiber.Ctx) error
 	GetMoeksInRadius(c *fiber.Ctx) error
+	GetAllCPH(c *fiber.Ctx) error
 }
 
 // InitMapRouter подключение путей для работы карты через RestAPI.
@@ -23,5 +24,6 @@ func InitMapRouter(_ context.Context, app *fiber.App, mapHandler handler) error 
 	geo.Get("/property/id/:object", mapHandler.GetObjectByID)
 	geo.Get("/property", mapHandler.GetPropertiesInRadius)
 	geo.Get("/moek", mapHandler.GetMoeksInRadius)
+	geo.Get("/cph", mapHandler.GetAllCPH)
 	return nil
 }

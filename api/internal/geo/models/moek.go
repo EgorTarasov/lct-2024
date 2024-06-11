@@ -40,3 +40,39 @@ func (moek *MoekDAO) ToDTO() *MoekDTO {
 		GeoDataCenter: moek.GeoDataCenter,
 	}
 }
+
+// JDSDAO Joint dispatch services запись о (Объединенные диспетчерские службы) в БД.
+type JDSDAO struct {
+	Number        string      `bson:"odsNumber" json:"odsNumber"`
+	Address       string      `bson:"odsAddress" json:"odsAddress"`
+	GeoData       interface{} `bson:"geoData" json:"geoData"`
+	GeoDataCenter interface{} `bson:"geoDataCenter" json:"geoDataCenter"`
+}
+
+// ConsumerDAO потребитель
+type ConsumerDAO struct {
+	Group   string `bson:"group" json:"group"`
+	Unom    string `bson:"consumerUnom" json:"unom"`
+	Address string `bson:"consumerAddress" json:"address"`
+}
+
+// ConsumerDTO потребитель
+type ConsumerDTO struct {
+	Group   string `json:"group"`
+	Unom    string `json:"unom"`
+	Address string `json:"address"`
+}
+
+func (consumer *ConsumerDAO) ToDTO() *ConsumerDTO {
+	return &ConsumerDTO{
+		Group:   consumer.Group,
+		Unom:    consumer.Unom,
+		Address: consumer.Address,
+	}
+}
+
+// CHP Combined heat and power plant
+type CHP struct {
+	Name      string        `bson:"ctp" json:"chp"`
+	Consumers []ConsumerDTO `bson:"consumers" json:"consumers"`
+}

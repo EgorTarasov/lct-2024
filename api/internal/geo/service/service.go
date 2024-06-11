@@ -12,14 +12,16 @@ type service struct {
 	cfg    *config.Config
 	or     objectRepo
 	moek   moekRepo
+	ods    odsRepository
 }
 
 // New конструктор сервиса для работы с аккаунтами пользователей.
-func New(_ context.Context, cfg *config.Config, objectRepo objectRepo, moek moekRepo, tracer trace.Tracer) *service {
+func New(_ context.Context, cfg *config.Config, objectRepo objectRepo, moek moekRepo, ods odsRepository, tracer trace.Tracer) *service {
 	return &service{
 		cfg:    cfg,
 		tracer: tracer,
 		or:     objectRepo,
 		moek:   moek,
+		ods:    ods,
 	}
 }

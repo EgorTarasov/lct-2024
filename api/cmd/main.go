@@ -20,7 +20,7 @@ import (
 // @contact.email	fiber@swagger.io
 // @license.name	BSD 3-Clause License
 // @license.url	https://raw.githubusercontent.com/EgorTarasov/true-tech/main/LICENSE
-// @host			api.larek.tech
+// @host			api.lct.larek.tech
 // @BasePath		/ //no-lint.
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())

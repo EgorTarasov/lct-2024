@@ -104,7 +104,8 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 	// objectRepo := mapRepo.NewObjectRepo(pg, tracer)
 	propertyRepo := geoMongo.NewPropertyRepository(&mongo, tracer)
 	moeksRepo := geoMongo.NewMoekRepository(&mongo, tracer)
-	mapService := geo.New(ctx, cfg, propertyRepo, moeksRepo, tracer)
+	odsRepo := geoMongo.NewOdsRepository(&mongo, tracer)
+	mapService := geo.New(ctx, cfg, propertyRepo, moeksRepo, odsRepo, tracer)
 	mapController := mapHandler.NewMapController(ctx, mapService, tracer)
 
 	if err = mapRouter.InitMapRouter(ctx, app, mapController); err != nil {
