@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/EgorTarasov/lct-2024/api/internal/geo/models"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 	"go.opentelemetry.io/otel/trace"
@@ -18,15 +19,17 @@ type mapService interface {
 }
 
 type mapController struct {
-	s      mapService
-	tracer trace.Tracer
+	s         mapService
+	tracer    trace.Tracer
+	validator *validator.Validate
 }
 
 // NewMapController создание контроллера для авторизации.
 func NewMapController(_ context.Context, s mapService, tracer trace.Tracer) *mapController {
 	return &mapController{
-		s:      s,
-		tracer: tracer,
+		s:         s,
+		tracer:    tracer,
+		validator: validator.New(validator.WithRequiredStructEnabled()),
 	}
 }
 
@@ -64,6 +67,12 @@ func (mc *mapController) GetObjectByID(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(result)
 }
 
+type radiusRequest struct {
+	Latitude  float64 `json:"latitude" validate:"required,lt=90"`
+	Longitude float64 `json:"longitude" validate:"required,lt=90"`
+	Radius    float64 `json:"radius" validate:"required,lt=5000"`
+}
+
 // GetPropertiesInRadius godoc
 //
 //	получения объектов недвижимости по координатам и радиусу
@@ -93,6 +102,16 @@ func (mc *mapController) GetPropertiesInRadius(c *fiber.Ctx) error { //nolint:du
 	radius, err := strconv.ParseFloat(c.Query("radius"), 64)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err, "field": "radius"})
+	}
+
+	req := radiusRequest{
+		Latitude:  latitude,
+		Longitude: longitude,
+		Radius:    radius,
+	}
+
+	if err := mc.validator.Struct(req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error(), "fields": err.(validator.ValidationErrors)})
 	}
 
 	result, err := mc.s.GetObjectsInRadius(ctx, longitude, latitude, radius)

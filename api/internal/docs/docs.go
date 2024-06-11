@@ -220,6 +220,42 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/map/events": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "map"
+                ],
+                "summary": "получение аварийных ситуаций и информации об объекте",
+                "parameters": [
+                    {
+                        "description": "emergencyRequest",
+                        "name": "emergencyRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.emergencyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Event"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -259,11 +295,138 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.emergencyRequest": {
+            "type": "object",
+            "required": [
+                "distance",
+                "latitude",
+                "longitude"
+            ],
+            "properties": {
+                "distance": {
+                    "type": "integer",
+                    "maximum": 10000,
+                    "minimum": 0
+                },
+                "latitude": {
+                    "type": "number",
+                    "maximum": 90,
+                    "minimum": -90
+                },
+                "longitude": {
+                    "type": "number",
+                    "maximum": 180,
+                    "minimum": -180
+                }
+            }
+        },
         "handler.errResponse": {
             "type": "object",
             "properties": {
                 "error": {
                     "type": "string"
+                }
+            }
+        },
+        "internal_chp_models.Address": {
+            "type": "object",
+            "required": [
+                "address",
+                "municipalDistrict"
+            ],
+            "properties": {
+                "address": {
+                    "description": "Полный Адрес в реестре.",
+                    "type": "string"
+                },
+                "border": {
+                    "description": "Граница объекта на карте."
+                },
+                "center": {
+                    "description": "Центр объекта на карте.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/internal_chp_models.Point"
+                        }
+                    ]
+                },
+                "municipalDistrict": {
+                    "description": "Район округ.",
+                    "type": "string"
+                },
+                "unom": {
+                    "description": "Уникальный номер объекта недвижимости.",
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_chp_models.Point": {
+            "type": "object",
+            "properties": {
+                "coordinates": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.DisconnectionDTO": {
+            "type": "object",
+            "properties": {
+                "actualDisconnectionDate": {},
+                "actualReconnectionDate": {},
+                "disconnectionType": {
+                    "type": "string"
+                },
+                "plannedDisconnectionDate": {},
+                "plannedReconnectionDate": {},
+                "reason": {
+                    "type": "string"
+                },
+                "registrationDate": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Event": {
+            "type": "object",
+            "properties": {
+                "EndedAt": {
+                    "description": "Дата окончания",
+                    "type": "string"
+                },
+                "country": {
+                    "description": "Округ",
+                    "type": "string"
+                },
+                "externalEndedAt": {
+                    "description": "Дата закрытия в системе",
+                    "type": "string"
+                },
+                "geo": {
+                    "$ref": "#/definitions/internal_chp_models.Address"
+                },
+                "source": {
+                    "description": "Источник",
+                    "type": "string"
+                },
+                "startDate": {
+                    "description": "Дата начала",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "Описание",
+                    "type": "string"
+                },
+                "unom": {
+                    "type": "integer"
                 }
             }
         },
@@ -298,6 +461,12 @@ const docTemplate = `{
         "models.PropertyDTO": {
             "type": "object",
             "properties": {
+                "disconnections": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.DisconnectionDTO"
+                    }
+                },
                 "globalID": {
                     "type": "integer"
                 },
@@ -311,7 +480,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "api.larek.tech",
+	Host:             "api.lct.larek.tech",
 	BasePath:         "/ //no-lint.",
 	Schemes:          []string{},
 	Title:            "lct api",

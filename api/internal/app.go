@@ -13,11 +13,12 @@ import (
 	authHandler "github.com/EgorTarasov/lct-2024/api/internal/auth/rest/handler"
 	authRouter "github.com/EgorTarasov/lct-2024/api/internal/auth/rest/router"
 	auth "github.com/EgorTarasov/lct-2024/api/internal/auth/service"
+	mapRepo "github.com/EgorTarasov/lct-2024/api/internal/chp/repository/mongo"
+	mapHandler "github.com/EgorTarasov/lct-2024/api/internal/chp/rest/handler"
+	mapRouter "github.com/EgorTarasov/lct-2024/api/internal/chp/rest/router"
+	mapService "github.com/EgorTarasov/lct-2024/api/internal/chp/service"
 	"github.com/EgorTarasov/lct-2024/api/internal/config"
-	geoMongo "github.com/EgorTarasov/lct-2024/api/internal/geo/repository/mongo"
-	mapHandler "github.com/EgorTarasov/lct-2024/api/internal/geo/rest/handler"
-	mapRouter "github.com/EgorTarasov/lct-2024/api/internal/geo/rest/router"
-	geo "github.com/EgorTarasov/lct-2024/api/internal/geo/service"
+	sharedMongo "github.com/EgorTarasov/lct-2024/api/internal/shared/reposotory/mongo"
 	mongoDB "github.com/EgorTarasov/lct-2024/api/pkg/mongo"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	// подключение swagger для документации api.
@@ -100,19 +101,30 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 		return err
 	}
 
-	// geo.
-	// objectRepo := mapRepo.NewObjectRepo(pg, tracer)
-	propertyRepo := geoMongo.NewPropertyRepository(&mongo, tracer)
-	moeksRepo := geoMongo.NewMoekRepository(&mongo, tracer)
-	odsRepo := geoMongo.NewOdsRepository(&mongo, tracer)
-	mapService := geo.New(ctx, cfg, propertyRepo, moeksRepo, odsRepo, tracer)
-	mapController := mapHandler.NewMapController(ctx, mapService, tracer)
+	// map
+	ar := sharedMongo.NewAddressRegistryRepository(mongo, tracer)
+	ev := mapRepo.NewEventRepo(mongo, tracer)
+	ms := mapService.NewService(ar, ev)
+	mc := mapHandler.NewMapController(ctx, ms, tracer)
 
-	if err = mapRouter.InitMapRouter(ctx, app, mapController); err != nil {
-		return err
-	}
+	mapRouter.InitRoutes(app, mc)
+
 	if err = app.Listen(fmt.Sprintf(":%d", cfg.Server.Port)); err != nil {
 		return err
 	}
 	return nil
 }
+
+// geo.
+// objectRepo := mapRepo.NewObjectRepo(pg, tracer)
+//propertyRepo := geoMongo.NewPropertyRepository(&mongo, tracer)
+//moeksRepo := geoMongo.NewMoekRepository(&mongo, tracer)
+//odsRepo := geoMongo.NewOdsRepository(&mongo, tracer)
+//mapService := geo.New(ctx, cfg, propertyRepo, moeksRepo, odsRepo, tracer)
+//mapController := mapHandler.NewMapController(ctx, mapService, tracer)
+
+// map
+
+//if err = mapRouter.InitMapRouter(ctx, app, mapController); err != nil {
+//	return err
+//}

@@ -23,10 +23,99 @@ definitions:
       password:
         type: string
     type: object
+  handler.emergencyRequest:
+    properties:
+      distance:
+        maximum: 10000
+        minimum: 0
+        type: integer
+      latitude:
+        maximum: 90
+        minimum: -90
+        type: number
+      longitude:
+        maximum: 180
+        minimum: -180
+        type: number
+    required:
+    - distance
+    - latitude
+    - longitude
+    type: object
   handler.errResponse:
     properties:
       error:
         type: string
+    type: object
+  internal_chp_models.Address:
+    properties:
+      address:
+        description: Полный Адрес в реестре.
+        type: string
+      border:
+        description: Граница объекта на карте.
+      center:
+        allOf:
+        - $ref: '#/definitions/internal_chp_models.Point'
+        description: Центр объекта на карте.
+      municipalDistrict:
+        description: Район округ.
+        type: string
+      unom:
+        description: Уникальный номер объекта недвижимости.
+        type: integer
+    required:
+    - address
+    - municipalDistrict
+    type: object
+  internal_chp_models.Point:
+    properties:
+      coordinates:
+        items:
+          type: number
+        type: array
+      type:
+        type: string
+    type: object
+  models.DisconnectionDTO:
+    properties:
+      actualDisconnectionDate: {}
+      actualReconnectionDate: {}
+      disconnectionType:
+        type: string
+      plannedDisconnectionDate: {}
+      plannedReconnectionDate: {}
+      reason:
+        type: string
+      registrationDate:
+        type: string
+      source:
+        type: string
+    type: object
+  models.Event:
+    properties:
+      EndedAt:
+        description: Дата окончания
+        type: string
+      country:
+        description: Округ
+        type: string
+      externalEndedAt:
+        description: Дата закрытия в системе
+        type: string
+      geo:
+        $ref: '#/definitions/internal_chp_models.Address'
+      source:
+        description: Источник
+        type: string
+      startDate:
+        description: Дата начала
+        type: string
+      title:
+        description: Описание
+        type: string
+      unom:
+        type: integer
     type: object
   models.MoekDTO:
     properties:
@@ -49,12 +138,16 @@ definitions:
     type: object
   models.PropertyDTO:
     properties:
+      disconnections:
+        items:
+          $ref: '#/definitions/models.DisconnectionDTO'
+        type: array
       globalID:
         type: integer
       point: {}
       polygon: {}
     type: object
-host: api.larek.tech
+host: api.lct.larek.tech
 info:
   contact:
     email: fiber@swagger.io
@@ -197,4 +290,27 @@ paths:
       summary: тестовая ручка на проверку postgis
       tags:
       - geo
+  /map/events:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: emergencyRequest
+        in: body
+        name: emergencyRequest
+        required: true
+        schema:
+          $ref: '#/definitions/handler.emergencyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Event'
+            type: array
+      summary: получение аварийных ситуаций и информации об объекте
+      tags:
+      - map
 swagger: "2.0"
