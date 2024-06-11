@@ -33,24 +33,29 @@ const handleRequest = async <T extends Schema>(
     return res as any;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      toast.error("Ошибка валидации данных", {
+      toast.error("Модели разошлись", {
         description: error.errors.map((e) => e.message).join("\n")
       });
       console.error("Validation error:", error.errors);
+    } else if (error instanceof CanceledError) {
+      console.debug("Запрос отменен");
+      throw error;
     } else if (axios.isAxiosError(error)) {
-      if (error.response?.status === 401) {
-        toast.error("Сессия истекла, пожалуйста, войдите снова");
-        authToken.remove();
-        window.location.replace("/login");
-      } else if (error.response?.status === 500) {
-        const errorData = error.response.data as any;
-        toast.error("Ошибка", {
-          description: errorData?.error ?? "Мы все узнаем и починим, попробуйте позже"
-        });
-      } else if (error instanceof CanceledError) {
-        console.debug("Запрос отменен");
-      } else {
-        toast.error("Неизвестная ошибка при выполнении запроса");
+      switch (error.response?.status) {
+        case 401:
+          toast.error("Сессия истекла, пожалуйста, войдите снова");
+          authToken.remove();
+          window.location.replace("/login");
+          break;
+        case 500:
+          toast.error("Ошибка", {
+            description:
+              (error.response.data as any)?.error ?? "Мы все узнаем и починим, попробуйте позже"
+          });
+          break;
+        default:
+          toast.error("Неизвестная ошибка при выполнении запроса");
+          break;
       }
     } else {
       toast.error("Неизвестная ошибка при выполнении запроса");

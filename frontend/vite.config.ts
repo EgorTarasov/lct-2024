@@ -4,6 +4,7 @@ import { TanStackRouterVite } from "@tanstack/router-vite-plugin";
 import path from "path";
 import svgr from "vite-plugin-svgr";
 import basicSsl from "@vitejs/plugin-basic-ssl";
+import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -15,6 +16,9 @@ export default defineConfig({
       svgrOptions: {
         exportType: "default"
       }
+    }),
+    VitePWA({
+      registerType: "autoUpdate"
     })
     // basicSsl()
   ],

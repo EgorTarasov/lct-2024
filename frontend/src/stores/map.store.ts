@@ -35,7 +35,8 @@ export class mapStore implements DisposableVm {
       issue: Issue.EMERGENCY,
       issues: [Issue.EMERGENCY, Issue.REPAIR],
       number: "ТЭЦ-1",
-      priority: Priority.Item.HIGH
+      priority: Priority.Item.HIGH,
+      incidentCount: 3
     }
   ];
   moveEnd = debounceAsync(async (signal) => {

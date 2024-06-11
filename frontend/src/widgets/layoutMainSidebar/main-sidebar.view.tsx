@@ -12,6 +12,7 @@ import { AnimatePresence } from "framer-motion";
 import { useIsPresent, motion } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { throttle } from "@/utils/debounce";
+import { SecondarySidebarView } from "./SecondarySidebar/secondary-sidebar.view";
 
 const transitionProps = {
   initial: { opacity: 0, translateY: 20 },
@@ -32,12 +33,13 @@ export const MainSidebarView = observer(() => {
 
   return (
     <>
+      <SecondarySidebarView />
       <div
         className="flex absolute gap-2 top-4 left-4 w-[412px]"
         style={{ zIndex: ELEVATION.SEARCHBAR }}>
         <IconInput
           containerClassName="flex-1"
-          className={ctx.isOpen ? "bg-background" : "bg-card"}
+          className={ctx.isOpen ? "bg-background shadow-none" : "bg-card"}
           rightIcon={<SearchIcon />}
           placeholder="Введите данные объекта"
         />
@@ -54,7 +56,10 @@ export const MainSidebarView = observer(() => {
           }}
           variant={filtersOpen ? "destructive" : "outline"}
           size="icon"
-          className="shadow">
+          className={cn(
+            filtersOpen ? "bg-destructive" : "bg-card",
+            ctx.isOpen ? "shadow-none" : "shadow-sm"
+          )}>
           {filtersOpen ? <XIcon /> : <FilterIcon />}
         </Button>
         <Tooltip>
@@ -62,7 +67,7 @@ export const MainSidebarView = observer(() => {
             <Button
               variant="outline"
               size="icon"
-              className="ml-4"
+              className="ml-4 bg-card"
               onClick={() => {
                 if (filtersOpen) {
                   setFiltersOpen(false);

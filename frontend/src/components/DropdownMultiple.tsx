@@ -82,7 +82,7 @@ const DropdownMultiple = observer(<T,>(p: ComboboxMultipleProps<T>) => {
             onChange={(event) => setQuery(event.target.value)}
           />
           <ComboboxButton className="h-5 w-5 absolute right-2 text-accent-foreground">
-            <ChevronDownIcon />
+            <ChevronDownIcon className={cn("transition-all", inputFocused && "rotate-180")} />
           </ComboboxButton>
         </div>
         <Transition
@@ -98,7 +98,7 @@ const DropdownMultiple = observer(<T,>(p: ComboboxMultipleProps<T>) => {
               scrollbarWidth: "thin"
             }}>
             {filteredOptions.length === 0 && query !== "" ? (
-              <div className="px-4 py-2 text-accent-foreground">Ничего не найдено</div>
+              <div className="px-4 py-2 text-muted-foreground">Ничего не найдено</div>
             ) : (
               filteredOptions.map((option, index) => (
                 <ComboboxOption

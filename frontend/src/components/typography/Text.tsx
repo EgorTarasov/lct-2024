@@ -19,7 +19,7 @@ export const Text: Record<keys, (p: HTMLProps<HTMLHeadingElement>) => JSX.Elemen
   H4: (p) => <h4 {...p} className={cn("text-xl font-semibold", p.className)}></h4>,
   H3: (p) => <h3 {...p} className={cn("text-2xl font-semibold", p.className)}></h3>,
   H2: (p) => <h2 {...p} className={cn("text-3xl font-semibold", p.className)}></h2>,
-  Large: (p) => <h2 {...p} className={cn("text-lg", p.className)}></h2>,
+  Large: (p) => <h2 {...p} className={cn("text-lg font-medium", p.className)}></h2>,
   UiMedium: (p) => <p {...p} className={cn("text-base font-medium", p.className)}></p>,
   SubtleSemi: (p) => <p {...p} className={cn("text-sm font-semibold", p.className)}></p>,
   Subtle: (p) => <p {...p} className={cn("text-sm font-normal", p.className)}></p>,

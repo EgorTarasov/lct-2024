@@ -1,14 +1,17 @@
 import { CSSProperties, ReactNode, createContext, useContext } from "react";
 
-export interface MainSidebarContent {
+export interface SidebarContent {
   content: ReactNode;
+  closeAction?: () => void;
 }
 
 interface MainSidebarContextProps {
   isOpen: boolean;
   toggleSidebar: () => void;
-  content: MainSidebarContent | null;
-  setContent: (v: MainSidebarContent | null) => void;
+  content: SidebarContent | null;
+  setContent: (v: SidebarContent | null) => void;
+  secondaryContent: SidebarContent | null;
+  setSecondaryContent: (v: SidebarContent | null) => void;
 }
 
 export const MainSidebarContext = createContext<MainSidebarContextProps | null>(null);

@@ -12,6 +12,7 @@ import { observer } from "mobx-react-lite";
 import { LayerSelect } from "./NotificationSort";
 import { useEffect, useState } from "react";
 import { Priority } from "@/types/priority.type";
+import { NotificationCard } from "@/components/cards/notification.card";
 
 const vm = NotificationStore;
 
@@ -38,48 +39,118 @@ export const NotificationWidget = observer(() => {
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent className="flex flex-col gap-3">
+      <SheetContent className="flex flex-col gap-3 h-full overflow-hidden">
         <SheetHeader>
           <SheetTitle>Уведомления</SheetTitle>
         </SheetHeader>
         {vm.notifications.length > 0 && <LayerSelect />}
-        <ScrollArea className="h-full flex-1 space-y-2">
+        <ScrollArea className="flex-1 space-y-2">
           {vm.notifications.map((n) => (
-            <li
+            <NotificationCard
               key={n.id}
-              className="p-4 pt-2 border space-y-2 list-none bg-card text-card-foreground rounded-md relative">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => vm.resolve(n)}
-                    className="ml-auto size-7 absolute p-1.5 right-0 top-0 hover:bg-transparent">
-                    <XIcon />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Скрыть уведомление</TooltipContent>
-              </Tooltip>
-              <Text.UiMedium>{n.title}</Text.UiMedium>
-              <Text.p>{n.description}</Text.p>
-              <div className="flex items-center gap-2">
-                <div
-                  className="border px-2 rounded-full"
-                  style={{
-                    color: Priority.ItemMap[n.priority].color,
-                    backgroundColor: Priority.ItemMap[n.priority].backgroundColor
-                  }}>
-                  <Text.Detail>{Priority.ItemMap[n.priority].alternateLocale} важность</Text.Detail>
-                </div>
-                <div className="gap-1 flex items-center text-muted-foreground">
-                  <Clock4Icon className="size-4" />
-                  <p className="text-xs">{getTimeDifference(n.date)}</p>
-                </div>
-              </div>
-            </li>
+              data={n}
+              onClose={() => {
+                vm.resolve(n);
+              }}
+            />
+          ))}
+          {vm.notifications.map((n) => (
+            <NotificationCard
+              key={n.id}
+              data={n}
+              onClose={() => {
+                vm.resolve(n);
+              }}
+            />
+          ))}
+          {vm.notifications.map((n) => (
+            <NotificationCard
+              key={n.id}
+              data={n}
+              onClose={() => {
+                vm.resolve(n);
+              }}
+            />
+          ))}
+          {vm.notifications.map((n) => (
+            <NotificationCard
+              key={n.id}
+              data={n}
+              onClose={() => {
+                vm.resolve(n);
+              }}
+            />
+          ))}
+          {vm.notifications.map((n) => (
+            <NotificationCard
+              key={n.id}
+              data={n}
+              onClose={() => {
+                vm.resolve(n);
+              }}
+            />
+          ))}
+          {vm.notifications.map((n) => (
+            <NotificationCard
+              key={n.id}
+              data={n}
+              onClose={() => {
+                vm.resolve(n);
+              }}
+            />
+          ))}
+          {vm.notifications.map((n) => (
+            <NotificationCard
+              key={n.id}
+              data={n}
+              onClose={() => {
+                vm.resolve(n);
+              }}
+            />
+          ))}
+          {vm.notifications.map((n) => (
+            <NotificationCard
+              key={n.id}
+              data={n}
+              onClose={() => {
+                vm.resolve(n);
+              }}
+            />
+          ))}
+          {vm.notifications.map((n) => (
+            <NotificationCard
+              key={n.id}
+              data={n}
+              onClose={() => {
+                vm.resolve(n);
+              }}
+            />
+          ))}
+          {vm.notifications.map((n) => (
+            <NotificationCard
+              key={n.id}
+              data={n}
+              onClose={() => {
+                vm.resolve(n);
+              }}
+            />
+          ))}
+          {vm.notifications.map((n) => (
+            <NotificationCard
+              key={n.id}
+              data={n}
+              onClose={() => {
+                vm.resolve(n);
+              }}
+            />
           ))}
           {vm.notifications.length === 0 && (
-            <Text.p className="text-center text-muted-foreground">Нет уведомлений</Text.p>
+            <div className="flex flex-col gap-3 pt-6 text-center">
+              <Text.p>Нет уведомлений</Text.p>
+              <Text.Small className="text-muted-foreground">
+                На иконке будет индикатор, когда они появятся
+              </Text.Small>
+            </div>
           )}
         </ScrollArea>
       </SheetContent>

@@ -18,10 +18,14 @@ import { Route as BaseImport } from './routes/_base'
 
 // Create Virtual Routes
 
-const MapIndexLazyImport = createFileRoute('/_map/')()
+const MapHeatsourcesLazyImport = createFileRoute('/_map/_heat_sources')()
 const BaseRegisterLazyImport = createFileRoute('/_base/register')()
 const BaseProfileLazyImport = createFileRoute('/_base/profile')()
 const BaseLoginLazyImport = createFileRoute('/_base/login')()
+const MapHeatsourcesIndexLazyImport = createFileRoute('/_map/_heat_sources/')()
+const MapHeatsourcesHeatsourceHeatSourceIdLazyImport = createFileRoute(
+  '/_map/_heat_sources/heat_source/$heatSourceId',
+)()
 
 // Create/Update Routes
 
@@ -35,10 +39,12 @@ const BaseRoute = BaseImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const MapIndexLazyRoute = MapIndexLazyImport.update({
-  path: '/',
+const MapHeatsourcesLazyRoute = MapHeatsourcesLazyImport.update({
+  id: '/_heat_sources',
   getParentRoute: () => MapRoute,
-} as any).lazy(() => import('./routes/_map/index.lazy').then((d) => d.Route))
+} as any).lazy(() =>
+  import('./routes/_map/_heat_sources.lazy').then((d) => d.Route),
+)
 
 const BaseRegisterLazyRoute = BaseRegisterLazyImport.update({
   path: '/register',
@@ -56,6 +62,23 @@ const BaseLoginLazyRoute = BaseLoginLazyImport.update({
   path: '/login',
   getParentRoute: () => BaseRoute,
 } as any).lazy(() => import('./routes/_base/login.lazy').then((d) => d.Route))
+
+const MapHeatsourcesIndexLazyRoute = MapHeatsourcesIndexLazyImport.update({
+  path: '/',
+  getParentRoute: () => MapHeatsourcesLazyRoute,
+} as any).lazy(() =>
+  import('./routes/_map/_heat_sources/index.lazy').then((d) => d.Route),
+)
+
+const MapHeatsourcesHeatsourceHeatSourceIdLazyRoute =
+  MapHeatsourcesHeatsourceHeatSourceIdLazyImport.update({
+    path: '/heat_source/$heatSourceId',
+    getParentRoute: () => MapHeatsourcesLazyRoute,
+  } as any).lazy(() =>
+    import('./routes/_map/_heat_sources/heat_source/$heatSourceId.lazy').then(
+      (d) => d.Route,
+    ),
+  )
 
 // Populate the FileRoutesByPath interface
 
@@ -96,12 +119,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BaseRegisterLazyImport
       parentRoute: typeof BaseImport
     }
-    '/_map/': {
-      id: '/_map/'
+    '/_map/_heat_sources': {
+      id: '/_map/_heat_sources'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof MapHeatsourcesLazyImport
+      parentRoute: typeof MapImport
+    }
+    '/_map/_heat_sources/': {
+      id: '/_map/_heat_sources/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof MapIndexLazyImport
-      parentRoute: typeof MapImport
+      preLoaderRoute: typeof MapHeatsourcesIndexLazyImport
+      parentRoute: typeof MapHeatsourcesLazyImport
+    }
+    '/_map/_heat_sources/heat_source/$heatSourceId': {
+      id: '/_map/_heat_sources/heat_source/$heatSourceId'
+      path: '/heat_source/$heatSourceId'
+      fullPath: '/heat_source/$heatSourceId'
+      preLoaderRoute: typeof MapHeatsourcesHeatsourceHeatSourceIdLazyImport
+      parentRoute: typeof MapHeatsourcesLazyImport
     }
   }
 }
@@ -114,7 +151,12 @@ export const routeTree = rootRoute.addChildren({
     BaseProfileLazyRoute,
     BaseRegisterLazyRoute,
   }),
-  MapRoute: MapRoute.addChildren({ MapIndexLazyRoute }),
+  MapRoute: MapRoute.addChildren({
+    MapHeatsourcesLazyRoute: MapHeatsourcesLazyRoute.addChildren({
+      MapHeatsourcesIndexLazyRoute,
+      MapHeatsourcesHeatsourceHeatSourceIdLazyRoute,
+    }),
+  }),
 })
 
 /* prettier-ignore-end */
@@ -140,7 +182,7 @@ export const routeTree = rootRoute.addChildren({
     "/_map": {
       "filePath": "_map.tsx",
       "children": [
-        "/_map/"
+        "/_map/_heat_sources"
       ]
     },
     "/_base/login": {
@@ -155,9 +197,21 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "_base/register.lazy.tsx",
       "parent": "/_base"
     },
-    "/_map/": {
-      "filePath": "_map/index.lazy.tsx",
-      "parent": "/_map"
+    "/_map/_heat_sources": {
+      "filePath": "_map/_heat_sources.lazy.tsx",
+      "parent": "/_map",
+      "children": [
+        "/_map/_heat_sources/",
+        "/_map/_heat_sources/heat_source/$heatSourceId"
+      ]
+    },
+    "/_map/_heat_sources/": {
+      "filePath": "_map/_heat_sources/index.lazy.tsx",
+      "parent": "/_map/_heat_sources"
+    },
+    "/_map/_heat_sources/heat_source/$heatSourceId": {
+      "filePath": "_map/_heat_sources/heat_source/$heatSourceId.lazy.tsx",
+      "parent": "/_map/_heat_sources"
     }
   }
 }

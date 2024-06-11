@@ -10,5 +10,6 @@ export namespace HeatSource {
     priority: Priority.Item;
     consumerCount: number;
     issues: Issue[];
+    incidentCount: number;
   }
 }
