@@ -47,6 +47,27 @@ definitions:
       error:
         type: string
     type: object
+  models.Address:
+    properties:
+      address:
+        description: Полный Адрес в реестре.
+        type: string
+      border:
+        description: Граница объекта на карте.
+      center:
+        allOf:
+        - $ref: '#/definitions/models.Point'
+        description: Центр объекта на карте.
+      municipalDistrict:
+        description: Район округ.
+        type: string
+      unom:
+        description: Уникальный номер объекта недвижимости.
+        type: integer
+    required:
+    - address
+    - municipalDistrict
+    type: object
   models.DisconnectionDTO:
     properties:
       actualDisconnectionDate: {}
@@ -224,6 +245,88 @@ paths:
       summary: creating email account
       tags:
       - auth
+  /consumers/filters:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/models.Filter'
+              type: array
+            type: array
+      summary: получение списка всех фильтров для поиска по объектам
+      tags:
+      - search consumers
+  /consumers/q:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: фильтры для поиска
+        in: body
+        name: filters
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/models.Filter'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.HeatingPointDTO'
+            type: array
+      summary: поиск по объектам consumers с учетом фильтров
+      tags:
+      - search consumers
+  /geo/location/unom:
+    get:
+      parameters:
+      - description: уникальный номер объекта
+        in: query
+        name: unom
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Address'
+      summary: получение гео данных по unom
+      tags:
+      - location
+  /geo/location/unoms:
+    get:
+      parameters:
+      - collectionFormat: csv
+        description: уникальные номера объектов
+        in: query
+        items:
+          type: integer
+        name: unoms
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Address'
+            type: array
+      summary: получение гео данных по unoms
+      tags:
+      - location
   /geo/moek:
     get:
       consumes:
@@ -319,47 +422,6 @@ paths:
       summary: получение аварийных ситуаций и информации об объекте
       tags:
       - map
-  /search/consumers/filters:
-    get:
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              items:
-                $ref: '#/definitions/models.Filter'
-              type: array
-            type: array
-      summary: получение списка всех фильтров для поиска по объектам
-      tags:
-      - search consumers
-  /search/consumers/q:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: фильтры для поиска
-        in: body
-        name: filters
-        required: true
-        schema:
-          items:
-            $ref: '#/definitions/models.Filter'
-          type: array
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/models.HeatingPointDTO'
-            type: array
-      summary: поиск по объектам consumers с учетом фильтров
-      tags:
-      - search consumers
   /search/objects:
     get:
       parameters:

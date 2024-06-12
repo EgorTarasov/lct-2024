@@ -40,12 +40,11 @@ func (r *addressRegistryRepository) GetGeoDataByUnom(ctx context.Context, unom i
 	ctx, span := r.tracer.Start(ctx, "addressRegistry.GetGeoDataByUnom", trace.WithAttributes(attribute.Int64("unom", unom)))
 	defer span.End()
 
+	filter := bson.M{"unom": unom}
+
 	err = r.mongo.FindOne(ctx, addressCollectionName,
-		bson.D{{Key: "unom", Value: unom}},
-		result,
-		options.
-			FindOne().
-			SetProjection(addressProjection),
+		filter,
+		&result,
 	)
 	if err != nil {
 		return models.Address{}, err

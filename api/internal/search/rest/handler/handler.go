@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/EgorTarasov/lct-2024/api/internal/search/models"
+	shared "github.com/EgorTarasov/lct-2024/api/internal/shared/models"
 	"github.com/gofiber/fiber/v2"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -12,6 +13,8 @@ type searchEngine interface {
 	SearchStateProperties(ctx context.Context, query string) ([]models.StatePropertySearchResult, error)
 	ListFilters(ctx context.Context) ([]models.Filter, error)
 	SearchWithFilters(ctx context.Context, filters []models.Filter) ([]models.HeatingPointDTO, error)
+	GeoDataByUnom(ctx context.Context, unom int64) (shared.Address, error)
+	GeoDataByUnoms(ctx context.Context, unoms []int64) ([]shared.Address, error)
 }
 
 // Обработчик http запросов для поиска по данным.
@@ -65,7 +68,7 @@ func (h *handler) SearchObjects(c *fiber.Ctx) error {
 // @Tags search consumers
 // @Produce  json
 // @Success 200 {array} []models.Filter
-// @Router /search/consumers/filters [get].
+// @Router /consumers/filters [get].
 func (h *handler) ListAllFilters(c *fiber.Ctx) error {
 	ctx, span := h.tr.Start(c.Context(), "handler.ListAllFilters")
 	defer span.End()
@@ -89,7 +92,7 @@ func (h *handler) ListAllFilters(c *fiber.Ctx) error {
 // @Produce  json
 // @Param filters body []models.Filter true "фильтры для поиска"
 // @Success 200 {array} models.HeatingPointDTO
-// @Router /search/consumers/q [get].
+// @Router /consumers/q [get].
 func (h *handler) SearchWithFilters(c *fiber.Ctx) error {
 	ctx, span := h.tr.Start(c.Context(), "handler.SearchWithFilters")
 	defer span.End()

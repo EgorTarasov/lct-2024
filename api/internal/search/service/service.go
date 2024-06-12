@@ -108,3 +108,19 @@ func (s *service) SearchWithFilters(ctx context.Context, filters []models.Filter
 	}
 	return response, nil
 }
+
+// GeoDataByUnom получение гео данных по уникальному номеру объекта.
+func (s *service) GeoDataByUnom(ctx context.Context, unom int64) (shared.Address, error) {
+	ctx, span := s.tr.Start(ctx, "service.GeoDataByUnom", trace.WithAttributes(attribute.Int64("unom", unom)))
+	defer span.End()
+
+	return s.ar.GetGeoDataByUnom(ctx, unom)
+}
+
+// GeoDataByUnoms получение гео данных по уникальным номерам объектов.
+func (s *service) GeoDataByUnoms(ctx context.Context, unoms []int64) ([]shared.Address, error) {
+	ctx, span := s.tr.Start(ctx, "service.GeoDataByUnoms", trace.WithAttributes(attribute.Int64Slice("unoms", unoms)))
+	defer span.End()
+
+	return s.ar.GetGeoDataByUnoms(ctx, unoms)
+}

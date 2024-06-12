@@ -103,6 +103,133 @@ const docTemplate = `{
                 }
             }
         },
+        "/consumers/filters": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "search consumers"
+                ],
+                "summary": "получение списка всех фильтров для поиска по объектам",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/models.Filter"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/consumers/q": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "search consumers"
+                ],
+                "summary": "поиск по объектам consumers с учетом фильтров",
+                "parameters": [
+                    {
+                        "description": "фильтры для поиска",
+                        "name": "filters",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Filter"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.HeatingPointDTO"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/geo/location/unom": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "location"
+                ],
+                "summary": "получение гео данных по unom",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "уникальный номер объекта",
+                        "name": "unom",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Address"
+                        }
+                    }
+                }
+            }
+        },
+        "/geo/location/unoms": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "location"
+                ],
+                "summary": "получение гео данных по unoms",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "уникальные номера объектов",
+                        "name": "unoms",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Address"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/geo/moek": {
             "get": {
                 "consumes": [
@@ -247,70 +374,6 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/search/consumers/filters": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "search consumers"
-                ],
-                "summary": "получение списка всех фильтров для поиска по объектам",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/definitions/models.Filter"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/search/consumers/q": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "search consumers"
-                ],
-                "summary": "поиск по объектам consumers с учетом фильтров",
-                "parameters": [
-                    {
-                        "description": "фильтры для поиска",
-                        "name": "filters",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Filter"
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.HeatingPointDTO"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/search/objects": {
             "get": {
                 "produces": [
@@ -413,6 +476,38 @@ const docTemplate = `{
             "properties": {
                 "error": {
                     "type": "string"
+                }
+            }
+        },
+        "models.Address": {
+            "type": "object",
+            "required": [
+                "address",
+                "municipalDistrict"
+            ],
+            "properties": {
+                "address": {
+                    "description": "Полный Адрес в реестре.",
+                    "type": "string"
+                },
+                "border": {
+                    "description": "Граница объекта на карте."
+                },
+                "center": {
+                    "description": "Центр объекта на карте.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Point"
+                        }
+                    ]
+                },
+                "municipalDistrict": {
+                    "description": "Район округ.",
+                    "type": "string"
+                },
+                "unom": {
+                    "description": "Уникальный номер объекта недвижимости.",
+                    "type": "integer"
                 }
             }
         },
