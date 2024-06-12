@@ -23,7 +23,7 @@ func NewSearchFilterRepo(mongo mongoDB.Mongo, tracer trace.Tracer) *consumersSea
 	}
 }
 
-var columnMappingFromDbToUser = map[string]string{
+var columnMappingFromDBToUser = map[string]string{
 	"balance_holder":              "Балансодержатель",
 	"consumer":                    "Потребитель",
 	"heating_point_src":           "Все подключенные к ТЭЦ",
@@ -32,7 +32,7 @@ var columnMappingFromDbToUser = map[string]string{
 	"heating_point_location_type": "Тип ТП",
 }
 
-var columnMappingFromUserToDb = map[string]string{
+var columnMappingFromUserToDB = map[string]string{
 	"Балансодержатель":       "balance_holder",
 	"Потребитель":            "consumer",
 	"Все подключенные к ТЭЦ": "heating_point_src",
@@ -48,8 +48,7 @@ func (repo *consumersSearchRepo) GetSearchFilter(ctx context.Context) (filters [
 	ctx, span := repo.tr.Start(ctx, "consumersSearchRepo.GetSearchFilter")
 	defer span.End()
 
-	for key, value := range columnMappingFromDbToUser {
-
+	for key, value := range columnMappingFromDBToUser {
 		results, err := repo.mongo.Distinct(ctx, consumerCollection, key, bson.M{})
 		if err != nil {
 			return nil, err
@@ -58,9 +57,7 @@ func (repo *consumersSearchRepo) GetSearchFilter(ctx context.Context) (filters [
 		values := make([]string, len(results))
 		for i, v := range results {
 			values[i] = v.(string)
-
 		}
-
 		filter := models.Filter{
 			Name:   value,
 			Values: values,
@@ -78,21 +75,22 @@ func (repo *consumersSearchRepo) SearchWithFilters(ctx context.Context, filters 
 
 	// TODO: add testing for query building
 	var filter bson.M
-	if len(filters) == 0 {
+	switch len(filters) {
+	case 0:
 		filter = bson.M{}
-	} else if len(filters) == 1 {
-		name, ok := columnMappingFromUserToDb[filters[0].Name]
+	case 1:
+		name, ok := columnMappingFromUserToDB[filters[0].Name]
 		if !ok {
 			log.Error().Interface("filter", filters[0]).Msg("unknown filter")
 			return nil, nil
 		}
 		filter = bson.M{name: bson.M{"$in": filters[0].Values}}
-	} else {
+	default:
 		processedFilters := make([]bson.M, 0, len(filters))
 
 		for _, f := range filters {
 			if len(f.Values) > 0 {
-				name, ok := columnMappingFromUserToDb[f.Name]
+				name, ok := columnMappingFromUserToDB[f.Name]
 				if !ok {
 					log.Error().Interface("filter", f).Msg("unknown filter")
 					continue
@@ -102,11 +100,12 @@ func (repo *consumersSearchRepo) SearchWithFilters(ctx context.Context, filters 
 		}
 		filter = bson.M{"$and": processedFilters}
 	}
+
 	log.Debug().Interface("filter", filter).Msg("search filter")
 
 	if err = repo.mongo.FindMany(ctx, consumerCollection, filter, &values); err != nil {
 		return nil, err
 	}
 
-	return
+	return values, nil
 }

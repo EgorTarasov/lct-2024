@@ -470,6 +470,9 @@ const docTemplate = `{
                 "number": {
                     "type": "string"
                 },
+                "source": {
+                    "type": "string"
+                },
                 "type": {
                     "type": "string"
                 }

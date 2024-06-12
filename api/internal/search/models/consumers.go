@@ -10,7 +10,8 @@ type HeatingPoint struct {
 	BalanceHolder     string      `bson:"balance_holder" json:"balanceHolder"`
 	Address           string      `bson:"heating_point_address" json:"-"`
 	ConsumerAddress   string      `bson:"consumer_address" json:"consumerAddress"`
-	Number            string      `bson:"heating_point_src" json:"number"`
+	Source            string      `bson:"heating_point_src" json:""`
+	Number            string      `bson:"heating_point_number" json:"number"`
 	Type              string      `bson:"heating_point_type" json:"type"`
 	LocationType      string      `bson:"heating_point_location_type" json:"locationType"`
 	District          string      `bson:"municipal_district" json:"district"`

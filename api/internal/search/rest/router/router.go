@@ -19,5 +19,4 @@ func InitRoutes(app *fiber.App, s searchController) {
 	consumers.Get("/filters", s.ListAllFilters)
 
 	search.Get("/object", s.SearchObjects)
-
 }
