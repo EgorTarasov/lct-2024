@@ -49,20 +49,21 @@ type JDSDAO struct {
 	GeoDataCenter interface{} `bson:"geoDataCenter" json:"geoDataCenter"`
 }
 
-// ConsumerDAO потребитель
+// ConsumerDAO потребитель.
 type ConsumerDAO struct {
 	Group   string `bson:"group" json:"group"`
 	Unom    string `bson:"consumerUnom" json:"unom"`
 	Address string `bson:"consumerAddress" json:"address"`
 }
 
-// ConsumerDTO потребитель
+// ConsumerDTO потребитель.
 type ConsumerDTO struct {
 	Group   string `json:"group"`
 	Unom    string `json:"unom"`
 	Address string `json:"address"`
 }
 
+// ToDTO преобразование объекта в DTO.
 func (consumer *ConsumerDAO) ToDTO() *ConsumerDTO {
 	return &ConsumerDTO{
 		Group:   consumer.Group,
@@ -71,7 +72,7 @@ func (consumer *ConsumerDAO) ToDTO() *ConsumerDTO {
 	}
 }
 
-// CHP Combined heat and power plant
+// CHP Combined heat and power plant.
 type CHP struct {
 	Name      string        `bson:"ctp" json:"chp"`
 	Consumers []ConsumerDTO `bson:"consumers" json:"consumers"`

@@ -8,7 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// addressRegistry справочник с гео информацией
+// addressRegistry справочник с гео информацией.
 type addressRegistry interface {
 	GetGeoDataInRadius(ctx context.Context, latitude, longitude float64, distance int) (result []shared.Address, err error)
 	GetGeoDataByUnom(ctx context.Context, unom int64) (shared.Address, error)
@@ -27,7 +27,7 @@ type service struct {
 	ev eventRepo
 }
 
-// NewService конструктор сервиса для работы с картой
+// NewService конструктор сервиса для работы с картой.
 func NewService(ar addressRegistry, ev eventRepo) *service {
 	return &service{
 		ar: ar,
@@ -60,18 +60,3 @@ func (s *service) GetEmergencyEventsInRadius(ctx context.Context, latitude, long
 
 	return events, nil
 }
-
-//eventUnom := make(map[int64]*models.Event)
-//unoms := make([]int64, 0, len(events))
-//for _, event := range events {
-//	//eventUnom[event.Unom] = event
-//	unoms = append(unoms, event.Unom)
-//}
-//
-//addressInfos, err := s.ar.GetGeoDataByUnoms(ctx, unoms)
-//if err != nil {
-//	return nil, err
-//}
-//for _, v := range addressInfos {
-//	eventUnom[v.Unom].Address = v
-//}

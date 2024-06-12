@@ -27,7 +27,7 @@ var addressProjection = bson.D{
 	{Key: "address", Value: 1},
 }
 
-// NewAddressRegistryRepository справочная
+// NewAddressRegistryRepository справочная информация по адресам.
 func NewAddressRegistryRepository(mongo mongo.Mongo, tracer trace.Tracer) *addressRegistryRepository {
 	return &addressRegistryRepository{
 		mongo:  mongo,
@@ -144,7 +144,7 @@ func (r *addressRegistryRepository) GetByMunicipalDistrict(ctx context.Context, 
 	return result, nil
 }
 
-// GetGeoDataInRadius
+// GetGeoDataInRadius возвращает геоданные в радиусе.
 func (r *addressRegistryRepository) GetGeoDataInRadius(ctx context.Context, latitude, longitude float64, distance int) (result []models.Address, err error) {
 	ctx, span := r.tracer.Start(ctx, "addressRegistry.GetGeoDataInRadius", trace.WithAttributes(attribute.Float64("latitude", latitude), attribute.Float64("longitude", longitude)))
 	defer span.End()
@@ -167,5 +167,6 @@ func (r *addressRegistryRepository) GetGeoDataInRadius(ctx context.Context, lati
 	if err != nil {
 		return nil, err
 	}
+
 	return result, nil
 }

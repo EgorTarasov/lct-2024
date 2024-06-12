@@ -87,7 +87,7 @@ type radiusRequest struct {
 // @Produce  json
 // @Success 200 {object} []models.PropertyDTO
 // @Router /geo/property [get].
-func (mc *mapController) GetPropertiesInRadius(c *fiber.Ctx) error { //nolint:dupl
+func (mc *mapController) GetPropertiesInRadius(c *fiber.Ctx) error {
 	ctx, span := mc.tracer.Start(c.Context(), "fiber.GetPropertiesInRadius")
 	defer span.End()
 
@@ -137,7 +137,7 @@ func (mc *mapController) GetPropertiesInRadius(c *fiber.Ctx) error { //nolint:du
 // @Produce  json
 // @Success 200 {object} []models.MoekDTO
 // @Router /geo/moek [get].
-func (mc *mapController) GetMoeksInRadius(c *fiber.Ctx) error { //nolint:dupl
+func (mc *mapController) GetMoeksInRadius(c *fiber.Ctx) error {
 	ctx, span := mc.tracer.Start(c.Context(), "fiber.GetMoeksInRadius")
 	defer span.End()
 

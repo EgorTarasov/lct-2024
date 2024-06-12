@@ -8,7 +8,7 @@ type EmergencyInfoDTO struct {
 	Purpose string `json:"purpose"`
 }
 
-// Event информация о событие
+// Event информация о событие.
 type Event struct {
 	// Округ
 	Country string `json:"country" bson:"country"`

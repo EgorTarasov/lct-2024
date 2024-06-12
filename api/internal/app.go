@@ -13,12 +13,16 @@ import (
 	authHandler "github.com/EgorTarasov/lct-2024/api/internal/auth/rest/handler"
 	authRouter "github.com/EgorTarasov/lct-2024/api/internal/auth/rest/router"
 	auth "github.com/EgorTarasov/lct-2024/api/internal/auth/service"
-	mapRepo "github.com/EgorTarasov/lct-2024/api/internal/chp/repository/mongo"
+	chpRepos "github.com/EgorTarasov/lct-2024/api/internal/chp/repository/mongo"
 	mapHandler "github.com/EgorTarasov/lct-2024/api/internal/chp/rest/handler"
 	mapRouter "github.com/EgorTarasov/lct-2024/api/internal/chp/rest/router"
 	mapService "github.com/EgorTarasov/lct-2024/api/internal/chp/service"
 	"github.com/EgorTarasov/lct-2024/api/internal/config"
-	sharedMongo "github.com/EgorTarasov/lct-2024/api/internal/shared/reposotory/mongo"
+	searchRepos "github.com/EgorTarasov/lct-2024/api/internal/search/repository"
+	searchHandler "github.com/EgorTarasov/lct-2024/api/internal/search/rest/handler"
+	searchRouter "github.com/EgorTarasov/lct-2024/api/internal/search/rest/router"
+	search "github.com/EgorTarasov/lct-2024/api/internal/search/service"
+	sharedMongo "github.com/EgorTarasov/lct-2024/api/internal/shared/repository/mongo"
 	mongoDB "github.com/EgorTarasov/lct-2024/api/pkg/mongo"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	// подключение swagger для документации api.
@@ -103,28 +107,30 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 
 	// map
 	ar := sharedMongo.NewAddressRegistryRepository(mongo, tracer)
-	ev := mapRepo.NewEventRepo(mongo, tracer)
+	ev := chpRepos.NewEventRepo(mongo, tracer)
 	ms := mapService.NewService(ar, ev)
 	mc := mapHandler.NewMapController(ctx, ms, tracer)
-
 	mapRouter.InitRoutes(app, mc)
+
+	// search
+	statePropertyRepo := searchRepos.NewStatePropertyRepo(mongo, tracer)
+	searchService := search.NewService(ar, statePropertyRepo, tracer)
+	searchController := searchHandler.New(searchService, tracer)
+	searchRouter.InitRoutes(app, searchController)
+
+	// geo.
+	// 	objectRepo := chpRepos.NewObjectRepo(pg, tracer)
+	// propertyRepo := geoMongo.NewPropertyRepository(&mongo, tracer)
+	// moeksRepo := geoMongo.NewMoekRepository(&mongo, tracer)
+	// odsRepo := geoMongo.NewOdsRepository(&mongo, tracer)
+	// mapService := geo.New(ctx, cfg, propertyRepo, moeksRepo, odsRepo, tracer)
+	// mapController := mapHandler.NewMapController(ctx, mapService, tracer)
+	// if err = mapRouter.InitMapRouter(ctx, app, mapController); err != nil {
+	// 	return err
+	// }
 
 	if err = app.Listen(fmt.Sprintf(":%d", cfg.Server.Port)); err != nil {
 		return err
 	}
 	return nil
 }
-
-// geo.
-// objectRepo := mapRepo.NewObjectRepo(pg, tracer)
-//propertyRepo := geoMongo.NewPropertyRepository(&mongo, tracer)
-//moeksRepo := geoMongo.NewMoekRepository(&mongo, tracer)
-//odsRepo := geoMongo.NewOdsRepository(&mongo, tracer)
-//mapService := geo.New(ctx, cfg, propertyRepo, moeksRepo, odsRepo, tracer)
-//mapController := mapHandler.NewMapController(ctx, mapService, tracer)
-
-// map
-
-//if err = mapRouter.InitMapRouter(ctx, app, mapController); err != nil {
-//	return err
-//}

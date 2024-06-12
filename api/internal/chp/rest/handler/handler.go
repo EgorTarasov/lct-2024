@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/EgorTarasov/lct-2024/api/internal/chp/models"
-	_ "github.com/EgorTarasov/lct-2024/api/internal/shared/models"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"go.opentelemetry.io/otel/trace"
@@ -20,7 +19,7 @@ type mapController struct {
 	v  *validator.Validate
 }
 
-// NewMapController конструктор контроллера карты
+// NewMapController конструктор контроллера карты.
 func NewMapController(_ context.Context, s mapService, tracer trace.Tracer) *mapController {
 	return &mapController{
 		s:  s,
@@ -45,7 +44,6 @@ type emergencyRequest struct {
 // @Param emergencyRequest body emergencyRequest true "emergencyRequest"
 // @Accept  json
 // @Produce  json
-// @Success 200 {array} models.Event
 // @Router /map/events [get].
 func (mc *mapController) GetEmergencyEvents(c *fiber.Ctx) error {
 	// @Success 200 {object} []models.Event

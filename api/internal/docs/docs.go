@@ -244,13 +244,37 @@ const docTemplate = `{
                         }
                     }
                 ],
+                "responses": {}
+            }
+        },
+        "/search/objects": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "search"
+                ],
+                "summary": "поиск по объектам (потребителям) тепло энергии",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "поисковой запрос",
+                        "name": "q",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Event"
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/models.StatePropertySearchResult"
+                                }
                             }
                         }
                     }
@@ -328,52 +352,6 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_chp_models.Address": {
-            "type": "object",
-            "required": [
-                "address",
-                "municipalDistrict"
-            ],
-            "properties": {
-                "address": {
-                    "description": "Полный Адрес в реестре.",
-                    "type": "string"
-                },
-                "border": {
-                    "description": "Граница объекта на карте."
-                },
-                "center": {
-                    "description": "Центр объекта на карте.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/internal_chp_models.Point"
-                        }
-                    ]
-                },
-                "municipalDistrict": {
-                    "description": "Район округ.",
-                    "type": "string"
-                },
-                "unom": {
-                    "description": "Уникальный номер объекта недвижимости.",
-                    "type": "integer"
-                }
-            }
-        },
-        "internal_chp_models.Point": {
-            "type": "object",
-            "properties": {
-                "coordinates": {
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-                    }
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
         "models.DisconnectionDTO": {
             "type": "object",
             "properties": {
@@ -392,41 +370,6 @@ const docTemplate = `{
                 },
                 "source": {
                     "type": "string"
-                }
-            }
-        },
-        "models.Event": {
-            "type": "object",
-            "properties": {
-                "EndedAt": {
-                    "description": "Дата окончания",
-                    "type": "string"
-                },
-                "country": {
-                    "description": "Округ",
-                    "type": "string"
-                },
-                "externalEndedAt": {
-                    "description": "Дата закрытия в системе",
-                    "type": "string"
-                },
-                "geo": {
-                    "$ref": "#/definitions/internal_chp_models.Address"
-                },
-                "source": {
-                    "description": "Источник",
-                    "type": "string"
-                },
-                "startDate": {
-                    "description": "Дата начала",
-                    "type": "string"
-                },
-                "title": {
-                    "description": "Описание",
-                    "type": "string"
-                },
-                "unom": {
-                    "type": "integer"
                 }
             }
         },
@@ -458,6 +401,20 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Point": {
+            "type": "object",
+            "properties": {
+                "coordinates": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "models.PropertyDTO": {
             "type": "object",
             "properties": {
@@ -472,6 +429,52 @@ const docTemplate = `{
                 },
                 "point": {},
                 "polygon": {}
+            }
+        },
+        "models.StatePropertySearchResult": {
+            "type": "object",
+            "required": [
+                "address",
+                "municipalDistrict"
+            ],
+            "properties": {
+                "address": {
+                    "description": "Полный Адрес в реестре.",
+                    "type": "string"
+                },
+                "area": {},
+                "border": {
+                    "description": "Граница объекта на карте."
+                },
+                "center": {
+                    "description": "Центр объекта на карте.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/models.Point"
+                        }
+                    ]
+                },
+                "class": {
+                    "type": "string"
+                },
+                "feature": {
+                    "type": "string"
+                },
+                "floors": {},
+                "municipalDistrict": {
+                    "description": "Район округ.",
+                    "type": "string"
+                },
+                "purpose": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "unom": {
+                    "description": "Уникальный номер объекта недвижимости.",
+                    "type": "integer"
+                }
             }
         }
     }

@@ -26,7 +26,6 @@ func NewOdsRepository(db *mongoDB.Mongo, tracer trace.Tracer) *odsRepository {
 
 // GetAllCPH returns all CHP from the database.
 func (pr *odsRepository) GetAllCPH(ctx context.Context) ([]string, error) {
-
 	result, err := pr.db.Distinct(ctx, odsCollectionName, "ctp", bson.D{
 		{
 			Key: "ctp",

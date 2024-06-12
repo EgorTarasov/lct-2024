@@ -1,0 +1,55 @@
+package handler
+
+import (
+	"context"
+
+	"github.com/EgorTarasov/lct-2024/api/internal/search/models"
+	"github.com/gofiber/fiber/v2"
+	"go.opentelemetry.io/otel/trace"
+)
+
+type searchEngine interface {
+	SearchStateProperties(ctx context.Context, query string) ([]models.StatePropertySearchResult, error)
+}
+
+// Обработчик http запросов для поиска по данным.
+type handler struct {
+	se searchEngine
+	tr trace.Tracer
+}
+
+// New создание новых обработчиков для http запросов поиска.
+func New(s searchEngine, tracer trace.Tracer) *handler {
+	return &handler{
+		se: s,
+		tr: tracer,
+	}
+}
+
+// SearchObjects godoc
+//
+// текстовый поиск по социальным объектам
+//
+// @Summary поиск по объектам (потребителям) тепло энергии
+// @Description
+// @Tags search
+// @Param q query string true "поисковой запрос"
+// @Produce  json
+// @Success 200 {array} []models.StatePropertySearchResult
+// @Router /search/objects [get].
+func (h *handler) SearchObjects(c *fiber.Ctx) error {
+	ctx, span := h.tr.Start(c.Context(), "handler.SearchObjects")
+	defer span.End()
+
+	query := c.Query("q")
+	if len(query) < 1 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "no query was provided"})
+	}
+
+	res, err := h.se.SearchStateProperties(ctx, query)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(res)
+}
