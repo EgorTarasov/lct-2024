@@ -59,5 +59,5 @@ const Page = () => {
 
 export const Route = createFileRoute("/_map")({
   component: Page,
-  beforeLoad: (x) => checkGrant(x, GrantsService.canReadMap)
+  beforeLoad: () => checkGrant(GrantsService.canReadMap)
 });

@@ -28,7 +28,7 @@ export const UserNav = observer(() => {
             to="/profile"
             className="size-10 flex shadow items-center justify-center rounded-full bg-accent text-accent-foreground">
             <Text.p>
-              {[AuthService.auth.user.firstName, AuthService.auth.user.lastName]
+              {[AuthService.auth.user.firstName ?? "К", AuthService.auth.user.lastName ?? "Д"]
                 .map((name) => name[0].toUpperCase())
                 .join("")}
             </Text.p>

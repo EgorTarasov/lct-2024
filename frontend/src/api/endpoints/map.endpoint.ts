@@ -9,7 +9,7 @@ export namespace MapEndpoint {
     radius: number,
     signal: GenericAbortSignal
   ) =>
-    api.get("/geo/property", MapDto.Property, {
+    api.get("/geo/moek", MapDto.Property, {
       params: { latitude, longitude, radius },
       signal
     });

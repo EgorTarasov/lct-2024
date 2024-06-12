@@ -39,5 +39,5 @@ export const Route = createRootRoute({
   component: Page,
   pendingComponent: LoadingWrapper,
   notFoundComponent: NotFoundPage,
-  beforeLoad: () => AuthService.waitInit
+  beforeLoad: () => AuthService.waitInit()
 });

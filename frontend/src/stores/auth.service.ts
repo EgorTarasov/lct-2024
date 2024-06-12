@@ -9,14 +9,14 @@ class AuthServiceViewModel {
 
   constructor() {
     makeAutoObservable(this);
-    // void this.init();
-    this.auth = {
-      state: "authenticated",
-      user: {
-        firstName: "John",
-        lastName: "Doe"
-      }
-    };
+    void this.init();
+    // this.auth = {
+    //   state: "authenticated",
+    //   user: {
+    //     firstName: "John",
+    //     lastName: "Doe"
+    //   }
+    // };
   }
 
   private async init() {
@@ -35,7 +35,8 @@ class AuthServiceViewModel {
 
   login = async (v: AuthEndpoint.LoginTemplate): Promise<boolean> => {
     try {
-      await AuthEndpoint.login(v);
+      const token = await AuthEndpoint.login(v);
+      authToken.set(token.accessToken);
 
       const user = await UserEndpoint.current();
       this.auth = { state: "authenticated", user };
@@ -68,7 +69,8 @@ class AuthServiceViewModel {
 
   register = async (v: AuthEndpoint.RegisterTemplate): Promise<boolean> => {
     try {
-      await AuthEndpoint.register(v);
+      const token = await AuthEndpoint.register(v);
+      authToken.set(token.accessToken);
 
       const user = await UserEndpoint.current();
       this.auth = { state: "authenticated", user };

@@ -6,14 +6,23 @@ import { HeatDistributor } from "@/types/heat.type";
 import { Issue } from "@/types/issue.type";
 import { debounceAsync } from "@/utils/debounce";
 import { Priority } from "@/types/priority.type";
+import { ConsumersEndpoint } from "@/api/endpoints/consumers.endpoint";
 
 export class HeatDistributorsViewModel implements DisposableVm {
   constructor() {
     makeAutoObservable(this);
     const r = reaction(
-      () => [this.search, this.heatNetworks.value, this.layer, this.page],
+      () => [this.search, this.heatNetworks.value, this.page],
       () => this.fetchList()
     );
+
+    this.init();
+  }
+
+  async init() {
+    const res = await ConsumersEndpoint.getFilters();
+    console.log(res);
+    await this.fetchList();
   }
 
   //#region filters
@@ -44,8 +53,7 @@ export class HeatDistributorsViewModel implements DisposableVm {
   fetchList = debounceAsync(async () => {
     const filters = {
       search: this.search,
-      heatNetworks: this.heatNetworks.value,
-      layer: this.layer
+      heatNetworks: this.heatNetworks.value
     };
 
     console.log(filters);

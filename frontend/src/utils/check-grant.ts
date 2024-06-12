@@ -1,11 +1,11 @@
-import { NavigateFn } from "@tanstack/react-router";
+import { redirect } from "@tanstack/react-router";
 
-export const checkGrant = (x: { navigate: NavigateFn }, allowed: boolean) => {
+export const checkGrant = (allowed: boolean) => {
   if (allowed) {
     return;
   }
 
-  x.navigate({
+  throw redirect({
     to: "/login"
   });
 };

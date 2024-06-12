@@ -37,6 +37,8 @@ export const Page = () => {
       navigate({
         to: "/"
       });
+    } else {
+      toast.error("Неверная почта или пароль");
     }
   };
 
@@ -58,7 +60,12 @@ export const Page = () => {
                 <FormItem>
                   <FormLabel>Почта</FormLabel>
                   <FormControl>
-                    <Input {...field} disabled={disabled} placeholder="me@example.com" />
+                    <Input
+                      {...field}
+                      name="email"
+                      disabled={disabled}
+                      placeholder="me@example.com"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -78,7 +85,7 @@ export const Page = () => {
                     </Link>
                   </div>
                   <FormControl>
-                    <Input {...field} disabled={disabled} type="password" />
+                    <Input {...field} name="password" disabled={disabled} type="password" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -14,9 +14,7 @@ class grantService {
   }
 
   get canReadMap() {
-    if (!isLoggedIn(AuthService.auth)) return false;
-
-    return true;
+    return isLoggedIn(AuthService.auth);
   }
 }
 

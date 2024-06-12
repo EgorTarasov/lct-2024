@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 axios.defaults.baseURL = "https://api.lct.larek.tech/";
 
-type Schema = ZodObject<any> | z.ZodArray<ZodObject<any> | z.ZodAny>;
+type Schema = ZodObject<any> | z.ZodArray<ZodObject<any> | z.ZodAny> | z.ZodAny;
 
 const getConfig = (config?: AxiosRequestConfig<unknown>) => ({
   ...config,
@@ -54,7 +54,7 @@ const handleRequest = async <T extends Schema>(
           });
           break;
         default:
-          toast.error("Неизвестная ошибка при выполнении запроса");
+          // toast.error("Неизвестная ошибка при выполнении запроса");
           break;
       }
     } else {

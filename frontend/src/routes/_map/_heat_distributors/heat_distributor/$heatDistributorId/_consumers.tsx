@@ -115,9 +115,9 @@ const Page = observer(() => {
               </ScrollArea>
               <PaginationWidget
                 className="mt-auto mb-2"
-                currentPage={11}
+                currentPage={1}
                 onPageChange={() => void 0}
-                totalPages={12}
+                totalPages={1}
               />
             </>
           ) : (
