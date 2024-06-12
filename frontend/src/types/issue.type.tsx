@@ -1,10 +1,16 @@
-import { AlertTriangleIcon, ThermometerSnowflakeIcon, WrenchIcon } from "lucide-react";
+import {
+  AlertTriangleIcon,
+  CalendarClockIcon,
+  ThermometerSnowflakeIcon,
+  WrenchIcon
+} from "lucide-react";
 import { LocaleExtended } from "./locale.type";
 
 export enum Issue {
   EMERGENCY = "EMERGENCY",
   REPAIR = "REPAIR",
-  TEMPERATURE = "TEMPERATURE"
+  TEMPERATURE = "TEMPERATURE",
+  PREDICTION = "PREDICTION"
 }
 
 export const IssueLocaleMap: LocaleExtended<Issue> = {
@@ -28,5 +34,12 @@ export const IssueLocaleMap: LocaleExtended<Issue> = {
     color: "#0EA5E9",
     icon: <ThermometerSnowflakeIcon />,
     locale: "Аварийная ситуация"
+  },
+  [Issue.PREDICTION]: {
+    backgroundColor: "rgba(147, 51, 234, 0.2)",
+    borderColor: "rgba(147, 51, 234, 0.4)",
+    color: "#9333EA",
+    icon: <CalendarClockIcon />,
+    locale: "Возможна авария"
   }
 };

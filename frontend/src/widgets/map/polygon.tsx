@@ -4,7 +4,7 @@ import { LatLngExpression } from "leaflet";
 import { FC } from "react";
 import { Marker, Polygon, Popup } from "react-leaflet";
 
-export const ConsumerPolygon: FC<{ data: Consumer.Item }> = (x) => {
+export const ConsumerPolygon: FC<{ data: Consumer.Polygon }> = (x) => {
   const getTopLeftCorner = () => {
     return x.data.position.reduce(
       (acc, point) => {

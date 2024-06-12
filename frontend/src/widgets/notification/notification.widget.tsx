@@ -44,7 +44,7 @@ export const NotificationWidget = observer(() => {
           <SheetTitle>Уведомления</SheetTitle>
         </SheetHeader>
         {vm.notifications.length > 0 && <LayerSelect />}
-        <ScrollArea className="flex-1 space-y-2">
+        <ScrollArea className="flex-1 space-y-2 flex flex-col gap-2">
           {vm.notifications.map((n) => (
             <NotificationCard
               key={n.id}

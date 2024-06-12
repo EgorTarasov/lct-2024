@@ -1,45 +1,36 @@
 import { DisposableVm } from "@/utils/vm";
 import { makeAutoObservable } from "mobx";
-import L, { Map } from "leaflet";
+import { Map } from "leaflet";
 import { MapEndpoint } from "@/api/endpoints/map.endpoint";
 import { debounceAsync } from "@/utils/debounce";
-import { FiltersViewModel } from "@/widgets/map/vm/filters.vm";
+import { HeatSourcesViewModel } from "@/widgets/map/vm/filters.vm";
 import { Consumer } from "@/types/consumer.type";
 import { Priority } from "@/types/priority.type";
-import { HeatSource } from "@/types/heat.type";
-import { Issue } from "@/types/issue.type";
+import { ConsumersViewModel } from "../widgets/map/vm/consumers.vm";
 
 export class mapStore implements DisposableVm {
-  filters = new FiltersViewModel(this);
   constructor() {
     makeAutoObservable(this);
   }
 
+  consumersVm: ConsumersViewModel | null = null;
+  heatSourceVm = new HeatSourcesViewModel(this);
+
+  //#region map
+  consumerGeozones: Consumer.Polygon[] = [];
+  shouldZoomIn = true;
   private map: Map | null = null;
+
   setMap(m: Map) {
     if (this.map) {
       this.dispose();
     }
 
     this.map = m;
-    this.map.addEventListener("moveend", () => this.moveEnd());
+    this.map.addEventListener("moveend", () => this.fetchVisiblePart());
   }
 
-  shouldZoomIn = true;
-  consumers: Consumer.Item[] = [];
-  heatSources: HeatSource.Item[] = [
-    {
-      address: "ул. Ленина, 1",
-      consumerCount: 10,
-      id: 1,
-      issue: Issue.EMERGENCY,
-      issues: [Issue.EMERGENCY, Issue.REPAIR],
-      number: "ТЭЦ-1",
-      priority: Priority.Item.HIGH,
-      incidentCount: 3
-    }
-  ];
-  moveEnd = debounceAsync(async (signal) => {
+  fetchVisiblePart = debounceAsync(async (signal) => {
     if (!this.map) return;
 
     const zoom = this.map.getZoom();
@@ -52,7 +43,7 @@ export class mapStore implements DisposableVm {
     }
     this.shouldZoomIn = false;
     const res = await MapEndpoint.getProperty(center.lat, center.lng, radiusKm, signal);
-    const polygons: Consumer.Item[] = [];
+    const polygons: Consumer.Polygon[] = [];
     res.forEach((v) => {
       const coords = v.polygon.find((p) => p.Key === "coordinates")?.Value as
         | number[][][]
@@ -66,8 +57,9 @@ export class mapStore implements DisposableVm {
       });
     });
 
-    this.consumers = polygons;
+    this.consumerGeozones = polygons;
   }, 500);
+  //#endregion
 
   dispose(): void {
     this.map = null;

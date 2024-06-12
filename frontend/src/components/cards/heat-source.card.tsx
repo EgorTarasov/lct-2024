@@ -6,9 +6,9 @@ import { Link } from "@tanstack/react-router";
 import { PriorityCard, PriorityIcon } from "./priority-icon";
 
 function pluralizeConsumer(count: number): string {
-  const singular = "Потребитель";
-  const genitiveSingular = "Потребителя";
-  const genitivePlural = "Потребителей";
+  const singular = "потребитель";
+  const genitiveSingular = "потребителя";
+  const genitivePlural = "потребителей";
 
   if (count % 10 === 1 && count % 100 !== 11) {
     return singular;
@@ -37,8 +37,8 @@ export const HeatSourceCard: FC<{ data: HeatSource.Item }> = (x) => {
         <p className="text-sm text-muted-foreground">
           {x.data.consumerCount} {pluralizeConsumer(x.data.consumerCount)} тепла
         </p>
-        {x.data.issues.map((v) => (
-          <IssueIcon className="*:size-4" data={v} />
+        {x.data.issues.map((v, i) => (
+          <IssueIcon key={i} className="*:size-4" data={v} />
         ))}
       </div>
     </Link>
@@ -46,12 +46,12 @@ export const HeatSourceCard: FC<{ data: HeatSource.Item }> = (x) => {
 };
 
 export const HeatSourceCardReadonly: FC<{ data: HeatSource.Item }> = (x) => (
-  <div className="flex flex-col px-4 py-2 w-full">
+  <div className="flex flex-col px-4 pb-2 w-full">
     <div className="flex items-center justify-between w-full">
       <Text.SubtleMedium className="text-muted-foreground">{x.data.number}</Text.SubtleMedium>
     </div>
     <Text.Large className="pb-1">{x.data.address}</Text.Large>
-    <div className="flex gap-2 items-center">
+    <div className="flex items-center justify-between">
       <IssueCard data={x.data.issue} />
       <PriorityCard data={x.data.priority} />
     </div>

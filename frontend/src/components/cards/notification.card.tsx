@@ -9,7 +9,7 @@ import { getTimeDifference } from "@/utils/time";
 
 export const NotificationCard: FC<{ data: Notification.Item; onClose: () => void }> = (x) => {
   return (
-    <li className="p-4 pt-2 border space-y-2 list-none bg-card text-card-foreground rounded-md relative">
+    <li className="mb-2 p-4 pt-2 border space-y-2 list-none bg-card text-card-foreground rounded-md relative">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button

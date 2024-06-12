@@ -13,7 +13,7 @@ import { ChevronDownIcon } from "lucide-react";
 import { observer } from "mobx-react-lite";
 
 export const LayerSelect = observer(() => {
-  const vm = MapStore.filters;
+  const vm = MapStore.heatSourceVm;
 
   return (
     <DropdownMenu>
@@ -32,7 +32,7 @@ export const LayerSelect = observer(() => {
               <Button
                 variant="ghost"
                 className="flex gap-2 w-full text-left"
-                onClick={() => vm.setLayer(key as MapFilters.Layer)}>
+                onClick={() => (vm.layer = key as MapFilters.Layer)}>
                 <span className="*:size-4">{v.icon}</span>
                 <Text.Subtle className="flex-1">{v.locale}</Text.Subtle>
               </Button>

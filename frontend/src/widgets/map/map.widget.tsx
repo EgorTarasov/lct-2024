@@ -43,7 +43,7 @@ const Map = observer(() => {
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         />
         <ZoomControl position="topright" />
-        {vm.consumers.map((v) => (
+        {vm.consumerGeozones.map((v) => (
           <ConsumerPolygon key={v.id} data={v} />
         ))}
         <Polygon

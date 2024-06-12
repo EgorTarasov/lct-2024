@@ -14,7 +14,9 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as MapImport } from './routes/_map'
+import { Route as IncidentsImport } from './routes/_incidents'
 import { Route as BaseImport } from './routes/_base'
+import { Route as MapHeatsourcesHeatsourceHeatSourceIdConsumersImport } from './routes/_map/_heat_sources/heat_source/$heatSourceId/_consumers'
 
 // Create Virtual Routes
 
@@ -23,14 +25,26 @@ const BaseRegisterLazyImport = createFileRoute('/_base/register')()
 const BaseProfileLazyImport = createFileRoute('/_base/profile')()
 const BaseLoginLazyImport = createFileRoute('/_base/login')()
 const MapHeatsourcesIndexLazyImport = createFileRoute('/_map/_heat_sources/')()
-const MapHeatsourcesHeatsourceHeatSourceIdLazyImport = createFileRoute(
+const MapHeatsourcesHeatsourceHeatSourceIdImport = createFileRoute(
   '/_map/_heat_sources/heat_source/$heatSourceId',
 )()
+const MapHeatsourcesHeatsourceHeatSourceIdIndexLazyImport = createFileRoute(
+  '/_map/_heat_sources/heat_source/$heatSourceId/',
+)()
+const MapHeatsourcesHeatsourceHeatSourceIdConsumersConsumersIndexLazyImport =
+  createFileRoute(
+    '/_map/_heat_sources/heat_source/$heatSourceId/_consumers/consumers/',
+  )()
 
 // Create/Update Routes
 
 const MapRoute = MapImport.update({
   id: '/_map',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const IncidentsRoute = IncidentsImport.update({
+  id: '/_incidents',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -70,14 +84,36 @@ const MapHeatsourcesIndexLazyRoute = MapHeatsourcesIndexLazyImport.update({
   import('./routes/_map/_heat_sources/index.lazy').then((d) => d.Route),
 )
 
-const MapHeatsourcesHeatsourceHeatSourceIdLazyRoute =
-  MapHeatsourcesHeatsourceHeatSourceIdLazyImport.update({
+const MapHeatsourcesHeatsourceHeatSourceIdRoute =
+  MapHeatsourcesHeatsourceHeatSourceIdImport.update({
     path: '/heat_source/$heatSourceId',
     getParentRoute: () => MapHeatsourcesLazyRoute,
+  } as any)
+
+const MapHeatsourcesHeatsourceHeatSourceIdIndexLazyRoute =
+  MapHeatsourcesHeatsourceHeatSourceIdIndexLazyImport.update({
+    path: '/',
+    getParentRoute: () => MapHeatsourcesHeatsourceHeatSourceIdRoute,
   } as any).lazy(() =>
-    import('./routes/_map/_heat_sources/heat_source/$heatSourceId.lazy').then(
-      (d) => d.Route,
-    ),
+    import(
+      './routes/_map/_heat_sources/heat_source/$heatSourceId/index.lazy'
+    ).then((d) => d.Route),
+  )
+
+const MapHeatsourcesHeatsourceHeatSourceIdConsumersRoute =
+  MapHeatsourcesHeatsourceHeatSourceIdConsumersImport.update({
+    id: '/_consumers',
+    getParentRoute: () => MapHeatsourcesHeatsourceHeatSourceIdRoute,
+  } as any)
+
+const MapHeatsourcesHeatsourceHeatSourceIdConsumersConsumersIndexLazyRoute =
+  MapHeatsourcesHeatsourceHeatSourceIdConsumersConsumersIndexLazyImport.update({
+    path: '/consumers/',
+    getParentRoute: () => MapHeatsourcesHeatsourceHeatSourceIdConsumersRoute,
+  } as any).lazy(() =>
+    import(
+      './routes/_map/_heat_sources/heat_source/$heatSourceId/_consumers/consumers/index.lazy'
+    ).then((d) => d.Route),
   )
 
 // Populate the FileRoutesByPath interface
@@ -89,6 +125,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: ''
       preLoaderRoute: typeof BaseImport
+      parentRoute: typeof rootRoute
+    }
+    '/_incidents': {
+      id: '/_incidents'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof IncidentsImport
       parentRoute: typeof rootRoute
     }
     '/_map': {
@@ -137,8 +180,29 @@ declare module '@tanstack/react-router' {
       id: '/_map/_heat_sources/heat_source/$heatSourceId'
       path: '/heat_source/$heatSourceId'
       fullPath: '/heat_source/$heatSourceId'
-      preLoaderRoute: typeof MapHeatsourcesHeatsourceHeatSourceIdLazyImport
+      preLoaderRoute: typeof MapHeatsourcesHeatsourceHeatSourceIdImport
       parentRoute: typeof MapHeatsourcesLazyImport
+    }
+    '/_map/_heat_sources/heat_source/$heatSourceId/_consumers': {
+      id: '/_map/_heat_sources/heat_source/$heatSourceId/_consumers'
+      path: '/heat_source/$heatSourceId'
+      fullPath: '/heat_source/$heatSourceId'
+      preLoaderRoute: typeof MapHeatsourcesHeatsourceHeatSourceIdConsumersImport
+      parentRoute: typeof MapHeatsourcesHeatsourceHeatSourceIdRoute
+    }
+    '/_map/_heat_sources/heat_source/$heatSourceId/': {
+      id: '/_map/_heat_sources/heat_source/$heatSourceId/'
+      path: '/'
+      fullPath: '/heat_source/$heatSourceId/'
+      preLoaderRoute: typeof MapHeatsourcesHeatsourceHeatSourceIdIndexLazyImport
+      parentRoute: typeof MapHeatsourcesHeatsourceHeatSourceIdImport
+    }
+    '/_map/_heat_sources/heat_source/$heatSourceId/_consumers/consumers/': {
+      id: '/_map/_heat_sources/heat_source/$heatSourceId/_consumers/consumers/'
+      path: '/consumers'
+      fullPath: '/heat_source/$heatSourceId/consumers'
+      preLoaderRoute: typeof MapHeatsourcesHeatsourceHeatSourceIdConsumersConsumersIndexLazyImport
+      parentRoute: typeof MapHeatsourcesHeatsourceHeatSourceIdConsumersImport
     }
   }
 }
@@ -154,7 +218,14 @@ export const routeTree = rootRoute.addChildren({
   MapRoute: MapRoute.addChildren({
     MapHeatsourcesLazyRoute: MapHeatsourcesLazyRoute.addChildren({
       MapHeatsourcesIndexLazyRoute,
-      MapHeatsourcesHeatsourceHeatSourceIdLazyRoute,
+      MapHeatsourcesHeatsourceHeatSourceIdRoute:
+        MapHeatsourcesHeatsourceHeatSourceIdRoute.addChildren({
+          MapHeatsourcesHeatsourceHeatSourceIdConsumersRoute:
+            MapHeatsourcesHeatsourceHeatSourceIdConsumersRoute.addChildren({
+              MapHeatsourcesHeatsourceHeatSourceIdConsumersConsumersIndexLazyRoute,
+            }),
+          MapHeatsourcesHeatsourceHeatSourceIdIndexLazyRoute,
+        }),
     }),
   }),
 })
@@ -168,6 +239,7 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.tsx",
       "children": [
         "/_base",
+        "/_incidents",
         "/_map"
       ]
     },
@@ -178,6 +250,9 @@ export const routeTree = rootRoute.addChildren({
         "/_base/profile",
         "/_base/register"
       ]
+    },
+    "/_incidents": {
+      "filePath": "_incidents.tsx"
     },
     "/_map": {
       "filePath": "_map.tsx",
@@ -210,8 +285,27 @@ export const routeTree = rootRoute.addChildren({
       "parent": "/_map/_heat_sources"
     },
     "/_map/_heat_sources/heat_source/$heatSourceId": {
-      "filePath": "_map/_heat_sources/heat_source/$heatSourceId.lazy.tsx",
-      "parent": "/_map/_heat_sources"
+      "filePath": "_map/_heat_sources/heat_source/$heatSourceId",
+      "parent": "/_map/_heat_sources",
+      "children": [
+        "/_map/_heat_sources/heat_source/$heatSourceId/_consumers",
+        "/_map/_heat_sources/heat_source/$heatSourceId/"
+      ]
+    },
+    "/_map/_heat_sources/heat_source/$heatSourceId/_consumers": {
+      "filePath": "_map/_heat_sources/heat_source/$heatSourceId/_consumers.tsx",
+      "parent": "/_map/_heat_sources/heat_source/$heatSourceId",
+      "children": [
+        "/_map/_heat_sources/heat_source/$heatSourceId/_consumers/consumers/"
+      ]
+    },
+    "/_map/_heat_sources/heat_source/$heatSourceId/": {
+      "filePath": "_map/_heat_sources/heat_source/$heatSourceId/index.lazy.tsx",
+      "parent": "/_map/_heat_sources/heat_source/$heatSourceId"
+    },
+    "/_map/_heat_sources/heat_source/$heatSourceId/_consumers/consumers/": {
+      "filePath": "_map/_heat_sources/heat_source/$heatSourceId/_consumers/consumers/index.lazy.tsx",
+      "parent": "/_map/_heat_sources/heat_source/$heatSourceId/_consumers"
     }
   }
 }

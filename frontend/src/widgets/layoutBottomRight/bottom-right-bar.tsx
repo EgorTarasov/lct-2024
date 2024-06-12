@@ -6,9 +6,9 @@ import { ELEVATION } from "@/constants/elevation";
 export const BottomRightBar = observer(() => {
   return (
     <div className="absolute right-4 bottom-4 flex gap-2 z-[11]">
-      {MapStore.consumers.length > 0 && (
+      {MapStore.consumerGeozones.length > 0 && (
         <div className="appear flex items-center justify-center bg-card border rounded-xl px-2 gap-2">
-          Найдено объектов: {MapStore.consumers.length}
+          Найдено объектов: {MapStore.consumerGeozones.length}
         </div>
       )}
       <WeatherWidget />

@@ -5,7 +5,7 @@ import { MapStore } from "@/stores/map.store";
 import { observer } from "mobx-react-lite";
 
 export const MainSidebarFilters = observer(() => {
-  const vm = MapStore.filters;
+  const vm = MapStore.heatSourceVm;
 
   return (
     <div className="gap-3 h-full overflow-hidden flex flex-col">
