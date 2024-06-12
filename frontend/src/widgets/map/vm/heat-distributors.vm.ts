@@ -1,18 +1,16 @@
-import { mapStore } from "@/stores/map.store";
-
 import { MapFilters, MapFiltersLocale } from "@/constants/map-filters";
 import { Filter } from "@/stores/filter.vm";
 import { DisposableVm } from "@/utils/vm";
 import { makeAutoObservable, reaction } from "mobx";
-import { HeatSource } from "@/types/heat.type";
+import { HeatDistributor } from "@/types/heat.type";
 import { Issue } from "@/types/issue.type";
-import { Priority } from "@/types/priority.type";
 import { debounceAsync } from "@/utils/debounce";
+import { Priority } from "@/types/priority.type";
 
-export class HeatSourcesViewModel implements DisposableVm {
-  constructor(private parent: mapStore) {
+export class HeatDistributorsViewModel implements DisposableVm {
+  constructor() {
     makeAutoObservable(this);
-    reaction(
+    const r = reaction(
       () => [this.search, this.heatNetworks.value, this.layer, this.page],
       () => this.fetchList()
     );
@@ -21,7 +19,6 @@ export class HeatSourcesViewModel implements DisposableVm {
   //#region filters
   search = "";
   heatNetworks = new Filter(Object.values(MapFilters.HeatNetwork), MapFiltersLocale.HeatNetwork);
-  layer: MapFilters.Layer = MapFilters.Layer.AllObjects;
   //#endregion
 
   page = 0;
@@ -31,7 +28,7 @@ export class HeatSourcesViewModel implements DisposableVm {
     if (this.page === 0) return;
     this.page--;
   }
-  items: HeatSource.Item[] = [
+  items: HeatDistributor.Item[] = [
     {
       address: "ул. Ленина, 1",
       consumerCount: 10,
@@ -39,7 +36,7 @@ export class HeatSourcesViewModel implements DisposableVm {
       issue: Issue.EMERGENCY,
       issues: [Issue.EMERGENCY, Issue.REPAIR],
       number: "ТЭЦ-1",
-      priority: Priority.Item.HIGH,
+      priority: Priority.HIGH,
       incidentCount: 3
     }
   ];

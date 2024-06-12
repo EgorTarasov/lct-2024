@@ -6,14 +6,26 @@ import { ru } from "date-fns/locale";
 import { cn } from "@/utils/cn";
 import { buttonVariants } from "@/components/ui/button";
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>;
+export type CalendarProps = React.ComponentProps<typeof DayPicker> & { highlightedDates?: Date[] };
 
-function Calendar({ className, classNames, showOutsideDays = true, ...props }: CalendarProps) {
+function Calendar({
+  className,
+  classNames,
+  showOutsideDays = true,
+  highlightedDates,
+  ...props
+}: CalendarProps) {
   return (
     <DayPicker
       locale={ru}
       showOutsideDays={showOutsideDays}
       className={cn("p-3", className)}
+      modifiers={{
+        highlightedDates: highlightedDates ?? []
+      }}
+      modifiersClassNames={{
+        highlightedDates: "text-status-prediction-foreground bg-status-prediction"
+      }}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",

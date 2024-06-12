@@ -4,10 +4,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Button } from "../ui/button";
 import { Clock4Icon, XIcon } from "lucide-react";
 import { Text } from "../typography/Text";
-import { Priority } from "@/types/priority.type";
 import { getTimeDifference } from "@/utils/time";
+import { PriorityLocaleMap } from "@/types/priority.type";
 
-export const NotificationCard: FC<{ data: Notification.Item; onClose: () => void }> = (x) => {
+export const NotificationCard: FC<{ data: Notification; onClose: () => void }> = (x) => {
   return (
     <li className="mb-2 p-4 pt-2 border space-y-2 list-none bg-card text-card-foreground rounded-md relative">
       <Tooltip>
@@ -28,10 +28,10 @@ export const NotificationCard: FC<{ data: Notification.Item; onClose: () => void
         <div
           className="border px-2 rounded-full"
           style={{
-            color: Priority.ItemMap[x.data.priority].color,
-            backgroundColor: Priority.ItemMap[x.data.priority].backgroundColor
+            color: PriorityLocaleMap[x.data.priority].color,
+            backgroundColor: PriorityLocaleMap[x.data.priority].backgroundColor
           }}>
-          <Text.Detail>{Priority.ItemMap[x.data.priority].alternateLocale} важность</Text.Detail>
+          <Text.Detail>{PriorityLocaleMap[x.data.priority].alternateLocale} важность</Text.Detail>
         </div>
         <div className="gap-1 flex items-center text-muted-foreground">
           <Clock4Icon className="size-4" />

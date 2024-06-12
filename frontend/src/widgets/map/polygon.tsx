@@ -1,5 +1,5 @@
 import { Consumer } from "@/types/consumer.type";
-import { Priority } from "@/types/priority.type";
+import { PriorityLocaleMap } from "@/types/priority.type";
 import { LatLngExpression } from "leaflet";
 import { FC } from "react";
 import { Marker, Polygon, Popup } from "react-leaflet";
@@ -21,7 +21,7 @@ export const ConsumerPolygon: FC<{ data: Consumer.Polygon }> = (x) => {
     <>
       <Polygon
         positions={x.data.position as LatLngExpression[]}
-        color={Priority.ItemMap[x.data.priority].color}
+        color={PriorityLocaleMap[x.data.priority].color}
       />
       <Marker position={getTopLeftCorner() as LatLngExpression}>
         <Popup>Polygon {x.data.id}</Popup>

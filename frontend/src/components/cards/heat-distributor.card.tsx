@@ -1,9 +1,10 @@
-import { HeatSource } from "@/types/heat.type";
+import { HeatDistributor } from "@/types/heat.type";
 import { FC } from "react";
 import { Text } from "../typography/Text";
 import { IssueCard, IssueIcon } from "./issue.card";
 import { Link } from "@tanstack/react-router";
 import { PriorityCard, PriorityIcon } from "./priority-icon";
+import { cn } from "@/utils/cn";
 
 function pluralizeConsumer(count: number): string {
   const singular = "потребитель";
@@ -19,15 +20,15 @@ function pluralizeConsumer(count: number): string {
   }
 }
 
-export const HeatSourceCard: FC<{ data: HeatSource.Item }> = (x) => {
+export const HeatDistributorCard: FC<{ data: HeatDistributor.Item; className?: string }> = (x) => {
   return (
     <Link
-      to="/heat_source/$heatSourceId"
+      to="/heat_distributor/$heatDistributorId"
       params={{
-        heatSourceId: x.data.id.toString()
+        heatDistributorId: x.data.id.toString()
       }}
-      className="flex flex-col px-4 py-2 hover:bg-muted/50 w-full">
-      <div className="flex items-center justify-between w-full">
+      className={cn("flex flex-col px-4 py-2 hover:bg-muted/50 w-full", x.className)}>
+      <div className="flex items-center justify-between w-full flex-wrap gap-3">
         <Text.SubtleMedium className="text-muted-foreground">{x.data.number}</Text.SubtleMedium>
         <PriorityIcon data={x.data.priority} />
       </div>
@@ -45,7 +46,7 @@ export const HeatSourceCard: FC<{ data: HeatSource.Item }> = (x) => {
   );
 };
 
-export const HeatSourceCardReadonly: FC<{ data: HeatSource.Item }> = (x) => (
+export const HeatDistributorCardReadonly: FC<{ data: HeatDistributor.Item }> = (x) => (
   <div className="flex flex-col px-4 pb-2 w-full">
     <div className="flex items-center justify-between w-full">
       <Text.SubtleMedium className="text-muted-foreground">{x.data.number}</Text.SubtleMedium>

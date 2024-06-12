@@ -3,18 +3,26 @@ import { makeAutoObservable } from "mobx";
 import { Map } from "leaflet";
 import { MapEndpoint } from "@/api/endpoints/map.endpoint";
 import { debounceAsync } from "@/utils/debounce";
-import { HeatSourcesViewModel } from "@/widgets/map/vm/filters.vm";
 import { Consumer } from "@/types/consumer.type";
-import { Priority } from "@/types/priority.type";
 import { ConsumersViewModel } from "../widgets/map/vm/consumers.vm";
+import { HeatDistributorsViewModel } from "@/widgets/map/vm/heat-distributors.vm";
+import { Priority } from "@/types/priority.type";
+import { DateRange } from "react-day-picker";
+import { MapFilters } from "@/constants/map-filters";
 
-export class mapStore implements DisposableVm {
+class mapStore implements DisposableVm {
   constructor() {
     makeAutoObservable(this);
   }
 
   consumersVm: ConsumersViewModel | null = null;
-  heatSourceVm = new HeatSourcesViewModel(this);
+  heatSourceVm = new HeatDistributorsViewModel();
+  dateRange: DateRange = {
+    from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+    to: new Date()
+  };
+  datesWithEvents: Date[] = [new Date()];
+  layer: MapFilters.Layer = MapFilters.Layer.AllObjects;
 
   //#region map
   consumerGeozones: Consumer.Polygon[] = [];
@@ -53,7 +61,7 @@ export class mapStore implements DisposableVm {
       polygons.push({
         id: v.globalID,
         position: coords[0].map((v) => [v[1], v[0]]),
-        priority: Priority.Item.LOW
+        priority: Priority.LOW
       });
     });
 

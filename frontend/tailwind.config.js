@@ -53,6 +53,12 @@ module.exports = {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))"
+        },
+        status: {
+          prediction: {
+            DEFAULT: "rgba(147, 51, 234, 0.2)",
+            foreground: "rgb(147, 51, 234)"
+          }
         }
       },
       borderRadius: {

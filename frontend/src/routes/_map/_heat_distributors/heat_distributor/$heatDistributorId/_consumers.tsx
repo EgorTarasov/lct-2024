@@ -19,7 +19,7 @@ import { LoadingWrapper } from "@/components/ui/loaders/LoadingWrapper";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { MapStore } from "@/stores/map.store";
-import { HeatSource } from "@/types/heat.type";
+import { HeatDistributor } from "@/types/heat.type";
 import { cn } from "@/utils/cn";
 import { FCVM } from "@/utils/vm";
 import { MainSidebar } from "@/widgets/layoutMainSidebar/main-sidebar.widget";
@@ -51,7 +51,10 @@ const PriorityDropdown: FCVM<ConsumersViewModel> = observer(({ vm }) => (
   </DropdownMenu>
 ));
 
-const PageBreadcrumbs: FC<{ heatSourceId: string; heatSource: HeatSource.Item | null }> = (x) => (
+const PageBreadcrumbs: FC<{
+  heatDistributorId: string;
+  heatSource: HeatDistributor.Item | null;
+}> = (x) => (
   <Breadcrumb className="px-4">
     <BreadcrumbList>
       <BreadcrumbItem>
@@ -65,8 +68,8 @@ const PageBreadcrumbs: FC<{ heatSourceId: string; heatSource: HeatSource.Item | 
         <DropdownMenuContent>
           <DropdownMenuItem asChild>
             <Link
-              to="/heat_source/$heatSourceId"
-              params={{ heatSourceId: x.heatSourceId }}
+              to="/heat_distributor/$heatDistributorId"
+              params={{ heatDistributorId: x.heatDistributorId }}
               className={cn("w-full h-full cursor-pointer", !x.heatSource && "text-destructive")}>
               {x.heatSource?.number ?? "Неизвестный источник"}
             </Link>
@@ -82,29 +85,29 @@ const PageBreadcrumbs: FC<{ heatSourceId: string; heatSource: HeatSource.Item | 
 );
 
 const Page = observer(() => {
-  const heatSourceId = Route.useParams().heatSourceId;
-  const heatSource = MapStore.heatSourceVm.items.find((v) => v.id.toString() === heatSourceId);
+  const heatDistributorId = Route.useParams().heatDistributorId;
+  const heatSource = MapStore.heatSourceVm.items.find((v) => v.id.toString() === heatDistributorId);
   const vm = MapStore.consumersVm;
 
   useEffect(() => {
     if (heatSource) {
       MapStore.consumersVm = new ConsumersViewModel(heatSource);
     }
-  }, [heatSourceId]);
+  }, [heatDistributorId]);
 
   return (
     <>
       <MainSidebar>
         <div className="gap-3 h-full overflow-hidden flex flex-col">
           <Text.UiMedium className="px-4 text-muted-foreground">Реестр объектов</Text.UiMedium>
-          <PageBreadcrumbs heatSourceId={heatSourceId} heatSource={heatSource ?? null} />
+          <PageBreadcrumbs heatDistributorId={heatDistributorId} heatSource={heatSource ?? null} />
           {heatSource && vm ? (
             <>
               <PriorityDropdown vm={vm} />
               <ScrollArea>
                 {vm.items.map((v) => (
                   <React.Fragment key={v.id}>
-                    <ConsumerCard data={v} />
+                    <ConsumerCard heatDistributorId={heatDistributorId} data={v} />
                     <Separator />
                   </React.Fragment>
                 ))}
@@ -113,7 +116,7 @@ const Page = observer(() => {
               <PaginationWidget
                 className="mt-auto mb-2"
                 currentPage={11}
-                onPageChange={(v) => void 0}
+                onPageChange={() => void 0}
                 totalPages={12}
               />
             </>
@@ -130,6 +133,8 @@ const Page = observer(() => {
   );
 });
 
-export const Route = createFileRoute("/_map/_heat_sources/heat_source/$heatSourceId/_consumers")({
+export const Route = createFileRoute(
+  "/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers"
+)({
   component: Page
 });

@@ -8,8 +8,8 @@ export const MainSidebarFilters = observer(() => {
   const vm = MapStore.heatSourceVm;
 
   return (
-    <div className="gap-3 h-full overflow-hidden flex flex-col">
-      <Text.SubtleSemi className="text-muted-foreground">Фильтры</Text.SubtleSemi>
+    <div className="px-4 pb-4 gap-3 h-full overflow-hidden flex flex-col">
+      <Text.UiMedium className="text-muted-foreground">Фильтры</Text.UiMedium>
       <div className="space-y-2 flex-1">
         <DropdownMultiple {...vm.heatNetworks.attributes} label="Тепловая сеть" />
       </div>

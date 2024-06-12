@@ -16,24 +16,34 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as MapImport } from './routes/_map'
 import { Route as IncidentsImport } from './routes/_incidents'
 import { Route as BaseImport } from './routes/_base'
-import { Route as MapHeatsourcesHeatsourceHeatSourceIdConsumersImport } from './routes/_map/_heat_sources/heat_source/$heatSourceId/_consumers'
+import { Route as MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersImport } from './routes/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers'
 
 // Create Virtual Routes
 
-const MapHeatsourcesLazyImport = createFileRoute('/_map/_heat_sources')()
+const MapHeatdistributorsLazyImport = createFileRoute(
+  '/_map/_heat_distributors',
+)()
 const BaseRegisterLazyImport = createFileRoute('/_base/register')()
 const BaseProfileLazyImport = createFileRoute('/_base/profile')()
 const BaseLoginLazyImport = createFileRoute('/_base/login')()
-const MapHeatsourcesIndexLazyImport = createFileRoute('/_map/_heat_sources/')()
-const MapHeatsourcesHeatsourceHeatSourceIdImport = createFileRoute(
-  '/_map/_heat_sources/heat_source/$heatSourceId',
+const MapHeatdistributorsIndexLazyImport = createFileRoute(
+  '/_map/_heat_distributors/',
 )()
-const MapHeatsourcesHeatsourceHeatSourceIdIndexLazyImport = createFileRoute(
-  '/_map/_heat_sources/heat_source/$heatSourceId/',
-)()
-const MapHeatsourcesHeatsourceHeatSourceIdConsumersConsumersIndexLazyImport =
+const MapHeatdistributorsHeatdistributorHeatDistributorIdImport =
   createFileRoute(
-    '/_map/_heat_sources/heat_source/$heatSourceId/_consumers/consumers/',
+    '/_map/_heat_distributors/heat_distributor/$heatDistributorId',
+  )()
+const MapHeatdistributorsHeatdistributorHeatDistributorIdIndexLazyImport =
+  createFileRoute(
+    '/_map/_heat_distributors/heat_distributor/$heatDistributorId/',
+  )()
+const MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersConsumersIndexLazyImport =
+  createFileRoute(
+    '/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers/consumers/',
+  )()
+const MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersConsumersConsumerIdLazyImport =
+  createFileRoute(
+    '/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers/consumers/$consumerId',
   )()
 
 // Create/Update Routes
@@ -53,11 +63,11 @@ const BaseRoute = BaseImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const MapHeatsourcesLazyRoute = MapHeatsourcesLazyImport.update({
-  id: '/_heat_sources',
+const MapHeatdistributorsLazyRoute = MapHeatdistributorsLazyImport.update({
+  id: '/_heat_distributors',
   getParentRoute: () => MapRoute,
 } as any).lazy(() =>
-  import('./routes/_map/_heat_sources.lazy').then((d) => d.Route),
+  import('./routes/_map/_heat_distributors.lazy').then((d) => d.Route),
 )
 
 const BaseRegisterLazyRoute = BaseRegisterLazyImport.update({
@@ -77,42 +87,61 @@ const BaseLoginLazyRoute = BaseLoginLazyImport.update({
   getParentRoute: () => BaseRoute,
 } as any).lazy(() => import('./routes/_base/login.lazy').then((d) => d.Route))
 
-const MapHeatsourcesIndexLazyRoute = MapHeatsourcesIndexLazyImport.update({
-  path: '/',
-  getParentRoute: () => MapHeatsourcesLazyRoute,
-} as any).lazy(() =>
-  import('./routes/_map/_heat_sources/index.lazy').then((d) => d.Route),
-)
+const MapHeatdistributorsIndexLazyRoute =
+  MapHeatdistributorsIndexLazyImport.update({
+    path: '/',
+    getParentRoute: () => MapHeatdistributorsLazyRoute,
+  } as any).lazy(() =>
+    import('./routes/_map/_heat_distributors/index.lazy').then((d) => d.Route),
+  )
 
-const MapHeatsourcesHeatsourceHeatSourceIdRoute =
-  MapHeatsourcesHeatsourceHeatSourceIdImport.update({
-    path: '/heat_source/$heatSourceId',
-    getParentRoute: () => MapHeatsourcesLazyRoute,
+const MapHeatdistributorsHeatdistributorHeatDistributorIdRoute =
+  MapHeatdistributorsHeatdistributorHeatDistributorIdImport.update({
+    path: '/heat_distributor/$heatDistributorId',
+    getParentRoute: () => MapHeatdistributorsLazyRoute,
   } as any)
 
-const MapHeatsourcesHeatsourceHeatSourceIdIndexLazyRoute =
-  MapHeatsourcesHeatsourceHeatSourceIdIndexLazyImport.update({
+const MapHeatdistributorsHeatdistributorHeatDistributorIdIndexLazyRoute =
+  MapHeatdistributorsHeatdistributorHeatDistributorIdIndexLazyImport.update({
     path: '/',
-    getParentRoute: () => MapHeatsourcesHeatsourceHeatSourceIdRoute,
+    getParentRoute: () =>
+      MapHeatdistributorsHeatdistributorHeatDistributorIdRoute,
   } as any).lazy(() =>
     import(
-      './routes/_map/_heat_sources/heat_source/$heatSourceId/index.lazy'
+      './routes/_map/_heat_distributors/heat_distributor/$heatDistributorId/index.lazy'
     ).then((d) => d.Route),
   )
 
-const MapHeatsourcesHeatsourceHeatSourceIdConsumersRoute =
-  MapHeatsourcesHeatsourceHeatSourceIdConsumersImport.update({
+const MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersRoute =
+  MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersImport.update({
     id: '/_consumers',
-    getParentRoute: () => MapHeatsourcesHeatsourceHeatSourceIdRoute,
+    getParentRoute: () =>
+      MapHeatdistributorsHeatdistributorHeatDistributorIdRoute,
   } as any)
 
-const MapHeatsourcesHeatsourceHeatSourceIdConsumersConsumersIndexLazyRoute =
-  MapHeatsourcesHeatsourceHeatSourceIdConsumersConsumersIndexLazyImport.update({
-    path: '/consumers/',
-    getParentRoute: () => MapHeatsourcesHeatsourceHeatSourceIdConsumersRoute,
-  } as any).lazy(() =>
+const MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersConsumersIndexLazyRoute =
+  MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersConsumersIndexLazyImport.update(
+    {
+      path: '/consumers/',
+      getParentRoute: () =>
+        MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersRoute,
+    } as any,
+  ).lazy(() =>
     import(
-      './routes/_map/_heat_sources/heat_source/$heatSourceId/_consumers/consumers/index.lazy'
+      './routes/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers/consumers/index.lazy'
+    ).then((d) => d.Route),
+  )
+
+const MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersConsumersConsumerIdLazyRoute =
+  MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersConsumersConsumerIdLazyImport.update(
+    {
+      path: '/consumers/$consumerId',
+      getParentRoute: () =>
+        MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersRoute,
+    } as any,
+  ).lazy(() =>
+    import(
+      './routes/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers/consumers/$consumerId.lazy'
     ).then((d) => d.Route),
   )
 
@@ -162,47 +191,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BaseRegisterLazyImport
       parentRoute: typeof BaseImport
     }
-    '/_map/_heat_sources': {
-      id: '/_map/_heat_sources'
+    '/_map/_heat_distributors': {
+      id: '/_map/_heat_distributors'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof MapHeatsourcesLazyImport
+      preLoaderRoute: typeof MapHeatdistributorsLazyImport
       parentRoute: typeof MapImport
     }
-    '/_map/_heat_sources/': {
-      id: '/_map/_heat_sources/'
+    '/_map/_heat_distributors/': {
+      id: '/_map/_heat_distributors/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof MapHeatsourcesIndexLazyImport
-      parentRoute: typeof MapHeatsourcesLazyImport
+      preLoaderRoute: typeof MapHeatdistributorsIndexLazyImport
+      parentRoute: typeof MapHeatdistributorsLazyImport
     }
-    '/_map/_heat_sources/heat_source/$heatSourceId': {
-      id: '/_map/_heat_sources/heat_source/$heatSourceId'
-      path: '/heat_source/$heatSourceId'
-      fullPath: '/heat_source/$heatSourceId'
-      preLoaderRoute: typeof MapHeatsourcesHeatsourceHeatSourceIdImport
-      parentRoute: typeof MapHeatsourcesLazyImport
+    '/_map/_heat_distributors/heat_distributor/$heatDistributorId': {
+      id: '/_map/_heat_distributors/heat_distributor/$heatDistributorId'
+      path: '/heat_distributor/$heatDistributorId'
+      fullPath: '/heat_distributor/$heatDistributorId'
+      preLoaderRoute: typeof MapHeatdistributorsHeatdistributorHeatDistributorIdImport
+      parentRoute: typeof MapHeatdistributorsLazyImport
     }
-    '/_map/_heat_sources/heat_source/$heatSourceId/_consumers': {
-      id: '/_map/_heat_sources/heat_source/$heatSourceId/_consumers'
-      path: '/heat_source/$heatSourceId'
-      fullPath: '/heat_source/$heatSourceId'
-      preLoaderRoute: typeof MapHeatsourcesHeatsourceHeatSourceIdConsumersImport
-      parentRoute: typeof MapHeatsourcesHeatsourceHeatSourceIdRoute
+    '/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers': {
+      id: '/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers'
+      path: '/heat_distributor/$heatDistributorId'
+      fullPath: '/heat_distributor/$heatDistributorId'
+      preLoaderRoute: typeof MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersImport
+      parentRoute: typeof MapHeatdistributorsHeatdistributorHeatDistributorIdRoute
     }
-    '/_map/_heat_sources/heat_source/$heatSourceId/': {
-      id: '/_map/_heat_sources/heat_source/$heatSourceId/'
+    '/_map/_heat_distributors/heat_distributor/$heatDistributorId/': {
+      id: '/_map/_heat_distributors/heat_distributor/$heatDistributorId/'
       path: '/'
-      fullPath: '/heat_source/$heatSourceId/'
-      preLoaderRoute: typeof MapHeatsourcesHeatsourceHeatSourceIdIndexLazyImport
-      parentRoute: typeof MapHeatsourcesHeatsourceHeatSourceIdImport
+      fullPath: '/heat_distributor/$heatDistributorId/'
+      preLoaderRoute: typeof MapHeatdistributorsHeatdistributorHeatDistributorIdIndexLazyImport
+      parentRoute: typeof MapHeatdistributorsHeatdistributorHeatDistributorIdImport
     }
-    '/_map/_heat_sources/heat_source/$heatSourceId/_consumers/consumers/': {
-      id: '/_map/_heat_sources/heat_source/$heatSourceId/_consumers/consumers/'
+    '/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers/consumers/$consumerId': {
+      id: '/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers/consumers/$consumerId'
+      path: '/consumers/$consumerId'
+      fullPath: '/heat_distributor/$heatDistributorId/consumers/$consumerId'
+      preLoaderRoute: typeof MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersConsumersConsumerIdLazyImport
+      parentRoute: typeof MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersImport
+    }
+    '/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers/consumers/': {
+      id: '/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers/consumers/'
       path: '/consumers'
-      fullPath: '/heat_source/$heatSourceId/consumers'
-      preLoaderRoute: typeof MapHeatsourcesHeatsourceHeatSourceIdConsumersConsumersIndexLazyImport
-      parentRoute: typeof MapHeatsourcesHeatsourceHeatSourceIdConsumersImport
+      fullPath: '/heat_distributor/$heatDistributorId/consumers'
+      preLoaderRoute: typeof MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersConsumersIndexLazyImport
+      parentRoute: typeof MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersImport
     }
   }
 }
@@ -216,15 +252,18 @@ export const routeTree = rootRoute.addChildren({
     BaseRegisterLazyRoute,
   }),
   MapRoute: MapRoute.addChildren({
-    MapHeatsourcesLazyRoute: MapHeatsourcesLazyRoute.addChildren({
-      MapHeatsourcesIndexLazyRoute,
-      MapHeatsourcesHeatsourceHeatSourceIdRoute:
-        MapHeatsourcesHeatsourceHeatSourceIdRoute.addChildren({
-          MapHeatsourcesHeatsourceHeatSourceIdConsumersRoute:
-            MapHeatsourcesHeatsourceHeatSourceIdConsumersRoute.addChildren({
-              MapHeatsourcesHeatsourceHeatSourceIdConsumersConsumersIndexLazyRoute,
-            }),
-          MapHeatsourcesHeatsourceHeatSourceIdIndexLazyRoute,
+    MapHeatdistributorsLazyRoute: MapHeatdistributorsLazyRoute.addChildren({
+      MapHeatdistributorsIndexLazyRoute,
+      MapHeatdistributorsHeatdistributorHeatDistributorIdRoute:
+        MapHeatdistributorsHeatdistributorHeatDistributorIdRoute.addChildren({
+          MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersRoute:
+            MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersRoute.addChildren(
+              {
+                MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersConsumersConsumerIdLazyRoute,
+                MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersConsumersIndexLazyRoute,
+              },
+            ),
+          MapHeatdistributorsHeatdistributorHeatDistributorIdIndexLazyRoute,
         }),
     }),
   }),
@@ -257,7 +296,7 @@ export const routeTree = rootRoute.addChildren({
     "/_map": {
       "filePath": "_map.tsx",
       "children": [
-        "/_map/_heat_sources"
+        "/_map/_heat_distributors"
       ]
     },
     "/_base/login": {
@@ -272,40 +311,45 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "_base/register.lazy.tsx",
       "parent": "/_base"
     },
-    "/_map/_heat_sources": {
-      "filePath": "_map/_heat_sources.lazy.tsx",
+    "/_map/_heat_distributors": {
+      "filePath": "_map/_heat_distributors.lazy.tsx",
       "parent": "/_map",
       "children": [
-        "/_map/_heat_sources/",
-        "/_map/_heat_sources/heat_source/$heatSourceId"
+        "/_map/_heat_distributors/",
+        "/_map/_heat_distributors/heat_distributor/$heatDistributorId"
       ]
     },
-    "/_map/_heat_sources/": {
-      "filePath": "_map/_heat_sources/index.lazy.tsx",
-      "parent": "/_map/_heat_sources"
+    "/_map/_heat_distributors/": {
+      "filePath": "_map/_heat_distributors/index.lazy.tsx",
+      "parent": "/_map/_heat_distributors"
     },
-    "/_map/_heat_sources/heat_source/$heatSourceId": {
-      "filePath": "_map/_heat_sources/heat_source/$heatSourceId",
-      "parent": "/_map/_heat_sources",
+    "/_map/_heat_distributors/heat_distributor/$heatDistributorId": {
+      "filePath": "_map/_heat_distributors/heat_distributor/$heatDistributorId",
+      "parent": "/_map/_heat_distributors",
       "children": [
-        "/_map/_heat_sources/heat_source/$heatSourceId/_consumers",
-        "/_map/_heat_sources/heat_source/$heatSourceId/"
+        "/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers",
+        "/_map/_heat_distributors/heat_distributor/$heatDistributorId/"
       ]
     },
-    "/_map/_heat_sources/heat_source/$heatSourceId/_consumers": {
-      "filePath": "_map/_heat_sources/heat_source/$heatSourceId/_consumers.tsx",
-      "parent": "/_map/_heat_sources/heat_source/$heatSourceId",
+    "/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers": {
+      "filePath": "_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers.tsx",
+      "parent": "/_map/_heat_distributors/heat_distributor/$heatDistributorId",
       "children": [
-        "/_map/_heat_sources/heat_source/$heatSourceId/_consumers/consumers/"
+        "/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers/consumers/$consumerId",
+        "/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers/consumers/"
       ]
     },
-    "/_map/_heat_sources/heat_source/$heatSourceId/": {
-      "filePath": "_map/_heat_sources/heat_source/$heatSourceId/index.lazy.tsx",
-      "parent": "/_map/_heat_sources/heat_source/$heatSourceId"
+    "/_map/_heat_distributors/heat_distributor/$heatDistributorId/": {
+      "filePath": "_map/_heat_distributors/heat_distributor/$heatDistributorId/index.lazy.tsx",
+      "parent": "/_map/_heat_distributors/heat_distributor/$heatDistributorId"
     },
-    "/_map/_heat_sources/heat_source/$heatSourceId/_consumers/consumers/": {
-      "filePath": "_map/_heat_sources/heat_source/$heatSourceId/_consumers/consumers/index.lazy.tsx",
-      "parent": "/_map/_heat_sources/heat_source/$heatSourceId/_consumers"
+    "/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers/consumers/$consumerId": {
+      "filePath": "_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers/consumers/$consumerId.lazy.tsx",
+      "parent": "/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers"
+    },
+    "/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers/consumers/": {
+      "filePath": "_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers/consumers/index.lazy.tsx",
+      "parent": "/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers"
     }
   }
 }

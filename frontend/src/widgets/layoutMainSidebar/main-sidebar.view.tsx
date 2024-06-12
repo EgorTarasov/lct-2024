@@ -88,14 +88,14 @@ export const MainSidebarView = observer(() => {
           (ctx.isOpen || filtersOpen) && "translate-x-0"
         )}
         style={{ zIndex: ELEVATION.SIDEBAR }}>
-        <div className={"w-96 flex h-full bg-card text-card-foreground shadow-md pt-[72px]"}>
+        <div className="w-96 flex h-full bg-card text-card-foreground shadow-md pt-[72px] *:w-full">
           <AnimatePresence mode="popLayout">
             {filtersOpen ? (
-              <motion.div className="w-full p-4" key="filters" {...transitionProps}>
+              <motion.div key="filters" {...transitionProps}>
                 <MainSidebarFilters />
               </motion.div>
             ) : (
-              <motion.div className={"w-full"} key="content" {...transitionProps}>
+              <motion.div key="content" {...transitionProps}>
                 {ctx.content?.content}
               </motion.div>
             )}

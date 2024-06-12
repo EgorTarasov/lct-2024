@@ -1,11 +1,11 @@
-import { Priority } from "@/types/priority.type";
+import { Priority, PriorityLocaleMap } from "@/types/priority.type";
 import { FC } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { Text } from "../typography/Text";
 
-export const PriorityCard: FC<{ data: Priority.Item }> = (x) => {
-  const v = Priority.ItemMap[x.data];
+export const PriorityCard: FC<{ data: Priority }> = (x) => {
+  const v = PriorityLocaleMap[x.data];
 
   return (
     <div className="flex gap-1 items-center">
@@ -17,8 +17,8 @@ export const PriorityCard: FC<{ data: Priority.Item }> = (x) => {
   );
 };
 
-export const PriorityIcon: FC<{ data: Priority.Item }> = (x) => {
-  const v = Priority.ItemMap[x.data];
+export const PriorityIcon: FC<{ data: Priority }> = (x) => {
+  const v = PriorityLocaleMap[x.data];
 
   return (
     <Tooltip>

@@ -5,7 +5,7 @@ export const IssueCard: FC<{ data: Issue }> = (x) => {
   const v = IssueLocaleMap[x.data];
   return (
     <div
-      className="p-1 w-fit space-x-2 rounded-sm flex gap-1 text-sm items-center"
+      className="py-1 px-1.5 w-fit space-x-2 rounded-sm flex gap-1 text-sm items-center"
       style={{
         backgroundColor: v.backgroundColor,
         color: v.color

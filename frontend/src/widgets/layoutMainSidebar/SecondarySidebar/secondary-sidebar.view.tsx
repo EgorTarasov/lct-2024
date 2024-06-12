@@ -22,7 +22,7 @@ export const SecondarySidebarView = () => {
           {...transitionProps}
           className="absolute left-[392px] top-24 bottom-12 w-96 overflow-hidden pointer-events-none"
           style={{ zIndex: ELEVATION.SIDEBAR }}>
-          <div className="flex flex-col bg-card w-full shadow-lg rounded-2xl pb-8 pointer-events-auto">
+          <div className="flex flex-col bg-card w-full shadow-lg rounded-2xl pb-6 pointer-events-auto">
             {ctx.secondaryContent.closeAction && (
               <div className="flex justify-end">
                 <Button

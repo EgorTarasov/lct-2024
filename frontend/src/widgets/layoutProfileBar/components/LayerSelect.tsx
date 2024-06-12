@@ -13,7 +13,7 @@ import { ChevronDownIcon } from "lucide-react";
 import { observer } from "mobx-react-lite";
 
 export const LayerSelect = observer(() => {
-  const vm = MapStore.heatSourceVm;
+  const vm = MapStore;
 
   return (
     <DropdownMenu>

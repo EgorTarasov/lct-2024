@@ -1,52 +1,30 @@
-import { HeatSourceCardReadonly } from "@/components/cards/heat-source.card";
+import { Section } from "@/components/cards/Section";
+import { HeatDistributorCardReadonly } from "@/components/cards/heat-distributor.card";
+import { TitleInfo } from "@/components/cards/title-info";
 import { Text } from "@/components/typography/Text";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent
+} from "@/components/ui/accordion";
+import { buttonVariants } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { MapStore } from "@/stores/map.store";
 import { cn } from "@/utils/cn";
+import { pluralizeIncident } from "@/utils/pluralize/incident";
 import { SecondarySidebar } from "@/widgets/layoutMainSidebar/SecondarySidebar/secondary-sidebar.widget";
 import { Link, createLazyFileRoute, useNavigate } from "@tanstack/react-router";
 import { ChevronRightIcon } from "lucide-react";
 import { observer } from "mobx-react-lite";
-import { FC, PropsWithChildren, ReactNode, useEffect } from "react";
-
-function pluralizeIncident(count: number): string {
-  const singular = "событии";
-  const few = "событиях";
-
-  if (count % 10 === 1 && count % 100 !== 11) {
-    return singular;
-  }
-  return few;
-}
 
 const vm = MapStore;
 
-const Section: FC<PropsWithChildren & { className?: string; title?: ReactNode }> = (x) => (
-  <>
-    <Separator />
-    <section className={cn("px-4 py-3 pt-2 flex flex-col", x.className)}>
-      {x.title && (
-        <div className="h-9 flex items-center font-medium w-full justify-between">{x.title}</div>
-      )}
-      {x.children}
-    </section>
-  </>
-);
-
-const TitleInfo: FC<{ title: string; info: string }> = (x) => (
-  <li className="text-sm space-x-1 flex">
-    <h4 className="font-medium">{x.title}:</h4>
-    <p>{x.info}</p>
-  </li>
-);
-
 const Page = observer(() => {
   const navigate = useNavigate();
-  const heatSourceId = Route.useParams().heatSourceId;
+  const heatDistributorId = Route.useParams().heatDistributorId;
 
-  const heatSource = vm.heatSourceVm.items.find((v) => v.id.toString() === heatSourceId);
+  const heatSource = vm.heatSourceVm.items.find((v) => v.id.toString() === heatDistributorId);
 
   return (
     <SecondarySidebar
@@ -57,14 +35,20 @@ const Page = observer(() => {
       }}>
       {heatSource ? (
         <div className="flex flex-col">
-          <HeatSourceCardReadonly data={heatSource} />
-          <Section title="Информация об объекте">
-            <ul className="space-y-2">
+          <HeatDistributorCardReadonly data={heatSource} />
+          <Section className="px-0" title={<span className="px-4">Информация об объекте</span>}>
+            <ul className="space-y-2 px-4">
               <TitleInfo title="Вид ТП" info="ЦТП" />
             </ul>
+            <Accordion type="single" collapsible>
+              <AccordionItem value="1">
+                <AccordionTrigger className="px-4">Подробнее</AccordionTrigger>
+                <AccordionContent className="px-4">tst</AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </Section>
           {heatSource.incidentCount > 0 && (
-            <Section>
+            <Section withoutSeparator className="pt-0.5">
               <Link className="border px-4 py-3 rounded-xl hover:bg-background text-sm space-y-2 group transition-colors">
                 <p>
                   Имеется информация о {heatSource.incidentCount}{" "}
@@ -83,8 +67,8 @@ const Page = observer(() => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link
-                      to="/heat_source/$heatSourceId/consumers"
-                      params={{ heatSourceId }}
+                      to="/heat_distributor/$heatDistributorId/consumers"
+                      params={{ heatDistributorId }}
                       className={cn(
                         buttonVariants({ variant: "outline", size: "icon" }),
                         "shadow-none"
@@ -107,6 +91,8 @@ const Page = observer(() => {
   );
 });
 
-export const Route = createLazyFileRoute("/_map/_heat_sources/heat_source/$heatSourceId/")({
+export const Route = createLazyFileRoute(
+  "/_map/_heat_distributors/heat_distributor/$heatDistributorId/"
+)({
   component: Page
 });

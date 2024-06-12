@@ -1,4 +1,4 @@
-import { HeatSourceCard } from "@/components/cards/heat-source.card";
+import { HeatDistributorCard } from "@/components/cards/heat-distributor.card";
 import { Text } from "@/components/typography/Text";
 import {
   Breadcrumb,
@@ -7,12 +7,6 @@ import {
   BreadcrumbPage
 } from "@/components/ui/breadcrumb";
 import { LoadingWrapper } from "@/components/ui/loaders/LoadingWrapper";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationPrevious
-} from "@/components/ui/pagination";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { MapStore } from "@/stores/map.store";
@@ -46,7 +40,7 @@ const Page = observer(() => {
           <ScrollArea>
             {vm.items.map((v) => (
               <React.Fragment key={v.id}>
-                <HeatSourceCard data={v} />
+                <HeatDistributorCard data={v} />
                 <Separator />
               </React.Fragment>
             ))}
@@ -70,6 +64,6 @@ const Page = observer(() => {
   );
 });
 
-export const Route = createLazyFileRoute("/_map/_heat_sources")({
+export const Route = createLazyFileRoute("/_map/_heat_distributors")({
   component: Page
 });

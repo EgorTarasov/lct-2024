@@ -59,6 +59,7 @@
   #app {
     @apply bg-background text-foreground;
     transition: background-color 150ms, color 150ms;
+    -webkit-font-smoothing: antialiased;
   }
 }
 

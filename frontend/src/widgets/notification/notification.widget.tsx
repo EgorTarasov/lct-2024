@@ -2,16 +2,12 @@ import { Text } from "@/components/typography/Text";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { NotificationStore } from "@/stores/notification.store";
-import { Consumer } from "@/types/consumer.type";
 import { cn } from "@/utils/cn";
-import { getTimeDifference } from "@/utils/time";
-import { BellIcon, Clock4Icon, XIcon } from "lucide-react";
+import { BellIcon } from "lucide-react";
 import { observer } from "mobx-react-lite";
 import { LayerSelect } from "./NotificationSort";
 import { useEffect, useState } from "react";
-import { Priority } from "@/types/priority.type";
 import { NotificationCard } from "@/components/cards/notification.card";
 
 const vm = NotificationStore;
