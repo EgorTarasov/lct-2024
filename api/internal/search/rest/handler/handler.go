@@ -6,6 +6,7 @@ import (
 	"github.com/EgorTarasov/lct-2024/api/internal/search/models"
 	shared "github.com/EgorTarasov/lct-2024/api/internal/shared/models"
 	"github.com/gofiber/fiber/v2"
+	"github.com/rs/zerolog/log"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -15,6 +16,7 @@ type searchEngine interface {
 	SearchWithFilters(ctx context.Context, filters []models.Filter) ([]models.HeatingPointDTO, error)
 	GeoDataByUnom(ctx context.Context, unom int64) (shared.Address, error)
 	GeoDataByUnoms(ctx context.Context, unoms []int64) ([]shared.Address, error)
+	GetConsumersInfo(ctx context.Context, unoms []int64) (interface{}, error)
 }
 
 // Обработчик http запросов для поиска по данным.
@@ -99,7 +101,7 @@ func (h *handler) SearchWithFilters(c *fiber.Ctx) error {
 
 	var filters []models.Filter
 	if err := c.BodyParser(&filters); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		log.Info().Err(err).Msg("failed to parse filters")
 	}
 
 	res, err := h.se.SearchWithFilters(ctx, filters)

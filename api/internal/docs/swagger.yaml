@@ -1,5 +1,15 @@
 basePath: / //no-lint.
 definitions:
+  constants.Role:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - User
+    - Admin
+    - Moderator
   handler.RegisterData:
     properties:
       email:
@@ -180,6 +190,15 @@ definitions:
     - address
     - municipalDistrict
     type: object
+  token.UserPayload:
+    properties:
+      auth_type:
+        type: string
+      role:
+        $ref: '#/definitions/constants.Role'
+      user_id:
+        type: integer
+    type: object
 host: api.lct.larek.tech
 info:
   contact:
@@ -217,6 +236,25 @@ paths:
           schema:
             $ref: '#/definitions/handler.errResponse'
       summary: Auth with email creds
+      tags:
+      - auth
+  /auth/me:
+    get:
+      description: get user data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/token.UserPayload'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errResponse'
+      security:
+      - Bearer: []
+      summary: get user data
       tags:
       - auth
   /auth/register:

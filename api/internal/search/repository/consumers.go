@@ -42,6 +42,8 @@ var columnMappingFromUserToDB = map[string]string{
 }
 
 const consumerCollection = "consumers"
+const stateConsumerCollection = "state_property"
+const mkdConsumerCollection = "mkd"
 
 // GetSearchFilter возвращает фильтры для поиска по consumer collection.
 func (repo *consumersSearchRepo) GetSearchFilter(ctx context.Context) (filters []models.Filter, err error) {
@@ -103,6 +105,45 @@ func (repo *consumersSearchRepo) SearchWithFilters(ctx context.Context, filters 
 
 	log.Debug().Interface("filter", filter).Msg("search filter")
 
+	if err = repo.mongo.FindMany(ctx, consumerCollection, filter, &values); err != nil {
+		return nil, err
+	}
+
+	return values, nil
+}
+
+// GetStateConsumersByUnoms возвращает данные о состоянии объектов по их уникальным номерам.
+func (repo *consumersSearchRepo) GetStateConsumersByUnoms(ctx context.Context, unoms []int64) (values []models.StateConsumer, err error) {
+	ctx, span := repo.tr.Start(ctx, "consumersSearchRepo.GetStateConsumersByUnoms")
+	defer span.End()
+
+	filter := bson.M{"unom": bson.M{"$in": unoms}}
+	if err = repo.mongo.FindMany(ctx, stateConsumerCollection, filter, &values); err != nil {
+		return nil, err
+	}
+
+	return values, nil
+}
+
+// GetMKDConsumersByUnoms возвращает данные о МКД по их уникальным номерам.
+func (repo *consumersSearchRepo) GetMKDConsumersByUnoms(ctx context.Context, unoms []int64) (values []models.MKDConsumer, err error) {
+	ctx, span := repo.tr.Start(ctx, "consumersSearchRepo.GetMKDConsumersByUnoms")
+	defer span.End()
+
+	filter := bson.M{"unom": bson.M{"$in": unoms}}
+	if err = repo.mongo.FindMany(ctx, mkdConsumerCollection, filter, &values); err != nil {
+		return nil, err
+	}
+
+	return values, nil
+}
+
+// GetDispatcherInfoByUnoms возвращает данные о диспетчерах по уникальным номерам объектов.
+func (repo *consumersSearchRepo) GetDispatcherInfoByUnoms(ctx context.Context, unoms []int64) (values []models.DispatchServices, err error) {
+	ctx, span := repo.tr.Start(ctx, "consumersSearchRepo.GetDispatcherInfoByUnoms")
+	defer span.End()
+
+	filter := bson.M{"unom": bson.M{"$in": unoms}}
 	if err = repo.mongo.FindMany(ctx, consumerCollection, filter, &values); err != nil {
 		return nil, err
 	}

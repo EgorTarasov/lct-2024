@@ -63,6 +63,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/me": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get user data",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "get user data",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/token.UserPayload"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/register": {
             "post": {
                 "description": "creating email account with FirstName and LastName",
@@ -410,6 +441,19 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "constants.Role": {
+            "type": "integer",
+            "enum": [
+                0,
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "User",
+                "Admin",
+                "Moderator"
+            ]
+        },
         "handler.RegisterData": {
             "type": "object",
             "properties": {
@@ -673,6 +717,20 @@ const docTemplate = `{
                 },
                 "unom": {
                     "description": "Уникальный номер объекта недвижимости.",
+                    "type": "integer"
+                }
+            }
+        },
+        "token.UserPayload": {
+            "type": "object",
+            "properties": {
+                "auth_type": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/constants.Role"
+                },
+                "user_id": {
                     "type": "integer"
                 }
             }

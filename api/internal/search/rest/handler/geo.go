@@ -76,3 +76,41 @@ func (h *handler) GetLocationsByUnoms(c *fiber.Ctx) error {
 	}
 	return c.Status(fiber.StatusOK).JSON(addresses)
 }
+
+// GetConsumersInfoByUnoms godoc
+//
+// получение информации о потребителях по unoms
+//
+// @Summary получение информации о потребителях по unoms
+// @Description
+// @Tags consumers
+// @Param unoms query []int true "уникальные номера объектов"
+// @Produce  json
+// @Success 200
+// @Router /consumers/info/unoms [get].
+func (h *handler) GetConsumersInfoByUnoms(c *fiber.Ctx) error {
+	ctx, span := h.tr.Start(c.Context(), "handler.GetConsumersInfoByUnoms")
+	defer span.End()
+	// parse query params array of unoms from query param unoms
+
+	unomsStr := c.Query("unoms")
+	if unomsStr == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "unoms is required"})
+	}
+	unomsSplited := strings.Split(unomsStr, ",")
+	unoms := make([]int64, len(unomsSplited))
+
+	for i, v := range unomsSplited {
+		unom, err := strconv.ParseInt(v, 10, 64)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		}
+		unoms[i] = unom
+	}
+
+	consumers, err := h.se.GetConsumersInfo(ctx, unoms)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.Status(fiber.StatusOK).JSON(consumers)
+}

@@ -125,6 +125,18 @@ func (ac *authController) AuthWithEmail(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"accessToken": accessToken})
 }
 
+// GetUserData godoc
+//
+//	получение данных о пользователе
+//
+// @Summary get user data
+// @Description get user data
+// @Tags auth
+// @Security Bearer
+// @Produce  json
+// @Success 200 {object} token.UserPayload
+// @Failure 400 {object} errResponse
+// @Router /auth/me [get].
 func (ac *authController) GetUserData(c *fiber.Ctx) error {
 	_, span := ac.tracer.Start(c.Context(), "fiber.GetUserData")
 	defer span.End()

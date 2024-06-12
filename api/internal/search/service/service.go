@@ -2,9 +2,11 @@ package service
 
 import (
 	"context"
+	"sync"
 
 	"github.com/EgorTarasov/lct-2024/api/internal/search/models"
 	shared "github.com/EgorTarasov/lct-2024/api/internal/shared/models"
+	"github.com/rs/zerolog/log"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -30,6 +32,9 @@ type addressRegistry interface {
 type consumerRepo interface {
 	GetSearchFilter(ctx context.Context) (filters []models.Filter, err error)
 	SearchWithFilters(ctx context.Context, filters []models.Filter) ([]models.HeatingPoint, error)
+	GetDispatcherInfoByUnoms(ctx context.Context, unoms []int64) ([]models.DispatchServices, error)
+	GetMKDConsumersByUnoms(ctx context.Context, unoms []int64) ([]models.MKDConsumer, error)
+	GetStateConsumersByUnoms(ctx context.Context, unoms []int64) (values []models.StateConsumer, err error)
 }
 
 // statePropertyRepo доступ к данным о потребителях.
@@ -123,4 +128,58 @@ func (s *service) GeoDataByUnoms(ctx context.Context, unoms []int64) ([]shared.A
 	defer span.End()
 
 	return s.ar.GetGeoDataByUnoms(ctx, unoms)
+}
+
+func (s *service) GetConsumersInfo(ctx context.Context, unoms []int64) (interface{}, error) {
+	ctx, span := s.tr.Start(ctx, "service.GetConsuerInfo", trace.WithAttributes(attribute.Int64Slice("unoms", unoms)))
+	defer span.End()
+	// бежим в 3 места и собираем ифнормацию
+
+	var (
+		stateConsumers []models.StateConsumer
+		dispatchers    []models.DispatchServices
+		mkdConsumers   []models.MKDConsumer
+	)
+
+	wg := sync.WaitGroup{}
+	wg.Add(3)
+	go func(routineCtx context.Context, unoms []int64) {
+		defer wg.Done()
+		var err error
+		stateConsumers, err = s.fr.GetStateConsumersByUnoms(routineCtx, unoms)
+		if err != nil {
+			log.Err(err).Msg("failed to get state consumers")
+			span.RecordError(err)
+		}
+	}(ctx, unoms)
+	go func(routineCtx context.Context, unoms []int64) {
+		defer wg.Done()
+		var err error
+		dispatchers, err = s.fr.GetDispatcherInfoByUnoms(routineCtx, unoms)
+		if err != nil {
+			log.Err(err).Msg("failed to get dispatchers")
+			span.RecordError(err)
+		}
+	}(ctx, unoms)
+	go func(routineCtx context.Context, unoms []int64) {
+		defer wg.Done()
+		var err error
+		mkdConsumers, err = s.fr.GetMKDConsumersByUnoms(routineCtx, unoms)
+		if err != nil {
+			log.Err(err).Msg("failed to get mkd consumers")
+			span.RecordError(err)
+		}
+	}(ctx, unoms)
+
+	wg.Wait()
+
+	return struct {
+		StateConsumers []models.StateConsumer    `json:"stateHeatConsumers"`
+		Dispatchers    []models.DispatchServices `json:"dispatchers"`
+		MKDConsumers   []models.MKDConsumer      `json:"mkdConsumers"`
+	}{
+		StateConsumers: stateConsumers,
+		Dispatchers:    dispatchers,
+		MKDConsumers:   mkdConsumers,
+	}, nil
 }

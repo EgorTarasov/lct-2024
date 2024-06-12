@@ -22,6 +22,7 @@ import (
 	searchHandler "github.com/EgorTarasov/lct-2024/api/internal/search/rest/handler"
 	searchRouter "github.com/EgorTarasov/lct-2024/api/internal/search/rest/router"
 	search "github.com/EgorTarasov/lct-2024/api/internal/search/service"
+	"github.com/EgorTarasov/lct-2024/api/internal/shared"
 	sharedMongo "github.com/EgorTarasov/lct-2024/api/internal/shared/repository/mongo"
 	mongoDB "github.com/EgorTarasov/lct-2024/api/pkg/mongo"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -88,6 +89,12 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 		AllowOrigins:     strings.Join(cfg.Server.CorsOrigins, ","),
 		AllowCredentials: true,
 	}))
+
+	app.Get("/test", func(c *fiber.Ctx) error {
+		q := c.Query("q")
+
+		return c.JSON(shared.ParseAddress(q))
+	})
 
 	//TODO: добавить swagger для документации api.
 	docs := app.Group("/docs")

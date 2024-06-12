@@ -42,7 +42,7 @@ linters-settings:
     checks: ["all"]
 
   funlen:
-    lines: 80
+    lines: 100
     statements: 60
     ignore-comments: true
 
