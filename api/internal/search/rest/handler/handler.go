@@ -10,6 +10,7 @@ import (
 
 type searchEngine interface {
 	SearchStateProperties(ctx context.Context, query string) ([]models.StatePropertySearchResult, error)
+	ListFilters(ctx context.Context) ([]models.Filter, error)
 }
 
 // Обработчик http запросов для поиска по данным.
@@ -52,4 +53,26 @@ func (h *handler) SearchObjects(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(res)
+}
+
+// ListAllFilters
+//
+// получение списка всех фильтров для поиска по объектам
+//
+// @Summary получение списка всех фильтров для поиска по объектам
+// @Description
+// @Tags search
+// @Produce  json
+// @Success 200 {array} []Filter
+// @Router /search/filters [get].
+func (h *handler) ListAllFilters(c *fiber.Ctx) error {
+	ctx, span := h.tr.Start(c.Context(), "handler.ListAllFilters")
+	defer span.End()
+
+	filters, err := h.se.ListFilters(ctx)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(filters)
 }

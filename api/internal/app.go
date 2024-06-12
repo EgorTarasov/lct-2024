@@ -114,7 +114,8 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 
 	// search
 	statePropertyRepo := searchRepos.NewStatePropertyRepo(mongo, tracer)
-	searchService := search.NewService(ar, statePropertyRepo, tracer)
+	filterRepo := searchRepos.NewSearchFilterRepo(mongo, tracer)
+	searchService := search.NewService(ar, statePropertyRepo, filterRepo, tracer)
 	searchController := searchHandler.New(searchService, tracer)
 	searchRouter.InitRoutes(app, searchController)
 

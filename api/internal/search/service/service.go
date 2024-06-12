@@ -13,6 +13,7 @@ import (
 type service struct {
 	ar addressRegistry
 	cr statePropertyRepo
+	fr filterRepo
 	tr trace.Tracer
 }
 
@@ -26,17 +27,22 @@ type addressRegistry interface {
 	GetByMunicipalDistrict(ctx context.Context, municipalDistricts []string) ([]shared.Address, error)
 }
 
+type filterRepo interface {
+	GetSearchFilter(ctx context.Context) (filters []models.Filter, err error)
+}
+
 // statePropertyRepo доступ к данным о потребителях.
 type statePropertyRepo interface {
 	SearchSimilarObjects(ctx context.Context, query string) (result []models.StateProperty, err error)
 }
 
 // NewService конструктор сервиса для поиска по данным.
-func NewService(ar addressRegistry, cr statePropertyRepo, tracer trace.Tracer) *service {
+func NewService(ar addressRegistry, cr statePropertyRepo, fr filterRepo, tracer trace.Tracer) *service {
 	return &service{
 		ar: ar,
-		tr: tracer,
+		fr: fr,
 		cr: cr,
+		tr: tracer,
 	}
 }
 
@@ -70,4 +76,16 @@ func (s *service) SearchStateProperties(ctx context.Context, query string) ([]mo
 	}
 
 	return result, err
+}
+
+// ListFilters получение списка всех фильтров для поиска по коллекции consumers.
+func (s *service) ListFilters(ctx context.Context) ([]models.Filter, error) {
+	ctx, span := s.tr.Start(ctx, "service.ListFilters")
+	defer span.End()
+
+	filters, err := s.fr.GetSearchFilter(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return filters, nil
 }
