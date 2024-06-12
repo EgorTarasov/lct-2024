@@ -247,6 +247,70 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/search/consumers/filters": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "search consumers"
+                ],
+                "summary": "получение списка всех фильтров для поиска по объектам",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/definitions/models.Filter"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/search/consumers/q": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "search consumers"
+                ],
+                "summary": "поиск по объектам consumers с учетом фильтров",
+                "parameters": [
+                    {
+                        "description": "фильтры для поиска",
+                        "name": "filters",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Filter"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.HeatingPointDTO"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/search/objects": {
             "get": {
                 "produces": [
@@ -369,6 +433,44 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "source": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Filter": {
+            "type": "object",
+            "properties": {
+                "filterName": {
+                    "type": "string"
+                },
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "models.HeatingPointDTO": {
+            "type": "object",
+            "properties": {
+                "balanceHolder": {
+                    "type": "string"
+                },
+                "commissioningDate": {},
+                "consumerAddress": {
+                    "type": "string"
+                },
+                "district": {
+                    "type": "string"
+                },
+                "locationType": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "string"
+                },
+                "type": {
                     "type": "string"
                 }
             }

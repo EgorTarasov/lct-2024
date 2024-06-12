@@ -13,7 +13,7 @@ import (
 type service struct {
 	ar addressRegistry
 	cr statePropertyRepo
-	fr filterRepo
+	fr consumerRepo
 	tr trace.Tracer
 }
 
@@ -27,8 +27,9 @@ type addressRegistry interface {
 	GetByMunicipalDistrict(ctx context.Context, municipalDistricts []string) ([]shared.Address, error)
 }
 
-type filterRepo interface {
+type consumerRepo interface {
 	GetSearchFilter(ctx context.Context) (filters []models.Filter, err error)
+	SearchWithFilters(ctx context.Context, filters []models.Filter) ([]models.HeatingPoint, error)
 }
 
 // statePropertyRepo доступ к данным о потребителях.
@@ -37,7 +38,7 @@ type statePropertyRepo interface {
 }
 
 // NewService конструктор сервиса для поиска по данным.
-func NewService(ar addressRegistry, cr statePropertyRepo, fr filterRepo, tracer trace.Tracer) *service {
+func NewService(ar addressRegistry, cr statePropertyRepo, fr consumerRepo, tracer trace.Tracer) *service {
 	return &service{
 		ar: ar,
 		fr: fr,
@@ -88,4 +89,22 @@ func (s *service) ListFilters(ctx context.Context) ([]models.Filter, error) {
 		return nil, err
 	}
 	return filters, nil
+}
+
+// SearchWithFilters поиск по коллекции consumers с учетом фильтров.
+func (s *service) SearchWithFilters(ctx context.Context, filters []models.Filter) (response []models.HeatingPointDTO, err error) {
+	ctx, span := s.tr.Start(ctx, "service.SearchWithFilters")
+	defer span.End()
+
+	result, err := s.fr.SearchWithFilters(ctx, filters)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, value := range result {
+		response = append(response, models.HeatingPointDTO{
+			HeatingPoint: value,
+		})
+	}
+	return response, nil
 }

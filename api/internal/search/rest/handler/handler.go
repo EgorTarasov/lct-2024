@@ -11,6 +11,7 @@ import (
 type searchEngine interface {
 	SearchStateProperties(ctx context.Context, query string) ([]models.StatePropertySearchResult, error)
 	ListFilters(ctx context.Context) ([]models.Filter, error)
+	SearchWithFilters(ctx context.Context, filters []models.Filter) ([]models.HeatingPointDTO, error)
 }
 
 // Обработчик http запросов для поиска по данным.
@@ -61,10 +62,10 @@ func (h *handler) SearchObjects(c *fiber.Ctx) error {
 //
 // @Summary получение списка всех фильтров для поиска по объектам
 // @Description
-// @Tags search
+// @Tags search consumers
 // @Produce  json
-// @Success 200 {array} []Filter
-// @Router /search/filters [get].
+// @Success 200 {array} []models.Filter
+// @Router /search/consumers/filters [get].
 func (h *handler) ListAllFilters(c *fiber.Ctx) error {
 	ctx, span := h.tr.Start(c.Context(), "handler.ListAllFilters")
 	defer span.End()
@@ -75,4 +76,33 @@ func (h *handler) ListAllFilters(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusOK).JSON(filters)
+}
+
+// SearchWithFilters godoc
+//
+// поиск по объектам consumers с учетом фильтров
+//
+// @Summary поиск по объектам consumers с учетом фильтров
+// @Description
+// @Tags search consumers
+// @Accept json
+// @Produce  json
+// @Param filters body []models.Filter true "фильтры для поиска"
+// @Success 200 {array} models.HeatingPointDTO
+// @Router /search/consumers/q [get].
+func (h *handler) SearchWithFilters(c *fiber.Ctx) error {
+	ctx, span := h.tr.Start(c.Context(), "handler.SearchWithFilters")
+	defer span.End()
+
+	var filters []models.Filter
+	if err := c.BodyParser(&filters); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	res, err := h.se.SearchWithFilters(ctx, filters)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(res)
 }
