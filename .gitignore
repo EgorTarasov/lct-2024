@@ -1,0 +1,5 @@
+data/
+features/
+.idea/
+.venv/
+catboost_info/
