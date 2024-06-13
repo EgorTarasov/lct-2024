@@ -4,18 +4,24 @@ import { ELEVATION } from "@/constants/elevation";
 import { useEffect, useState } from "react";
 import WeatherIcon from "./assets/weather.svg";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { observable } from "mobx";
+import { observer } from "mobx-react-lite";
 
-export const WeatherWidget = () => {
-  const [temperature, setTemperature] = useState<number | null>(null);
+const weather: { temperature: number | null } = observable({
+  temperature: null
+});
 
+export const WeatherWidget = observer(() => {
   useEffect(() => {
     const fetchWeather = async () => {
       const res = await WeatherEndpoint.getMoscow();
 
-      setTemperature(res.current.temperature_2m);
+      weather.temperature = res.current.temperature_2m;
     };
 
-    fetchWeather();
+    if (!weather.temperature) {
+      fetchWeather();
+    }
   }, []);
 
   return (
@@ -25,8 +31,8 @@ export const WeatherWidget = () => {
           className="appear flex items-center justify-center bg-card border rounded-xl px-2 gap-2 cursor-default"
           style={{ zIndex: ELEVATION.FILTERS }}>
           <WeatherIcon />
-          {temperature ? (
-            `${temperature}°С`
+          {weather.temperature ? (
+            `${weather.temperature}°С`
           ) : (
             <LoadingEllipsis className="*:bg-slate-300" size={48} />
           )}
@@ -35,4 +41,4 @@ export const WeatherWidget = () => {
       <TooltipContent>Погода в Москве</TooltipContent>
     </Tooltip>
   );
-};
+});

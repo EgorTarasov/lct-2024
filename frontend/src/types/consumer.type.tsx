@@ -18,5 +18,6 @@ export namespace Consumer {
     issue: Issue;
     info: Record<Info, string>;
     incidentCount: 2;
+    unom: string;
   }
 }

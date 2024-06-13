@@ -16,7 +16,7 @@ export const SecondarySidebarView = () => {
   const ctx = useSidebar();
 
   return (
-    <AnimatePresence mode="popLayout">
+    <AnimatePresence mode="popLayout" initial={false}>
       {ctx.isOpen && ctx.secondaryContent && (
         <motion.div
           {...transitionProps}

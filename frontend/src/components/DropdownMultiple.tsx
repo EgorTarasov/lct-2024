@@ -39,7 +39,13 @@ const DropdownMultiple = observer(<T,>(p: ComboboxMultipleProps<T>) => {
             .replace(/\s+/g, "")
             .includes(query.toLowerCase().replace(/\s+/g, ""))
         );
-  const placeholder = p.value.map((v) => p.compare(v)).join(", ") || (p.placeholder ?? "");
+  const placeholder = (function () {
+    const values = p.value.map((v) => p.compare(v));
+    if (values.length > 2) {
+      return `${values[0]}, ${values[1]} +${values.length - 2}`;
+    }
+    return values.join(", ") || (p.placeholder ?? "");
+  })();
 
   useEffect(() => {
     const closeOnEscape = (event: KeyboardEvent) => {

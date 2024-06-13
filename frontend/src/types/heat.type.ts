@@ -21,6 +21,7 @@ export namespace HeatDistributor {
     consumerCount: number;
     issues: Issue[];
     incidentCount: number;
+    unom: string;
   }
 }
 

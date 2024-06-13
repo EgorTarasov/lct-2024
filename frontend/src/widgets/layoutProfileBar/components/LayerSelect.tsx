@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { MapFilters, MapFiltersLocale } from "@/constants/map-filters";
+import { MapFilters, MapFiltersLocale } from "@/types/map-filters";
 import { MapStore } from "@/stores/map.store";
 import { ChevronDownIcon } from "lucide-react";
 import { observer } from "mobx-react-lite";

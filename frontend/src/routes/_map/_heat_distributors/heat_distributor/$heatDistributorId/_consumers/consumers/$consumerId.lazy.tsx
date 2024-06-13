@@ -1,6 +1,7 @@
 import { Section } from "@/components/cards/Section";
 import { ConsumerCardReadonly } from "@/components/cards/consumer.card";
 import { HeatDistributorCard } from "@/components/cards/heat-distributor.card";
+import { IssueLink } from "@/components/cards/issue.card";
 import { TitleInfo } from "@/components/cards/title-info";
 import { Text } from "@/components/typography/Text";
 import {
@@ -13,7 +14,6 @@ import { buttonVariants } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { MapStore } from "@/stores/map.store";
 import { cn } from "@/utils/cn";
-import { pluralizeIncident } from "@/utils/pluralize/incident";
 import { SecondarySidebar } from "@/widgets/layoutMainSidebar/SecondarySidebar/secondary-sidebar.widget";
 import { Link, createLazyFileRoute, useNavigate } from "@tanstack/react-router";
 import { ChevronRightIcon } from "lucide-react";
@@ -58,15 +58,7 @@ const Page = observer(() => {
           </Section>
           {consumer.incidentCount > 0 && (
             <Section withoutSeparator className="pt-1">
-              <Link className="border px-4 py-3 rounded-xl hover:bg-background text-sm space-y-2 group transition-colors">
-                <p>
-                  Имеется информация о {consumer.incidentCount}{" "}
-                  {pluralizeIncident(consumer.incidentCount)}, связанных с этим объектом
-                </p>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  Перейти к инцидентам <ChevronRightIcon className="size-5" />
-                </div>
-              </Link>
+              <IssueLink unom={consumer.unom} count={consumer.incidentCount} />
             </Section>
           )}
           <Section

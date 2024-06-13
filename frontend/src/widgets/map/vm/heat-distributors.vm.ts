@@ -1,33 +1,35 @@
-import { MapFilters, MapFiltersLocale } from "@/constants/map-filters";
 import { Filter } from "@/stores/filter.vm";
 import { DisposableVm } from "@/utils/vm";
-import { makeAutoObservable, reaction } from "mobx";
+import { IReactionDisposer, makeAutoObservable, reaction } from "mobx";
 import { HeatDistributor } from "@/types/heat.type";
 import { Issue } from "@/types/issue.type";
 import { debounceAsync } from "@/utils/debounce";
 import { Priority } from "@/types/priority.type";
-import { ConsumersEndpoint } from "@/api/endpoints/consumers.endpoint";
+import { MapFilters, MapFiltersLocale } from "@/types/map-filters";
 
 export class HeatDistributorsViewModel implements DisposableVm {
   constructor() {
     makeAutoObservable(this);
-    const r = reaction(
-      () => [this.search, this.heatNetworks.value, this.page],
+    this.r = reaction(
+      () => [this.search, this.heatNetworks.values, this.page],
       () => this.fetchList()
     );
 
     this.init();
   }
 
+  r: IReactionDisposer;
   async init() {
-    const res = await ConsumersEndpoint.getFilters();
-    console.log(res);
     await this.fetchList();
   }
 
   //#region filters
   search = "";
-  heatNetworks = new Filter(Object.values(MapFilters.HeatNetwork), MapFiltersLocale.HeatNetwork);
+  heatNetworks = new Filter(
+    "Тепловая сеть",
+    Object.values(MapFilters.HeatNetwork),
+    MapFiltersLocale.HeatNetwork
+  );
   //#endregion
 
   page = 0;
@@ -46,14 +48,15 @@ export class HeatDistributorsViewModel implements DisposableVm {
       issues: [Issue.EMERGENCY, Issue.REPAIR],
       number: "ТЭЦ-1",
       priority: Priority.HIGH,
-      incidentCount: 3
+      incidentCount: 3,
+      unom: "123"
     }
   ];
 
   fetchList = debounceAsync(async () => {
     const filters = {
       search: this.search,
-      heatNetworks: this.heatNetworks.value
+      heatNetworks: this.heatNetworks.values
     };
 
     console.log(filters);

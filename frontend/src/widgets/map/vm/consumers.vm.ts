@@ -19,7 +19,8 @@ export class ConsumersViewModel {
       },
       issue: Issue.PREDICTION,
       priority: Priority.LOW,
-      incidentCount: 2
+      incidentCount: 2,
+      unom: "123"
     }
   ];
   loading = false;

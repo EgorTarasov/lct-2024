@@ -1,5 +1,6 @@
 import { Section } from "@/components/cards/Section";
 import { HeatDistributorCardReadonly } from "@/components/cards/heat-distributor.card";
+import { IssueLink } from "@/components/cards/issue.card";
 import { TitleInfo } from "@/components/cards/title-info";
 import { Text } from "@/components/typography/Text";
 import {
@@ -49,15 +50,7 @@ const Page = observer(() => {
           </Section>
           {heatSource.incidentCount > 0 && (
             <Section withoutSeparator className="pt-0.5">
-              <Link className="border px-4 py-3 rounded-xl hover:bg-background text-sm space-y-2 group transition-colors">
-                <p>
-                  Имеется информация о {heatSource.incidentCount}{" "}
-                  {pluralizeIncident(heatSource.incidentCount)}, связанных с этим объектом
-                </p>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  Перейти к инцидентам <ChevronRightIcon className="size-5" />
-                </div>
-              </Link>
+              <IssueLink unom={heatSource.unom} count={heatSource.incidentCount} />
             </Section>
           )}
           <Section

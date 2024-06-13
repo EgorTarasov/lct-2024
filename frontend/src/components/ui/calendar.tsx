@@ -24,7 +24,7 @@ function Calendar({
         highlightedDates: highlightedDates ?? []
       }}
       modifiersClassNames={{
-        highlightedDates: "text-status-prediction-foreground bg-status-prediction"
+        highlightedDates: "!text-status-prediction-foreground !bg-status-prediction"
       }}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",

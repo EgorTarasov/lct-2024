@@ -8,21 +8,44 @@ import { ConsumersViewModel } from "../widgets/map/vm/consumers.vm";
 import { HeatDistributorsViewModel } from "@/widgets/map/vm/heat-distributors.vm";
 import { Priority } from "@/types/priority.type";
 import { DateRange } from "react-day-picker";
-import { MapFilters } from "@/constants/map-filters";
+import { ConsumersEndpoint } from "@/api/endpoints/consumers.endpoint";
+import { Filter } from "./filter.vm";
+import { MapFilters } from "@/types/map-filters";
 
 class mapStore implements DisposableVm {
   constructor() {
     makeAutoObservable(this);
+    void this.init();
   }
 
   consumersVm: ConsumersViewModel | null = null;
   heatSourceVm = new HeatDistributorsViewModel();
+  datesWithEvents: Date[] = [new Date()];
+
+  //#region filters
+  filters: Filter<string>[] = [];
+  search = "";
+  async init() {
+    const filters = await ConsumersEndpoint.getFilters();
+
+    this.filters = filters.map((f) => new Filter(f.filterName, f.values));
+  }
   dateRange: DateRange = {
     from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
     to: new Date()
   };
-  datesWithEvents: Date[] = [new Date()];
   layer: MapFilters.Layer = MapFilters.Layer.AllObjects;
+
+  reset() {
+    this.dateRange = {
+      from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      to: new Date()
+    };
+    this.datesWithEvents = [new Date()];
+    this.layer = MapFilters.Layer.AllObjects;
+    this.filters.forEach((f) => f.reset());
+  }
+  //#endregion
 
   //#region map
   consumerGeozones: Consumer.Polygon[] = [];

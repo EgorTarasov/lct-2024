@@ -3,35 +3,34 @@ import { makeAutoObservable } from "mobx";
 
 export class Filter<T extends string> {
   constructor(
-    readonly options: T[],
-    readonly locale: Record<T, string>,
-    private onChange?: () => void
+    public readonly name: string,
+    public readonly options: T[],
+    public readonly locale?: Record<T, string>
   ) {
     makeAutoObservable(this);
   }
 
   private _value: T[] = [];
 
-  get value() {
-    return this._value;
-  }
-
   get attributes(): ComboboxMultipleProps<T> {
     return {
-      value: this.value,
+      value: this._value,
       placeholder: this._value.length === 0 ? "Все" : undefined,
       options: this.options,
-      compare: (v: T) => this.locale[v],
+      label: this.name,
+      compare: (v: T) => (this.locale ? this.locale[v] : v),
       onChange: (v: T[]) => {
         if (v.length === this.options.length) {
           v = [];
         }
         this._value = v;
-
-        this.onChange?.();
       },
-      render: (v: T) => this.locale[v]
+      render: (v: T) => (this.locale ? this.locale[v] : v)
     };
+  }
+
+  get values(): T[] {
+    return this._value.length === 0 ? this.options : this._value;
   }
 
   reset() {
