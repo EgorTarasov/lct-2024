@@ -10,6 +10,36 @@ definitions:
     - User
     - Admin
     - Moderator
+  handler.Address:
+    properties:
+      address:
+        description: Полный Адрес в реестре.
+        type: string
+      border:
+        description: Граница объекта на карте.
+      center:
+        allOf:
+        - $ref: '#/definitions/handler.Point'
+        description: Центр объекта на карте.
+      municipalDistrict:
+        description: Район округ.
+        type: string
+      unom:
+        description: Уникальный номер объекта недвижимости.
+        type: integer
+    required:
+    - address
+    - municipalDistrict
+    type: object
+  handler.Point:
+    properties:
+      coordinates:
+        items:
+          type: number
+        type: array
+      type:
+        type: string
+    type: object
   handler.RegisterData:
     properties:
       email:
@@ -57,7 +87,12 @@ definitions:
       error:
         type: string
     type: object
-  models.Address:
+  handler.fileUploadResponse:
+    properties:
+      id:
+        type: integer
+    type: object
+  internal_search_models.Address:
     properties:
       address:
         description: Полный Адрес в реестре.
@@ -66,7 +101,7 @@ definitions:
         description: Граница объекта на карте.
       center:
         allOf:
-        - $ref: '#/definitions/models.Point'
+        - $ref: '#/definitions/internal_search_models.Point'
         description: Центр объекта на карте.
       municipalDistrict:
         description: Район округ.
@@ -77,6 +112,15 @@ definitions:
     required:
     - address
     - municipalDistrict
+    type: object
+  internal_search_models.Point:
+    properties:
+      coordinates:
+        items:
+          type: number
+        type: array
+      type:
+        type: string
     type: object
   models.DisconnectionDTO:
     properties:
@@ -104,20 +148,22 @@ definitions:
     type: object
   models.HeatingPointDTO:
     properties:
-      balanceHolder:
+      Адрес потребителя:
+        $ref: '#/definitions/internal_search_models.Address'
+      Адрес строения:
+        $ref: '#/definitions/internal_search_models.Address'
+      Балансодержатель:
         type: string
-      commissioningDate: {}
-      consumerAddress:
+      Вид ТП:
         type: string
-      district:
+      Дата ввода в эксплуатацию: {}
+      Источник теплоснабжения:
         type: string
-      locationType:
+      Муниципальный район:
         type: string
-      number:
+      Номер ТП (тепловой пункт):
         type: string
-      source:
-        type: string
-      type:
+      Тип по размещению:
         type: string
     type: object
   models.MoekDTO:
@@ -136,15 +182,6 @@ definitions:
       polygon: {}
       src:
         type: string
-      type:
-        type: string
-    type: object
-  models.Point:
-    properties:
-      coordinates:
-        items:
-          type: number
-        type: array
       type:
         type: string
     type: object
@@ -169,7 +206,7 @@ definitions:
         description: Граница объекта на карте.
       center:
         allOf:
-        - $ref: '#/definitions/models.Point'
+        - $ref: '#/definitions/internal_search_models.Point'
         description: Центр объекта на карте.
       class:
         type: string
@@ -189,6 +226,21 @@ definitions:
     required:
     - address
     - municipalDistrict
+    type: object
+  models.Upload:
+    properties:
+      createdAt:
+        type: string
+      filename:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+      url:
+        type: string
+      userID:
+        type: integer
     type: object
   token.UserPayload:
     properties:
@@ -212,77 +264,6 @@ info:
   title: lct api
   version: "1.0"
 paths:
-  /auth/login:
-    post:
-      consumes:
-      - application/json
-      description: auth with email + password
-      parameters:
-      - description: user creds
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/handler.emailCredentials'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/handler.accessTokenResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/handler.errResponse'
-      summary: Auth with email creds
-      tags:
-      - auth
-  /auth/me:
-    get:
-      description: get user data
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/token.UserPayload'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/handler.errResponse'
-      security:
-      - Bearer: []
-      summary: get user data
-      tags:
-      - auth
-  /auth/register:
-    post:
-      consumes:
-      - application/json
-      description: creating email account with FirstName and LastName
-      parameters:
-      - description: User Email
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/handler.RegisterData'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/handler.accessTokenResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/handler.errResponse'
-      summary: creating email account
-      tags:
-      - auth
   /consumers/filters:
     get:
       produces:
@@ -299,6 +280,25 @@ paths:
       summary: получение списка всех фильтров для поиска по объектам
       tags:
       - search consumers
+  /consumers/info/unoms:
+    get:
+      parameters:
+      - collectionFormat: csv
+        description: уникальные номера объектов
+        in: query
+        items:
+          type: integer
+        name: unoms
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: получение информации о потребителях по unoms
+      tags:
+      - consumers
   /consumers/q:
     get:
       consumes:
@@ -338,7 +338,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.Address'
+            $ref: '#/definitions/handler.Address'
       summary: получение гео данных по unom
       tags:
       - location
@@ -360,7 +360,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/models.Address'
+              $ref: '#/definitions/handler.Address'
             type: array
       summary: получение гео данных по unoms
       tags:
@@ -482,4 +482,153 @@ paths:
       summary: поиск по объектам (потребителям) тепло энергии
       tags:
       - search
+  /users/file/list:
+    get:
+      description: list uploads
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Upload'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errResponse'
+      security:
+      - Bearer: []
+      summary: list uploads
+      tags:
+      - users
+  /users/file/status/{id}:
+    get:
+      description: check file processing
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Upload'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errResponse'
+      security:
+      - Bearer: []
+      summary: check file processing
+      tags:
+      - users
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: users with email + password
+      parameters:
+      - description: user creds
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/handler.emailCredentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.accessTokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errResponse'
+      summary: Auth with email creds
+      tags:
+      - users
+  /users/me:
+    get:
+      description: get user data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/token.UserPayload'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errResponse'
+      security:
+      - Bearer: []
+      summary: get user data
+      tags:
+      - users
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: creating email account with FirstName and LastName
+      parameters:
+      - description: User Email
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/handler.RegisterData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.accessTokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errResponse'
+      summary: creating email account
+      tags:
+      - users
+  /users/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: upload file
+      parameters:
+      - description: key
+        in: query
+        name: key
+        required: true
+        type: string
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.fileUploadResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errResponse'
+      security:
+      - Bearer: []
+      summary: upload file
+      tags:
+      - users
 swagger: "2.0"

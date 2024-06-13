@@ -7,6 +7,25 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+//type Address struct {
+//	// Уникальный номер объекта недвижимости.
+//	Unom int64 `json:"unom" bson:"unom" validate:"required max=20000000"`
+//	// Полный Адрес в реестре.
+//	Address string `json:"address" bson:"address" validate:"required"`
+//	// Район округ.
+//	MunicipalDistrict string `json:"municipalDistrict" bson:"municipal_district" validate:"required"`
+//	// Граница объекта на карте.
+//	Polygon interface{} `json:"border" bson:"geo_data"`
+//	// Центр объекта на карте.
+//	Center Point `json:"center" bson:"geo_center"`
+//}
+//
+//// Point Репрезентация точки в формате geoJson.
+//type Point struct {
+//	Type        string    `json:"type" bson:"type"`
+//	Coordinates []float64 `json:"coordinates" bson:"coordinates"`
+//}
+
 // GetLocationByUnom godoc
 //
 // получение гео данных по unom
@@ -16,7 +35,7 @@ import (
 // @Tags location
 // @Param unom query int true "уникальный номер объекта"
 // @Produce  json
-// @Success 200 {object} models.Address
+// @Success 200 {object} Address
 // @Router /geo/location/unom [get].
 func (h *handler) GetLocationByUnom(c *fiber.Ctx) error {
 	ctx, span := h.tr.Start(c.Context(), "handler.GetLocationByUnom")
@@ -48,7 +67,7 @@ func (h *handler) GetLocationByUnom(c *fiber.Ctx) error {
 // @Tags location
 // @Param unoms query []int true "уникальные номера объектов"
 // @Produce  json
-// @Success 200 {array} models.Address
+// @Success 200 {array} Address
 // @Router /geo/location/unoms [get].
 func (h *handler) GetLocationsByUnoms(c *fiber.Ctx) error {
 	ctx, span := h.tr.Start(c.Context(), "handler.GetLocationsByUnoms")

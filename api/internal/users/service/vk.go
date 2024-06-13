@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/EgorTarasov/lct-2024/api/internal/auth/models"
-	"github.com/EgorTarasov/lct-2024/api/internal/auth/repository"
-	"github.com/EgorTarasov/lct-2024/api/internal/auth/token"
 	"github.com/EgorTarasov/lct-2024/api/internal/shared/constants"
+	"github.com/EgorTarasov/lct-2024/api/internal/users/models"
+	"github.com/EgorTarasov/lct-2024/api/internal/users/repository"
+	"github.com/EgorTarasov/lct-2024/api/internal/users/token"
 	"github.com/rs/zerolog/log"
 )
 
@@ -67,7 +67,7 @@ func (s *service) AuthorizeVk(ctx context.Context, accessCode string) (string, e
 
 	vkResponse, err := s.getVkUserData(ctx, accessCode)
 	if err != nil {
-		return "", fmt.Errorf("err during vk auth: %v", err.Error())
+		return "", fmt.Errorf("err during vk users: %v", err.Error())
 	}
 	log.Info().Str("vk response", fmt.Sprintf("%+v", vkResponse)).Msg("vk response")
 	vkUserData := vkResponse.Response[0]
@@ -158,18 +158,18 @@ func (s *service) getVkUserData(ctx context.Context, accessCode string) (vkUserR
 
 	resp, err := client.Get(vkAccessTokenURL)
 	if err != nil {
-		return userData, fmt.Errorf("err during vk auth %v", err)
+		return userData, fmt.Errorf("err during vk users %v", err)
 	}
 
 	rawBytes, err := io.ReadAll(resp.Body)
 	_ = resp.Body.Close()
 	if resp.StatusCode != 200 {
 		log.Info().Str("body", string(rawBytes)).Msg("vk response body")
-		return userData, fmt.Errorf("err during vk auth: %v", string(rawBytes))
+		return userData, fmt.Errorf("err during vk users: %v", string(rawBytes))
 	}
 
 	if err != nil {
-		return userData, fmt.Errorf("err during vk auth token %v", err.Error())
+		return userData, fmt.Errorf("err during vk users token %v", err.Error())
 	}
 	if err = json.Unmarshal(rawBytes, &response); err != nil {
 		return userData, fmt.Errorf("err during vk decoding json %v", err.Error())

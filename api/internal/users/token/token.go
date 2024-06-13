@@ -35,7 +35,7 @@ func Encode(_ context.Context, data UserPayload) (string, error) {
 			Subject:  "",
 			Audience: nil,
 			ExpiresAt: &jwt.NumericDate{
-				Time: time.Now().Add(time.Hour),
+				Time: time.Now().Add(time.Hour * 96),
 			},
 			NotBefore: nil,
 			IssuedAt: &jwt.NumericDate{

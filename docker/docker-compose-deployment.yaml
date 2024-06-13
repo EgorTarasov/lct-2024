@@ -6,7 +6,8 @@ volumes:
   postgres-data:
   redis-data:
   elasticsearch-data:
-  mongo-data:
+  data_mongo-data:
+    external: true
   s3-data:
 
 
@@ -41,7 +42,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
     volumes:
-      - "mongo-data:/data/db"
+      - "data_mongo-data:/data/db"
     ports:
       - "54002:27017"
 

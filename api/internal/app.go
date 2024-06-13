@@ -7,12 +7,6 @@ import (
 	"strings"
 	"sync"
 
-	authModels "github.com/EgorTarasov/lct-2024/api/internal/auth/models"
-	authPgRepo "github.com/EgorTarasov/lct-2024/api/internal/auth/repository/pg"
-	authRedisRepo "github.com/EgorTarasov/lct-2024/api/internal/auth/repository/redis"
-	authHandler "github.com/EgorTarasov/lct-2024/api/internal/auth/rest/handler"
-	authRouter "github.com/EgorTarasov/lct-2024/api/internal/auth/rest/router"
-	auth "github.com/EgorTarasov/lct-2024/api/internal/auth/service"
 	chpRepos "github.com/EgorTarasov/lct-2024/api/internal/chp/repository/mongo"
 	mapHandler "github.com/EgorTarasov/lct-2024/api/internal/chp/rest/handler"
 	mapRouter "github.com/EgorTarasov/lct-2024/api/internal/chp/rest/router"
@@ -24,7 +18,14 @@ import (
 	search "github.com/EgorTarasov/lct-2024/api/internal/search/service"
 	"github.com/EgorTarasov/lct-2024/api/internal/shared"
 	sharedMongo "github.com/EgorTarasov/lct-2024/api/internal/shared/repository/mongo"
+	authModels "github.com/EgorTarasov/lct-2024/api/internal/users/models"
+	authPgRepo "github.com/EgorTarasov/lct-2024/api/internal/users/repository/pg"
+	authRedisRepo "github.com/EgorTarasov/lct-2024/api/internal/users/repository/redis"
+	authHandler "github.com/EgorTarasov/lct-2024/api/internal/users/rest/handler"
+	authRouter "github.com/EgorTarasov/lct-2024/api/internal/users/rest/router"
+	auth "github.com/EgorTarasov/lct-2024/api/internal/users/service"
 	mongoDB "github.com/EgorTarasov/lct-2024/api/pkg/mongo"
+	pkgs3 "github.com/EgorTarasov/lct-2024/api/pkg/s3"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	// подключение swagger для документации api.
 	_ "github.com/EgorTarasov/lct-2024/api/internal/docs"
@@ -83,6 +84,13 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 	if err = mongoDB.Ping(ctx, mongo); err != nil {
 		return fmt.Errorf("can't establish connection with mongo: %v", err)
 	}
+
+	// s3
+	s3, err := pkgs3.MustNew(cfg.S3)
+	if err != nil {
+		return fmt.Errorf("can't create s3: %v", err)
+	}
+
 	redisClient := redis.NewClient(cfg.Redis)
 
 	app.Use(cors.New(cors.Config{
@@ -99,12 +107,13 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 	docs := app.Group("/docs")
 	docs.Get("/*", fiberSwagger.WrapHandler)
 
-	// auth.
+	// users.
 	tokenRedisClient := redis.New[authModels.UserDao](redisClient)
 	tokenRepo := authRedisRepo.New(ctx, tokenRedisClient, tracer)
 	userRepo := authPgRepo.NewAccountRepo(pg, tracer)
+	dataRepo := authPgRepo.NewDataRepo(pg, tracer)
 
-	authService := auth.New(ctx, cfg, userRepo, tokenRepo, tracer)
+	authService := auth.New(ctx, cfg, userRepo, dataRepo, tokenRepo, s3, tracer)
 	authHandlers := authHandler.NewAuthController(ctx, authService, tracer)
 
 	if err = authRouter.InitAuthRouter(ctx, app, authHandlers); err != nil {

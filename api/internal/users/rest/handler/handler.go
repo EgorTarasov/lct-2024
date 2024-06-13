@@ -2,11 +2,13 @@ package handler
 
 import (
 	"context"
+	"io"
 
+	"github.com/rs/zerolog/log"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/EgorTarasov/lct-2024/api/internal/auth/models"
-	"github.com/EgorTarasov/lct-2024/api/internal/auth/token"
+	"github.com/EgorTarasov/lct-2024/api/internal/users/models"
+	"github.com/EgorTarasov/lct-2024/api/internal/users/token"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -15,6 +17,9 @@ type authService interface {
 	CreateUserEmail(ctx context.Context, data models.UserCreate, email, password, ip string) (string, error)
 	AuthorizeEmail(ctx context.Context, email, password, ip string) (string, error)
 	AuthorizeVk(ctx context.Context, accessCode string) (string, error)
+	CreateUploads(ctx context.Context, file io.Reader, filename, idempotencyKey string, fileSize int64, userID int64) (int64, error)
+	CheckFileProcessing(ctx context.Context, id int64) (models.Upload, error)
+	ListUploads(ctx context.Context) ([]models.Upload, error)
 }
 
 type authController struct {
@@ -56,13 +61,13 @@ type errResponse struct {
 //
 // @Summary creating email account
 // @Description creating email account with FirstName and LastName
-// @Tags auth
+// @Tags users
 // @Accept  json
 // @Produce  json
 // @Param data body RegisterData true "User Email"
 // @Success 200 {object} accessTokenResponse
 // @Failure 400 {object} errResponse
-// @Router /auth/register [post].
+// @Router /users/register [post].
 func (ac *authController) CreateAccountWithEmail(c *fiber.Ctx) error {
 	ctx, span := ac.tracer.Start(c.Context(), "fiber.CreateAccountWithEmail")
 	defer span.End()
@@ -96,14 +101,14 @@ type emailCredentials struct {
 //	авторизация с использованием email + password
 //
 // @Summary Auth with email creds
-// @Description auth with email + password
-// @Tags auth
+// @Description users with email + password
+// @Tags users
 // @Accept  json
 // @Produce  json
 // @Param data body emailCredentials true "user creds"
 // @Success 200 {object} accessTokenResponse
 // @Failure 400 {object} errResponse
-// @Router /auth/login [post].
+// @Router /users/login [post].
 func (ac *authController) AuthWithEmail(c *fiber.Ctx) error {
 	ctx, span := ac.tracer.Start(c.Context(), "fiber.AuthWithEmail")
 	defer span.End()
@@ -131,12 +136,12 @@ func (ac *authController) AuthWithEmail(c *fiber.Ctx) error {
 //
 // @Summary get user data
 // @Description get user data
-// @Tags auth
+// @Tags users
 // @Security Bearer
 // @Produce  json
 // @Success 200 {object} token.UserPayload
 // @Failure 400 {object} errResponse
-// @Router /auth/me [get].
+// @Router /users/me [get].
 func (ac *authController) GetUserData(c *fiber.Ctx) error {
 	_, span := ac.tracer.Start(c.Context(), "fiber.GetUserData")
 	defer span.End()
@@ -160,4 +165,122 @@ func (ac *authController) AuthWithVk(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{"accessToken": accessToken})
+}
+
+type fileUploadResponse struct {
+	ID int64 `json:"id"`
+}
+
+// UploadFile godoc
+//
+//	загрузка табличных данных в систему
+//
+// @Summary upload file
+// @Description upload file
+// @Tags users
+// @Security Bearer
+// @Accept  multipart/form-data
+// @Produce  json
+// @Param key query string true "key"
+// @Param file formData file true "file"
+// @Success 200 {object} fileUploadResponse
+// @Failure 400 {object} errResponse
+// @Router /users/upload [post]
+func (ac *authController) UploadFile(c *fiber.Ctx) error {
+	ctx, span := ac.tracer.Start(c.Context(), "fiber.UploadFile")
+	defer span.End()
+
+	if c.Locals("userClaims") == nil {
+		log.Info().Interface("userClaims", c.Locals("userClaims")).Msg("no user claims")
+		return c.Status(fiber.StatusUnauthorized).JSON(errResponse{Err: "unauthorized"})
+	}
+
+	user := c.Locals("userClaims").(*jwt.Token)
+
+	key := c.Query("key")
+
+	claims := user.Claims.(*token.UserClaims)
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(errResponse{Err: err.Error()})
+	}
+
+	fileData, err := file.Open()
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(errResponse{Err: err.Error()})
+	}
+	id, err := ac.s.CreateUploads(ctx, fileData, file.Filename, key, file.Size, claims.UserID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(errResponse{Err: err.Error()})
+	}
+	return c.Status(200).JSON(fiber.Map{"id": id})
+}
+
+// CheckFileProcessing godoc
+//
+// проверка статуса обработки файлов
+//
+// @Summary check file processing
+// @Description check file processing
+// @Tags users
+// @Security Bearer
+// @Produce  json
+// @Param id path int true "id"
+// @Success 200 {object} models.Upload
+// @Failure 400 {object} errResponse
+// @Router /users/file/status/{id} [get]
+func (ac *authController) CheckFileProcessing(c *fiber.Ctx) error {
+	ctx, span := ac.tracer.Start(c.Context(), "fiber.CheckFileProcessing")
+	defer span.End()
+
+	if c.Locals("userClaims") == nil {
+		log.Info().Interface("userClaims", c.Locals("userClaims")).Msg("no user claims")
+		return c.Status(fiber.StatusUnauthorized).JSON(errResponse{Err: "unauthorized"})
+	}
+
+	user := c.Locals("userClaims").(*jwt.Token)
+
+	_ = user.Claims.(*token.UserClaims)
+
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(errResponse{Err: err.Error()})
+	}
+	response, err := ac.s.CheckFileProcessing(ctx, int64(id))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(errResponse{Err: err.Error()})
+	}
+
+	return c.JSON(response)
+}
+
+// ListUploads godoc
+//
+//	получение списка загруженных файлов
+//
+// @Summary list uploads
+// @Description list uploads
+// @Tags users
+// @Security Bearer
+// @Produce  json
+// @Success 200 {array} models.Upload
+// @Failure 400 {object} errResponse
+// @Router /users/file/list [get]
+func (ac *authController) ListUploads(c *fiber.Ctx) error {
+	ctx, span := ac.tracer.Start(c.Context(), "fiber.ListUploads")
+	defer span.End()
+
+	if c.Locals("userClaims") == nil {
+		log.Info().Interface("userClaims", c.Locals("userClaims")).Msg("no user claims")
+		return c.Status(fiber.StatusUnauthorized).JSON(errResponse{Err: "unauthorized"})
+	}
+
+	_ = c.Locals("userClaims").(*jwt.Token)
+
+	response, err := ac.s.ListUploads(ctx)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(errResponse{Err: err.Error()})
+	}
+	return c.JSON(response)
 }

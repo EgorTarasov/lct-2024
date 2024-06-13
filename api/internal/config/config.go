@@ -30,7 +30,7 @@ type Config struct {
 	Telemetry *telemetry.Config `yaml:"telemetry"`
 	Database  *postgres.Config  `yaml:"postgres"`
 	Redis     *redis.Config     `yaml:"redis"`
-	VkAuth    *vkAuth           `yaml:"vk-auth"`
+	VkAuth    *vkAuth           `yaml:"vk-users"`
 	S3        *s3.Config        `yaml:"s3"`
 	Mongo     *mongo.Config     `yaml:"mongo"`
 }

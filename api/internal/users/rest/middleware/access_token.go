@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/EgorTarasov/lct-2024/api/internal/auth/token"
+	"github.com/EgorTarasov/lct-2024/api/internal/users/token"
 	jwtware "github.com/gofiber/contrib/jwt"
 )
 

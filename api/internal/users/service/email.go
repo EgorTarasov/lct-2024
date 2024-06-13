@@ -7,8 +7,8 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/EgorTarasov/lct-2024/api/internal/auth/models"
-	"github.com/EgorTarasov/lct-2024/api/internal/auth/token"
+	"github.com/EgorTarasov/lct-2024/api/internal/users/models"
+	"github.com/EgorTarasov/lct-2024/api/internal/users/token"
 )
 
 type emailUserRepo interface {

@@ -23,117 +23,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/auth/login": {
-            "post": {
-                "description": "auth with email + password",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Auth with email creds",
-                "parameters": [
-                    {
-                        "description": "user creds",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.emailCredentials"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/handler.accessTokenResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/me": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "get user data",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "get user data",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/token.UserPayload"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/register": {
-            "post": {
-                "description": "creating email account with FirstName and LastName",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "creating email account",
-                "parameters": [
-                    {
-                        "description": "User Email",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.RegisterData"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/handler.accessTokenResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/handler.errResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/consumers/filters": {
             "get": {
                 "produces": [
@@ -155,6 +44,35 @@ const docTemplate = `{
                                 }
                             }
                         }
+                    }
+                }
+            }
+        },
+        "/consumers/info/unoms": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "consumers"
+                ],
+                "summary": "получение информации о потребителях по unoms",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "уникальные номера объектов",
+                        "name": "unoms",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     }
                 }
             }
@@ -220,7 +138,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Address"
+                            "$ref": "#/definitions/handler.Address"
                         }
                     }
                 }
@@ -254,7 +172,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/models.Address"
+                                "$ref": "#/definitions/handler.Address"
                             }
                         }
                     }
@@ -438,6 +356,241 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/users/file/list": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "list uploads",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "list uploads",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Upload"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/file/status/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "check file processing",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "check file processing",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Upload"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/login": {
+            "post": {
+                "description": "users with email + password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Auth with email creds",
+                "parameters": [
+                    {
+                        "description": "user creds",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.emailCredentials"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.accessTokenResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "get user data",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "get user data",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/token.UserPayload"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/register": {
+            "post": {
+                "description": "creating email account with FirstName and LastName",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "creating email account",
+                "parameters": [
+                    {
+                        "description": "User Email",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.RegisterData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.accessTokenResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/upload": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "upload file",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "upload file",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "key",
+                        "name": "key",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.fileUploadResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.errResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -453,6 +606,52 @@ const docTemplate = `{
                 "Admin",
                 "Moderator"
             ]
+        },
+        "handler.Address": {
+            "type": "object",
+            "required": [
+                "address",
+                "municipalDistrict"
+            ],
+            "properties": {
+                "address": {
+                    "description": "Полный Адрес в реестре.",
+                    "type": "string"
+                },
+                "border": {
+                    "description": "Граница объекта на карте."
+                },
+                "center": {
+                    "description": "Центр объекта на карте.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/handler.Point"
+                        }
+                    ]
+                },
+                "municipalDistrict": {
+                    "description": "Район округ.",
+                    "type": "string"
+                },
+                "unom": {
+                    "description": "Уникальный номер объекта недвижимости.",
+                    "type": "integer"
+                }
+            }
+        },
+        "handler.Point": {
+            "type": "object",
+            "properties": {
+                "coordinates": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
         },
         "handler.RegisterData": {
             "type": "object",
@@ -523,7 +722,15 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Address": {
+        "handler.fileUploadResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_search_models.Address": {
             "type": "object",
             "required": [
                 "address",
@@ -541,7 +748,7 @@ const docTemplate = `{
                     "description": "Центр объекта на карте.",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.Point"
+                            "$ref": "#/definitions/internal_search_models.Point"
                         }
                     ]
                 },
@@ -552,6 +759,20 @@ const docTemplate = `{
                 "unom": {
                     "description": "Уникальный номер объекта недвижимости.",
                     "type": "integer"
+                }
+            }
+        },
+        "internal_search_models.Point": {
+            "type": "object",
+            "properties": {
+                "coordinates": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
@@ -593,26 +814,29 @@ const docTemplate = `{
         "models.HeatingPointDTO": {
             "type": "object",
             "properties": {
-                "balanceHolder": {
+                "Адрес потребителя": {
+                    "$ref": "#/definitions/internal_search_models.Address"
+                },
+                "Адрес строения": {
+                    "$ref": "#/definitions/internal_search_models.Address"
+                },
+                "Балансодержатель": {
                     "type": "string"
                 },
-                "commissioningDate": {},
-                "consumerAddress": {
+                "Вид ТП": {
                     "type": "string"
                 },
-                "district": {
+                "Дата ввода в эксплуатацию": {},
+                "Источник теплоснабжения": {
                     "type": "string"
                 },
-                "locationType": {
+                "Муниципальный район": {
                     "type": "string"
                 },
-                "number": {
+                "Номер ТП (тепловой пункт)": {
                     "type": "string"
                 },
-                "source": {
-                    "type": "string"
-                },
-                "type": {
+                "Тип по размещению": {
                     "type": "string"
                 }
             }
@@ -639,20 +863,6 @@ const docTemplate = `{
                 "polygon": {},
                 "src": {
                     "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.Point": {
-            "type": "object",
-            "properties": {
-                "coordinates": {
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-                    }
                 },
                 "type": {
                     "type": "string"
@@ -694,7 +904,7 @@ const docTemplate = `{
                     "description": "Центр объекта на карте.",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/models.Point"
+                            "$ref": "#/definitions/internal_search_models.Point"
                         }
                     ]
                 },
@@ -717,6 +927,29 @@ const docTemplate = `{
                 },
                 "unom": {
                     "description": "Уникальный номер объекта недвижимости.",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Upload": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "userID": {
                     "type": "integer"
                 }
             }

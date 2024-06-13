@@ -1,8 +1,23 @@
 package models
 
-import (
-	shared "github.com/EgorTarasov/lct-2024/api/internal/shared/models"
-)
+type Address struct {
+	// Уникальный номер объекта недвижимости.
+	Unom int64 `json:"unom" bson:"unom" validate:"required max=20000000"`
+	// Полный Адрес в реестре.
+	Address string `json:"address" bson:"address" validate:"required"`
+	// Район округ.
+	MunicipalDistrict string `json:"municipalDistrict" bson:"municipal_district" validate:"required"`
+	// Граница объекта на карте.
+	Polygon interface{} `json:"border" bson:"geo_data"`
+	// Центр объекта на карте.
+	Center Point `json:"center" bson:"geo_center"`
+}
+
+// Point Репрезентация точки в формате geoJson.
+type Point struct {
+	Type        string    `json:"type" bson:"type"`
+	Coordinates []float64 `json:"coordinates" bson:"coordinates"`
+}
 
 // Filter фильтр для поиска по объектам.
 type Filter struct {
@@ -11,16 +26,16 @@ type Filter struct {
 }
 
 type HeatingPoint struct {
-	BalanceHolder       string         `bson:"balance_holder" json:"balanceHolder"`
-	Address             string         `bson:"heating_point_address" json:"-"`
-	ConsumerAddress     shared.Address `bson:"consumer_full_address" json:"consumerAddress"`
-	Source              string         `bson:"heating_point_src" json:""`
-	Number              string         `bson:"heating_point_number" json:"number"`
-	Type                string         `bson:"heating_point_type" json:"type"`
-	LocationType        string         `bson:"heating_point_location_type" json:"locationType"`
-	District            string         `bson:"municipal_district" json:"district"`
-	CommissioningDate   interface{}    `bson:"commissioning_date" json:"commissioningDate"`
-	HeatingPointAddress shared.Address `bson:"heating_point_full_address" json:"heatingPointAddress"`
+	BalanceHolder       string      `bson:"balance_holder" json:"Балансодержатель"`
+	Address             string      `bson:"heating_point_address" json:"-"`
+	ConsumerAddress     Address     `bson:"consumer_full_address" json:"Адрес строения"`
+	Source              string      `bson:"heating_point_src" json:"Источник теплоснабжения"`
+	Number              string      `bson:"heating_point_number" json:"Номер ТП (тепловой пункт)"`
+	Type                string      `bson:"heating_point_type" json:"Вид ТП"`
+	LocationType        string      `bson:"heating_point_location_type" json:"Тип по размещению"`
+	District            string      `bson:"municipal_district" json:"Муниципальный район"`
+	CommissioningDate   interface{} `bson:"commissioning_date" json:"Дата ввода в эксплуатацию"`
+	HeatingPointAddress Address     `bson:"heating_point_full_address" json:"Адрес потребителя"`
 }
 
 // Event событие которое произошло с объектом.

@@ -31,6 +31,11 @@ func MustNew(cfg *Config) (Mongo, error) {
 			db:    "",
 		}, fmt.Errorf("failed to create mongo client")
 	}
+	for _, collection := range cfg.CollectionNames {
+		err = client.Database(cfg.DB).CreateCollection(ctx, collection)
+		log.Info().Str("collection", collection).Err(err).Msg("failed to create collection")
+	}
+
 	return Mongo{
 		db:    cfg.DB,
 		mongo: client,

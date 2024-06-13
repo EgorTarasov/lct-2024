@@ -5,7 +5,7 @@ import (
 
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/EgorTarasov/lct-2024/api/internal/auth/models"
+	"github.com/EgorTarasov/lct-2024/api/internal/users/models"
 	"github.com/EgorTarasov/lct-2024/api/pkg/redis"
 )
 
