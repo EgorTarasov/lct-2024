@@ -113,40 +113,67 @@ func (repo *consumersSearchRepo) SearchWithFilters(ctx context.Context, filters 
 }
 
 // GetStateConsumersByUnoms возвращает данные о состоянии объектов по их уникальным номерам.
-func (repo *consumersSearchRepo) GetStateConsumersByUnoms(ctx context.Context, unoms []int64) (values []models.StateConsumer, err error) {
+func (repo *consumersSearchRepo) GetStateConsumersByUnoms(ctx context.Context, unoms []int64) (consumers []models.StateConsumer, err error) {
 	ctx, span := repo.tr.Start(ctx, "consumersSearchRepo.GetStateConsumersByUnoms")
 	defer span.End()
 
 	filter := bson.M{"unom": bson.M{"$in": unoms}}
-	if err = repo.mongo.FindMany(ctx, stateConsumerCollection, filter, &values); err != nil {
+	if err = repo.mongo.FindMany(ctx, stateConsumerCollection, filter, &consumers); err != nil {
 		return nil, err
 	}
 
-	return values, nil
+	for idx := 0; idx < len(consumers); idx += 1 {
+		filter = bson.M{"unom": consumers[idx].Unom}
+		err = repo.mongo.FindMany(ctx, "events", filter, &consumers[idx].Events)
+		if err != nil {
+			err = nil
+			log.Info().Err(err).Msg("err during retrieving events")
+		}
+	}
+
+	return consumers, nil
 }
 
 // GetMKDConsumersByUnoms возвращает данные о МКД по их уникальным номерам.
-func (repo *consumersSearchRepo) GetMKDConsumersByUnoms(ctx context.Context, unoms []int64) (values []models.MKDConsumer, err error) {
+func (repo *consumersSearchRepo) GetMKDConsumersByUnoms(ctx context.Context, unoms []int64) (consumers []models.MKDConsumer, err error) {
 	ctx, span := repo.tr.Start(ctx, "consumersSearchRepo.GetMKDConsumersByUnoms")
 	defer span.End()
 
 	filter := bson.M{"unom": bson.M{"$in": unoms}}
-	if err = repo.mongo.FindMany(ctx, mkdConsumerCollection, filter, &values); err != nil {
+	if err = repo.mongo.FindMany(ctx, mkdConsumerCollection, filter, &consumers); err != nil {
 		return nil, err
 	}
 
-	return values, nil
+	for idx := 0; idx < len(consumers); idx += 1 {
+		filter = bson.M{"unom": consumers[idx].Unom}
+		err = repo.mongo.FindMany(ctx, "events", filter, &consumers[idx].Events)
+		if err != nil {
+			err = nil
+			log.Info().Err(err).Msg("err during retrieving events")
+		}
+	}
+
+	return consumers, nil
 }
 
 // GetDispatcherInfoByUnoms возвращает данные о диспетчерах по уникальным номерам объектов.
-func (repo *consumersSearchRepo) GetDispatcherInfoByUnoms(ctx context.Context, unoms []int64) (values []models.DispatchServices, err error) {
+func (repo *consumersSearchRepo) GetDispatcherInfoByUnoms(ctx context.Context, unoms []int64) (consumers []models.DispatchServices, err error) {
 	ctx, span := repo.tr.Start(ctx, "consumersSearchRepo.GetDispatcherInfoByUnoms")
 	defer span.End()
 
 	filter := bson.M{"unom": bson.M{"$in": unoms}}
-	if err = repo.mongo.FindMany(ctx, consumerCollection, filter, &values); err != nil {
+	if err = repo.mongo.FindMany(ctx, consumerCollection, filter, &consumers); err != nil {
 		return nil, err
 	}
 
-	return values, nil
+	for idx := 0; idx < len(consumers); idx += 1 {
+		filter = bson.M{"unom": consumers[idx].Unom}
+		err = repo.mongo.FindMany(ctx, "events", filter, &consumers[idx].Events)
+		if err != nil {
+			err = nil
+			log.Info().Err(err).Msg("err during retrieving events")
+		}
+	}
+
+	return consumers, nil
 }

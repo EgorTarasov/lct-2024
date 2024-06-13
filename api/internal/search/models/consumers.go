@@ -25,6 +25,15 @@ type HeatingPoint struct {
 
 // Event событие которое произошло с объектом.
 type Event struct {
+	Address           string `bson:"address" json:"Адрес"`
+	Country           string `bson:"country" json:"Округ"`
+	EndedAt           string `bson:"ended_at" json:"Дата и время завершения события"`
+	ExternalClosedAt  string `bson:"external_closed_at" json:"Дата закрытия"`
+	Source            string `bson:"src" json:"Источник"`
+	Title             string `bson:"title" json:"Наименование"`
+	Unom              int64  `bson:"unom" json:"УНОМ"`
+	ExternalCreatedAt string `bson:"external_created_at" json:"Дата создания во внешней системе"`
+	ExternalEndedAt   string `bson:"external_ended_at" json:"Дата и время завершения события во внешней системе"`
 }
 
 // HeatingPointDTO DTO для объекта теплоснабжения.
@@ -35,15 +44,16 @@ type HeatingPointDTO struct {
 }
 
 type StateConsumer struct {
-	AdmDistrict       string      `bson:"administrative_district" json:"admDistrict"`
-	Material          string      `bson:"material" json:"material"`
-	MunicupalDistrict string      `bson:"municipal_district" json:"municupalDistrict"`
-	Purpose           string      `bson:"purpose" json:"purpose"`
-	Type              string      `bson:"type" json:"type"`
-	Area              interface{} `bson:"property_total_area" json:"area"`
-	Floors            interface{} `bson:"property_floors" json:"floors"`
-	PropertyClass     string      `bson:"property_class" json:"propertyClass"`
-	Unom              int64       `bson:"unom" json:"unom"`
+	AdmDistrict       string      `bson:"administrative_district" json:"Административный округ"`
+	Material          string      `bson:"material" json:"Материал"`
+	MunicupalDistrict string      `bson:"municipal_district" json:"Муниципальный округ"`
+	Purpose           string      `bson:"purpose" json:"Назначение"`
+	Type              string      `bson:"type" json:"Тип"`
+	Area              interface{} `bson:"property_total_area" json:"Общая площадь"`
+	Floors            interface{} `bson:"property_floors" json:"Этажность"`
+	PropertyClass     string      `bson:"property_class" json:"Класс"`
+	Unom              int64       `bson:"unom" json:"Уном"`
+	Events            []Event     `json:"События"`
 }
 
 // MKDConsumer тип потребителя многоквартирного дома (МКД).
@@ -70,42 +80,43 @@ type StateConsumer struct {
 // 19  roof_materials          4372 non-null   int64
 // 20  types_of_housing_stock  4372 non-null   int64
 // 21  mkd_state               4372 non-null   int64
-
 type MKDConsumer struct {
-	Deprecation          float64     `bson:"Depreciation" json:"deprecation"`
-	Address              string      `bson:"address" json:"address"`
-	Apartments           int64       `bson:"apartments" json:"apartments"`
-	FullAddress          string      `bson:"bti_address" json:"fullAddress"`
-	Country              string      `bson:"county" json:"country"`
-	District             string      `bson:"district" json:"district"`
-	Feature              int64       `bson:"emergency_feature" json:"feature"`
-	Entrances            int64       `bson:"entrances" json:"entrances"`
-	ExternalID           int64       `bson:"external_id" json:"externalID"`
-	Floors               int64       `bson:"floors" json:"floors"`
-	MKDState             int64       `bson:"mkd_state" json:"state"`
-	PassengerElevator    int64       `bson:"passenger_elevator" json:"PassengerElevator"`
-	ProjectSeries        interface{} `bson:"project_series" json:"projectSeries"`
-	RoofCleaningSequence int64       `bson:"roof_cleaning_sequence" json:"roofCleaningSequence"`
-	TotalArea            float64     `bson:"total_area" json:"totalArea"`
-	Unom                 int64       `bson:"unom" json:"unom"`
-	WallMaterial         int64       `bson:"wall_material" json:"wallMaterial"`
-	RoofMaterials        int64       `bson:"roof_materials" json:"roofMaterials"`
-	TotalLivingArea      float64     `bson:"total_living_area" json:"totalLivingArea"`
-	ServiceElevator      int64       `bson:"service_elevator" json:"serviceElevator"`
-	TotalNonLivingArea   interface{} `bson:"total_non_living_area" json:"totalNonLivingArea"`
-	TypesOfHousingStock  int64       `bson:"types_of_housing_stock" json:"typesOfHousingStock"`
+	Deprecation          float64     `bson:"Depreciation" json:"Износ объекта (по БТИ)"`
+	Address              string      `bson:"address" json:"Адрес из сторонней системы"`
+	Apartments           int64       `bson:"apartments" json:"Количество квартир"`
+	FullAddress          string      `bson:"bti_address" json:"Адрес по БТИ"`
+	Country              string      `bson:"county" json:"Округ"`
+	District             string      `bson:"district" json:"Район"`
+	Feature              int64       `bson:"emergency_feature" json:"Признак аварийности здания"`
+	Entrances            int64       `bson:"entrances" json:"Количество подъездов"`
+	ExternalID           int64       `bson:"external_id" json:"Идентификатор из сторонней системы"`
+	Floors               int64       `bson:"floors" json:"Количество этажей"`
+	MKDState             int64       `bson:"mkd_state" json:"Статусы МКД"`
+	PassengerElevator    int64       `bson:"passenger_elevator" json:"Пассажирские лифты"`
+	ProjectSeries        interface{} `bson:"project_series" json:"Серии проектов"`
+	RoofCleaningSequence int64       `bson:"roof_cleaning_sequence" json:"Очередность уборки кровли"`
+	TotalArea            float64     `bson:"total_area" json:"Общая площадь"`
+	Unom                 int64       `bson:"unom" json:"УНОМ"`
+	WallMaterial         int64       `bson:"wall_material" json:"Материалы стен"`
+	RoofMaterials        int64       `bson:"roof_materials" json:"Материалы кровли по БТИ"`
+	TotalLivingArea      float64     `bson:"total_living_area" json:"Общая жилая площадь"`
+	ServiceElevator      int64       `bson:"service_elevator" json:"Грузовые лифты"`
+	TotalNonLivingArea   interface{} `bson:"total_non_living_area" json:"Общая нежилая площадь"`
+	TypesOfHousingStock  int64       `bson:"types_of_housing_stock" json:"Типы жилищного фонда"`
+	Events               []Event     `json:"События"`
 }
 
 // DispatchServices данные о диспетчерской службе.
 type DispatchServices struct {
-	Address              string `bson:"address" json:"address"`
-	HeatDispatcherNumber string `bson:"chp" json:"heatDispatcherNumber"`
-	ConsumerName         string `bson:"consumer" json:"consumer"`
-	ConsumerGroup        string `bson:"consumer_group" json:"consumerGroup"`
-	Country              string `bson:"country" json:"country"`
-	DispatchAddress      string `bson:"dispatch_address" json:"centerAddress"`
-	DispatchNumber       string `bson:"dispatch_number" json:"dispatchNumber"`
-	ExternalID           string `bson:"external_id" json:"externalID"`
-	Unom                 int64  `bson:"unom" json:"unom"`
-	ConsumerFullAddress  string `bson:"Полный адрес" json:"consumerFullAddress"`
+	Address              string  `bson:"address" json:"Адрес потребителя"`
+	HeatDispatcherNumber string  `bson:"chp" json:"ЦТП"`
+	ConsumerName         string  `bson:"consumer" json:"Потребитель (или УК)"`
+	ConsumerGroup        string  `bson:"consumer_group" json:"Группа"`
+	Country              string  `bson:"country" json:"Округ"`
+	DispatchAddress      string  `bson:"dispatch_address" json:"Адрес ОДС"`
+	DispatchNumber       string  `bson:"dispatch_number" json:"№ ОДС"`
+	ExternalID           string  `bson:"external_id" json:"ID УУ"`
+	Unom                 int64   `bson:"unom" json:"УНОМ"`
+	ConsumerFullAddress  string  `bson:"Полный адрес" json:"consumerFullAddress"`
+	Events               []Event `json:"События"`
 }

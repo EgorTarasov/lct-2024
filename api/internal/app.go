@@ -96,7 +96,6 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 		return c.JSON(shared.ParseAddress(q))
 	})
 
-	//TODO: добавить swagger для документации api.
 	docs := app.Group("/docs")
 	docs.Get("/*", fiberSwagger.WrapHandler)
 
