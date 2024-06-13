@@ -15,7 +15,7 @@ interface MessageEvent {
   last?: boolean;
 }
 
-class AssistantViewModel {
+export class AssistantViewModel {
   constructor(
     public message: string,
     public onMessageFinished: () => void
@@ -70,5 +70,3 @@ class AssistantViewModel {
     }
   };
 }
-
-export const AssistantStore = new AssistantViewModel("", () => {});

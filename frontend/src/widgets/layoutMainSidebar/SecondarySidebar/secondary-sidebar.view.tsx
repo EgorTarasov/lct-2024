@@ -20,9 +20,9 @@ export const SecondarySidebarView = () => {
       {ctx.isOpen && ctx.secondaryContent && (
         <motion.div
           {...transitionProps}
-          className="absolute left-[392px] top-24 bottom-12 w-96 overflow-hidden pointer-events-none"
+          className="absolute flex flex-col left-[392px] top-24 bottom-12 w-96 overflow-hidden pointer-events-none rounded-2xl"
           style={{ zIndex: ELEVATION.SIDEBAR }}>
-          <div className="flex flex-col bg-card w-full shadow-lg rounded-2xl pb-6 pointer-events-auto">
+          <div className="flex flex-col bg-card w-full shadow-lg rounded-2xl pb-6 pointer-events-auto overflow-hidden">
             {ctx.secondaryContent.closeAction && (
               <div className="flex justify-end">
                 <Button

@@ -1,10 +1,10 @@
 import { ThemeProvider } from "@/components/hoc/theme-provider";
 import { LoadingWrapper } from "@/components/ui/loaders/LoadingWrapper";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ELEVATION } from "@/constants/elevation";
 import NotFoundPage from "@/pages/not-found.page";
 import { AuthService } from "@/stores/auth.service";
 import { createRootRoute, useMatch, useMatches } from "@tanstack/react-router";
-import { AnimatePresence } from "framer-motion";
 import React from "react";
 
 const Toaster = React.lazy(() =>
@@ -13,6 +13,10 @@ const Toaster = React.lazy(() =>
 
 const AnimatedOutlet = React.lazy(() =>
   import("@/components/router/animated-outlet").then((m) => ({ default: m.AnimatedOutlet }))
+);
+
+const AnimatePresence = React.lazy(() =>
+  import("framer-motion").then((m) => ({ default: m.AnimatePresence }))
 );
 
 const Page = () => {
@@ -24,7 +28,14 @@ const Page = () => {
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <TooltipProvider>
-        <React.Suspense fallback={null}>
+        <React.Suspense
+          fallback={
+            <div
+              className="absolute inset-0 flex justify-center items-center"
+              style={{ zIndex: ELEVATION.SIDEBAR }}>
+              <LoadingWrapper />
+            </div>
+          }>
           <AnimatePresence mode="popLayout">
             <AnimatedOutlet key={nextMatch.id} />
           </AnimatePresence>

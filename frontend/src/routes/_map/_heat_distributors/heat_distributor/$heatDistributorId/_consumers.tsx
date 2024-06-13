@@ -114,7 +114,7 @@ const Page = observer(() => {
                 {vm.loading && <LoadingWrapper />}
               </ScrollArea>
               <PaginationWidget
-                className="mt-auto mb-2"
+                className="mt-auto mb-4"
                 currentPage={1}
                 onPageChange={() => void 0}
                 totalPages={1}

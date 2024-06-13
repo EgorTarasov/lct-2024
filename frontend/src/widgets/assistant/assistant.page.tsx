@@ -1,11 +1,12 @@
 import { observer } from "mobx-react-lite";
 import { SendHorizonal } from "lucide-react";
-import { AssistantStore } from "./assistant.vm";
 import { IconInput } from "@/components/ui/input";
 import { IncidentsOverlay } from "../incidents/incidents-overlay";
+import { useState } from "react";
+import { AssistantViewModel } from "./assistant.vm";
 
 export const AssistantPage = observer(() => {
-  const vm = AssistantStore;
+  const [vm] = useState(() => new AssistantViewModel("", () => {}));
 
   return (
     <>

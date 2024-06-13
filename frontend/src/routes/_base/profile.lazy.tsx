@@ -1,6 +1,5 @@
-import { buttonVariants } from "@/components/ui/button";
 import { AssistantPage } from "@/widgets/assistant/assistant.page";
-import { Link, createLazyFileRoute } from "@tanstack/react-router";
+import { createLazyFileRoute } from "@tanstack/react-router";
 
 {
   /* <div className="w-full h-96 flex items-center justify-center text-2xl gap-8 mx-auto text-center flex-col">

@@ -1,16 +1,41 @@
 import { DisposableVm } from "@/utils/vm";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, when } from "mobx";
 import { Map } from "leaflet";
 import { MapEndpoint } from "@/api/endpoints/map.endpoint";
-import { debounceAsync } from "@/utils/debounce";
-import { Consumer } from "@/types/consumer.type";
 import { ConsumersViewModel } from "../widgets/map/vm/consumers.vm";
 import { HeatDistributorsViewModel } from "@/widgets/map/vm/heat-distributors.vm";
 import { Priority } from "@/types/priority.type";
 import { DateRange } from "react-day-picker";
-import { ConsumersEndpoint } from "@/api/endpoints/consumers.endpoint";
 import { Filter } from "./filter.vm";
 import { MapFilters } from "@/types/map-filters";
+import type { FeatureCollection, Feature } from "geojson";
+import L from "leaflet";
+import "leaflet.vectorgrid";
+import { buildPropertyFeature, buildSlicerLayer } from "@/utils/map";
+import { MapConstants } from "@/constants/map";
+
+// patch canvas for click events
+L.Canvas.Tile.include({
+  _onClick: function (e: L.LeafletEvent) {
+    const point = this._map.mouseEventToLayerPoint(e).subtract(this.getOffset());
+    let layer;
+    let clickedLayer;
+
+    for (const id in this._layers) {
+      layer = this._layers[id];
+      if (
+        layer.options.interactive &&
+        layer._containsPoint(point) &&
+        !this._map._draggableMoved(layer)
+      ) {
+        clickedLayer = layer;
+      }
+    }
+    if (clickedLayer) {
+      clickedLayer.fireEvent(e.type, undefined, true);
+    }
+  }
+});
 
 class mapStore implements DisposableVm {
   constructor() {
@@ -26,9 +51,10 @@ class mapStore implements DisposableVm {
   filters: Filter<string>[] = [];
   search = "";
   async init() {
-    const filters = await ConsumersEndpoint.getFilters();
+    // const filters = await ConsumersEndpoint.getFilters();
+    // this.filters = filters.map((f) => new Filter(f.filterName, f.values));
 
-    this.filters = filters.map((f) => new Filter(f.filterName, f.values));
+    this.fetchVisiblePart();
   }
   dateRange: DateRange = {
     from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
@@ -48,7 +74,11 @@ class mapStore implements DisposableVm {
   //#endregion
 
   //#region map
-  consumerGeozones: Consumer.Polygon[] = [];
+  allGeozones: FeatureCollection | null = null;
+
+  // get filteredGeozones() {
+  // }
+
   shouldZoomIn = true;
   private map: Map | null = null;
 
@@ -58,38 +88,75 @@ class mapStore implements DisposableVm {
     }
 
     this.map = m;
-    this.map.addEventListener("moveend", () => this.fetchVisiblePart());
+    // if (this.vectorTileLayer) {
+    //   console.log("set 2");
+    //   this.vectorTileLayer?.addTo(this.map);
+    // } else {
+    //   console.log("ye");
+    //   when(() => this.vectorTileLayer !== null).then(() => {
+    //     console.log(this.vectorTileLayer, "yo");
+    //     this.vectorTileLayer.addTo(this.map);
+    //   });
+    // }
+    this.map.addEventListener("moveend", () => {
+      const zoom = this.map?.getZoom();
+      // this.fetchVisiblePart();
+    });
   }
 
-  fetchVisiblePart = debounceAsync(async (signal) => {
-    if (!this.map) return;
+  async fetchVisiblePart() {
+    // const zoom = this.map.getZoom();
+    // const center = this.map.getCenter();
 
-    const zoom = this.map.getZoom();
-    const center = this.map.getCenter();
-
-    const radiusKm = 0.5 * Math.pow(2, 14 - zoom);
-    if (radiusKm > 0.4) {
-      this.shouldZoomIn = true;
-      return;
-    }
-    this.shouldZoomIn = false;
-    const res = await MapEndpoint.getProperty(center.lat, center.lng, radiusKm, signal);
-    const polygons: Consumer.Polygon[] = [];
+    // const radiusKm = 0.5 * Math.pow(2, 14 - zoom);
+    // if (radiusKm > 0.4) {
+    //   this.shouldZoomIn = true;
+    //   return;
+    // }
+    // this.shouldZoomIn = false;
+    console.log("running");
+    const res = await MapEndpoint.getProperty(0, 0, 0);
+    const polygons: MapConstants.PolygonFeature[] = [];
     res.forEach((v) => {
-      const coords = v.polygon.find((p) => p.Key === "coordinates")?.Value as
-        | number[][][]
-        | undefined;
-      if (!coords) return;
+      const feature = buildPropertyFeature(v);
 
-      polygons.push({
-        id: v.globalID,
-        position: coords[0].map((v) => [v[1], v[0]]),
-        priority: Priority.LOW
-      });
+      if (feature) {
+        polygons.push(feature);
+      }
     });
 
-    this.consumerGeozones = polygons;
-  }, 500);
+    // const layer = buildSlicerLayer(polygons, MapConstants.PolygonProperties.priority.high);
+
+    const featureCollection = {
+      type: "FeatureCollection" as const,
+      features: polygons
+    };
+    this.allGeozones = featureCollection;
+
+    const layer = L.vectorGrid.slicer(featureCollection, {
+      rendererFactory: L.canvas.tile,
+      vectorTileLayerStyles: {
+        sliced: {
+          weight: 2,
+          color: "#ff0000",
+          opacity: 1,
+          fillOpacity: 1,
+          fillColor: "#ff0000"
+        }
+      },
+      maxZoom: 24,
+      maxNativeZoom: 24,
+      interactive: true
+    });
+    if (!this.map) {
+      await when(() => this.map !== null);
+    }
+    layer.on("click", (e: L.LeafletEvent) => {
+      console.log(e);
+    });
+    layer.addTo(this.map!);
+    // this.setGeozones();
+  }
   //#endregion
 
   dispose(): void {

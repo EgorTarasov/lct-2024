@@ -4,4 +4,6 @@ export namespace IncidentFilters {
     Old = "old",
     Priority = "priority"
   }
+
+  export type Tab = "heat-sources" | "consumers";
 }

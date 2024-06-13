@@ -19,10 +19,10 @@ export const ConsumerPolygon: FC<{ data: Consumer.Polygon }> = (x) => {
 
   return (
     <>
-      <Polygon
+      {/* <Polygon
         positions={x.data.position as LatLngExpression[]}
         color={PriorityLocaleMap[x.data.priority].color}
-      />
+      /> */}
       <Marker position={getTopLeftCorner() as LatLngExpression}>
         <Popup>Polygon {x.data.id}</Popup>
       </Marker>

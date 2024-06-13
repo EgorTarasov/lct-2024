@@ -1,11 +1,30 @@
 import { Issue } from "./issue.type";
 import { Priority } from "./priority.type";
+import * as GJ from "geojson";
 
 export namespace Consumer {
   export interface Polygon {
-    id: number;
+    id: string;
     position: number[][];
-    priority: Priority;
+    data: {
+      number: string;
+      source: string;
+      balanceHolder: string;
+      commissioningDate: number;
+    };
+  }
+
+  export interface Features {
+    feature: GJ.Feature<
+      GJ.Polygon,
+      {
+        priority: Priority;
+        number: string;
+        source: string;
+        balanceHolder: string;
+        commissioningDate: number;
+      }
+    >;
   }
 
   export type Info = "type";

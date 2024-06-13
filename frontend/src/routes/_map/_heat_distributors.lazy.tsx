@@ -48,7 +48,7 @@ const Page = observer(() => {
           </ScrollArea>
           <AnimatePresence mode="popLayout" initial={false}>
             {vm.totalPages && (
-              <motion.div className="mt-auto mb-2" {...transitionProps}>
+              <motion.div className="mt-auto mb-4" {...transitionProps}>
                 <PaginationWidget
                   currentPage={vm.page + 1}
                   onPageChange={(v) => (vm.page = v - 1)}
