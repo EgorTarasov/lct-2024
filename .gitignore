@@ -19,3 +19,12 @@
 
 # Go workspace file
 go.work
+
+.env
+config.yaml
+.vscode/
+.idea/
+bin/
+.venv/
+*.json
+yappy-data/

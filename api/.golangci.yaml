@@ -1,0 +1,93 @@
+# More info on config here: https://golangci-lint.run/usage/configuration/#config-file
+run:
+  timeout: 1m
+  issues-exit-code: 1
+  tests: false
+
+output:
+  formats:
+    - format: colored-line-number
+      print-issued-lines: true
+      print-linter-name: true
+
+
+issues:
+  max-issues-per-linter: 1000
+  max-same-issues: 1000
+  exclude-use-default: false
+  exclude-dirs:
+    - bin
+    - var
+    - tmp
+    - mocks
+    - test
+  exclude:
+    - G104
+    - exported func .* returns unexported type .*, which can be annoying to use
+    - (comment on exported (method|function|type|constants)|should have( a package)? comment|comment should be of the form)
+    - should have a package comment
+    - don't use an underscore in package name
+    - Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*print(f|ln)?|os\.(Un)?Setenv). is not checked
+    - should check returned error before deferring
+
+
+linters-settings:
+  prealloc:
+    for-loops: true
+
+  stylecheck:
+    checks: ["all"]
+
+  staticcheck:
+    checks: ["all"]
+
+  funlen:
+    lines: 100
+    statements: 60
+    ignore-comments: true
+
+  govet:
+    shadow: true
+    # check-shadowing: true
+  dupl:
+    threshold: 100
+  goconst:
+    min-len:         2
+    min-occurrences: 2
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - dogsled
+    - dupl
+    - decorder
+    - errcheck
+    - forbidigo
+    - funlen
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - gomodguard
+    - revive
+    - gosec
+    - gosimple
+    - govet
+    - godot
+    - ineffassign
+    - misspell
+    - nakedret
+    - nolintlint
+    - exportloopref
+    - prealloc
+    - staticcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
+
+

@@ -1,0 +1,634 @@
+basePath: / //no-lint.
+definitions:
+  constants.Role:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - User
+    - Admin
+    - Moderator
+  handler.Address:
+    properties:
+      address:
+        description: Полный Адрес в реестре.
+        type: string
+      border:
+        description: Граница объекта на карте.
+      center:
+        allOf:
+        - $ref: '#/definitions/handler.Point'
+        description: Центр объекта на карте.
+      municipalDistrict:
+        description: Район округ.
+        type: string
+      unom:
+        description: Уникальный номер объекта недвижимости.
+        type: integer
+    required:
+    - address
+    - municipalDistrict
+    type: object
+  handler.Point:
+    properties:
+      coordinates:
+        items:
+          type: number
+        type: array
+      type:
+        type: string
+    type: object
+  handler.RegisterData:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      lastName:
+        type: string
+      password:
+        type: string
+    type: object
+  handler.accessTokenResponse:
+    properties:
+      accessToken:
+        type: string
+    type: object
+  handler.emailCredentials:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  handler.emergencyRequest:
+    properties:
+      distance:
+        maximum: 10000
+        minimum: 0
+        type: integer
+      latitude:
+        maximum: 90
+        minimum: -90
+        type: number
+      longitude:
+        maximum: 180
+        minimum: -180
+        type: number
+    required:
+    - distance
+    - latitude
+    - longitude
+    type: object
+  handler.errResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  handler.fileUploadResponse:
+    properties:
+      id:
+        type: integer
+    type: object
+  internal_search_models.Address:
+    properties:
+      address:
+        description: Полный Адрес в реестре.
+        type: string
+      border:
+        description: Граница объекта на карте.
+      center:
+        allOf:
+        - $ref: '#/definitions/internal_search_models.Point'
+        description: Центр объекта на карте.
+      municipalDistrict:
+        description: Район округ.
+        type: string
+      unom:
+        description: Уникальный номер объекта недвижимости.
+        type: integer
+    required:
+    - address
+    - municipalDistrict
+    type: object
+  internal_search_models.Point:
+    properties:
+      coordinates:
+        items:
+          type: number
+        type: array
+      type:
+        type: string
+    type: object
+  models.DisconnectionDTO:
+    properties:
+      actualDisconnectionDate: {}
+      actualReconnectionDate: {}
+      disconnectionType:
+        type: string
+      plannedDisconnectionDate: {}
+      plannedReconnectionDate: {}
+      reason:
+        type: string
+      registrationDate:
+        type: string
+      source:
+        type: string
+    type: object
+  models.Filter:
+    properties:
+      filterName:
+        type: string
+      values:
+        items:
+          type: string
+        type: array
+    type: object
+  models.HeatingPointDTO:
+    properties:
+      Адрес потребителя:
+        $ref: '#/definitions/internal_search_models.Address'
+      Адрес строения:
+        $ref: '#/definitions/internal_search_models.Address'
+      Балансодержатель:
+        type: string
+      Вид ТП:
+        type: string
+      Дата ввода в эксплуатацию: {}
+      Источник теплоснабжения:
+        type: string
+      Муниципальный район:
+        type: string
+      Номер ТП (тепловой пункт):
+        type: string
+      Тип по размещению:
+        type: string
+    type: object
+  models.MoekDTO:
+    properties:
+      loadActual:
+        type: number
+      loadAvg:
+        type: number
+      loadHeating:
+        type: number
+      loadVent:
+        type: number
+      number:
+        type: string
+      point: {}
+      polygon: {}
+      src:
+        type: string
+      type:
+        type: string
+    type: object
+  models.PropertyDTO:
+    properties:
+      disconnections:
+        items:
+          $ref: '#/definitions/models.DisconnectionDTO'
+        type: array
+      globalID:
+        type: integer
+      point: {}
+      polygon: {}
+    type: object
+  models.StatePropertySearchResult:
+    properties:
+      address:
+        description: Полный Адрес в реестре.
+        type: string
+      area: {}
+      border:
+        description: Граница объекта на карте.
+      center:
+        allOf:
+        - $ref: '#/definitions/internal_search_models.Point'
+        description: Центр объекта на карте.
+      class:
+        type: string
+      feature:
+        type: string
+      floors: {}
+      municipalDistrict:
+        description: Район округ.
+        type: string
+      purpose:
+        type: string
+      type:
+        type: string
+      unom:
+        description: Уникальный номер объекта недвижимости.
+        type: integer
+    required:
+    - address
+    - municipalDistrict
+    type: object
+  models.Upload:
+    properties:
+      createdAt:
+        type: string
+      filename:
+        type: string
+      id:
+        type: integer
+      status:
+        type: string
+      url:
+        type: string
+      userID:
+        type: integer
+    type: object
+  token.UserPayload:
+    properties:
+      auth_type:
+        type: string
+      role:
+        $ref: '#/definitions/constants.Role'
+      user_id:
+        type: integer
+    type: object
+host: api.lct.larek.tech
+info:
+  contact:
+    email: fiber@swagger.io
+    name: API Support
+  description: This is a sample swagger for Fiber
+  license:
+    name: BSD 3-Clause License
+    url: https://raw.githubusercontent.com/EgorTarasov/true-tech/main/LICENSE
+  termsOfService: http://swagger.io/terms/
+  title: lct api
+  version: "1.0"
+paths:
+  /consumers/filters:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/models.Filter'
+              type: array
+            type: array
+      summary: получение списка всех фильтров для поиска по объектам
+      tags:
+      - search consumers
+  /consumers/info/unoms:
+    get:
+      parameters:
+      - collectionFormat: csv
+        description: уникальные номера объектов
+        in: query
+        items:
+          type: integer
+        name: unoms
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: получение информации о потребителях по unoms
+      tags:
+      - consumers
+  /consumers/q:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: фильтры для поиска
+        in: body
+        name: filters
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/models.Filter'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.HeatingPointDTO'
+            type: array
+      summary: поиск по объектам consumers с учетом фильтров
+      tags:
+      - search consumers
+  /geo/location/unom:
+    get:
+      parameters:
+      - description: уникальный номер объекта
+        in: query
+        name: unom
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Address'
+      summary: получение гео данных по unom
+      tags:
+      - location
+  /geo/location/unoms:
+    get:
+      parameters:
+      - collectionFormat: csv
+        description: уникальные номера объектов
+        in: query
+        items:
+          type: integer
+        name: unoms
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handler.Address'
+            type: array
+      summary: получение гео данных по unoms
+      tags:
+      - location
+  /geo/moek:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: longitude
+        in: query
+        name: longitude
+        required: true
+        type: number
+      - description: latitude
+        in: query
+        name: latitude
+        required: true
+        type: number
+      - description: radius
+        in: query
+        name: radius
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.MoekDTO'
+            type: array
+      summary: третья тестовая ручка
+      tags:
+      - geo
+  /geo/property:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: longitude
+        in: query
+        name: longitude
+        required: true
+        type: number
+      - description: latitude
+        in: query
+        name: latitude
+        required: true
+        type: number
+      - description: radius
+        in: query
+        name: radius
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.PropertyDTO'
+            type: array
+      summary: вторая тестовая ручка
+      tags:
+      - geo
+  /geo/property/id/:object:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PropertyDTO'
+      summary: тестовая ручка на проверку postgis
+      tags:
+      - geo
+  /map/events:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: emergencyRequest
+        in: body
+        name: emergencyRequest
+        required: true
+        schema:
+          $ref: '#/definitions/handler.emergencyRequest'
+      produces:
+      - application/json
+      responses: {}
+      summary: получение аварийных ситуаций и информации об объекте
+      tags:
+      - map
+  /search/objects:
+    get:
+      parameters:
+      - description: поисковой запрос
+        in: query
+        name: q
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/models.StatePropertySearchResult'
+              type: array
+            type: array
+      summary: поиск по объектам (потребителям) тепло энергии
+      tags:
+      - search
+  /users/file/list:
+    get:
+      description: list uploads
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Upload'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errResponse'
+      security:
+      - Bearer: []
+      summary: list uploads
+      tags:
+      - users
+  /users/file/status/{id}:
+    get:
+      description: check file processing
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Upload'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errResponse'
+      security:
+      - Bearer: []
+      summary: check file processing
+      tags:
+      - users
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: users with email + password
+      parameters:
+      - description: user creds
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/handler.emailCredentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.accessTokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errResponse'
+      summary: Auth with email creds
+      tags:
+      - users
+  /users/me:
+    get:
+      description: get user data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/token.UserPayload'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errResponse'
+      security:
+      - Bearer: []
+      summary: get user data
+      tags:
+      - users
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: creating email account with FirstName and LastName
+      parameters:
+      - description: User Email
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/handler.RegisterData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.accessTokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errResponse'
+      summary: creating email account
+      tags:
+      - users
+  /users/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: upload file
+      parameters:
+      - description: key
+        in: query
+        name: key
+        required: true
+        type: string
+      - description: file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.fileUploadResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errResponse'
+      security:
+      - Bearer: []
+      summary: upload file
+      tags:
+      - users
+swagger: "2.0"

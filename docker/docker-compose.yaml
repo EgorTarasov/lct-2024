@@ -1,0 +1,113 @@
+version: "3"
+
+
+volumes:
+  grafana-storage:
+  postgres-data:
+  redis-data:
+  elasticsearch-data:
+  mongo-data:
+  s3-data:
+
+
+services:
+  backend:
+    container_name: backend
+    image: ghcr.io/egortarasov/lct-2024/api:amd64-0.0.2.3
+    command: ./main
+    restart:  always
+    volumes:
+      - /home/etarasov/lct.yaml:/root/config.yaml
+    ports:
+      - "9999:9999" # container port defined in config.yaml
+
+  postgres:
+    image: "postgres:16"
+    container_name: "pg"
+    restart: always
+    volumes:
+      - "postgres-data:/var/lib/postgresql/data"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - "54000:5432"
+
+  mongo:
+    image: mongo:5.0.27
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - "mongo-data:/data/db"
+    ports:
+      - "54002:27017"
+
+  s3:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - s3_data:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+    command: server --console-address ":9001" /data
+
+  redis:
+    image: 'redis:7.2.4'
+    container_name: 'redis'
+    restart: always
+    ports:
+      - '54001:6379'
+    volumes:
+      - 'redis-data:/root/redis'
+
+
+
+  jaeger:
+    image: jaegertracing/all-in-one
+    container_name: jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "5775:5775"
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"
+      - "9411:9411"
+      - "4317:4317"
+      - "4318:4318"
+
+  grafana:
+    image: grafana/grafana:latest
+    depends_on:
+      - prometheus
+    ports:
+      - "55000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+
+  # prometheus:
+  #   image: prom/prometheus:v2.28.0
+  #   volumes:
+  #     - ./prometheus:/etc/prometheus/
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yaml'
+  #   ports:
+  #     - "9090:9090"
+
+
+
+
+

@@ -1,0 +1,1 @@
+docker run -p 9999:9999 -d -v ./config.yaml:/root/config.yaml --name lct-api lct-api ./main
