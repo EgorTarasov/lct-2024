@@ -48,6 +48,7 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 
 	app := fiber.New(fiber.Config{
 		ServerHeader: "larek.tech",
+		BodyLimit:    400 * 1024 * 1024, // 400mb
 	})
 	appName := "api-local"
 	if dockerMode {

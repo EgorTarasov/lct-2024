@@ -73,6 +73,7 @@ def process_targets(df: pd.DataFrame):
     df_t["Наименование"] = df_t["Наименование"].astype("category")
     df_t["month"] = df_t["date"].apply(lambda x: x.month).astype("category")
     df_t["day_of_week"] = df_t["date"].apply(lambda x: x.dayofweek).astype("category")
+    df_t.to_parquet("features/target.parquet")
     return df_t
 
 

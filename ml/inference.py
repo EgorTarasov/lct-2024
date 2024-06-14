@@ -32,10 +32,10 @@ class ModelInference:
             features,
             cat_features=features.dtypes[features.dtypes == "category"].index.tolist(),
         )
-        out_data = self.model.predict_proba(pool)
+        out_data = self.model.predict_proba(pool)  # type: ignore
         return pd.DataFrame(
-            data=out_data, index=base_df[["unom", "date"]], columns=self.model.classes_
-        )
+            data=out_data, index=base_df[["unom", "date"]], columns=self.model.classes_  # type: ignore
+        )  # type: ignore
 
 
 if __name__ == "__main__":
@@ -44,7 +44,10 @@ if __name__ == "__main__":
     # "..data/dataset/11.Выгрузка_ОДПУ_отопление_ВАО_20240522.xlsx",
     # "..data/dataset/13. Адресный реестр объектов недвижимости города Москвы.xlsx",
 
-    unoms = [302, 16460]
-    dates = [dt.date(2024, 4, 6), dt.date(2024, 4, 7)]
+    unoms = [
+        302, 
+    ]
+    dates = [dt.date(2024, 6, date) for date in range(1, 30)]
     outs = pred.predict(unoms, dates)
+    outs.to_excel("artifact/predictions.xlsx")
     print(outs)

@@ -34,7 +34,7 @@ if __name__ == '__main__':
         loss_function='MultiClass',
         auto_class_weights='SqrtBalanced',
         eval_metric='TotalF1:average=Macro;use_weights=false',
-        task_type='GPU',
+        task_type='CPU',
         iterations=1000,
         random_state=0xDEADBEEF
     )
