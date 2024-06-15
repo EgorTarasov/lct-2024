@@ -1,0 +1,55 @@
+http-server:
+  port: 9999
+  domain: api.larek.tech
+  cors-origins:
+    - https://lct.larek.tech
+    - http://localhost:5173
+
+telemetry:
+  endpoint: 192.168.1.70:4318
+
+postgres:
+  user: "Dino"
+  password: "Dino-misos2024"
+  host: "192.168.1.70"
+  port: 54000
+  db: "dev"
+  ssl: false
+
+
+redis:
+  host: "192.168.1.70"
+  port: 54001
+  password: ""
+  db: 0
+
+mongo:
+    host: "192.168.1.70"
+    port: 54002
+    user: "Dino"
+    password: "Dino-misos2024"
+    db: "production"
+    collections:
+      - "events"
+      - "state_property"
+      - "dispatch_services"
+      - "disconnections"
+      - "consumers"
+      - "address_registry"
+      - "mkd"
+      - "property_metering_devices"
+
+s3:
+  host: 192.168.1.70
+  port: 9000
+  access_key: Xv3BMcf3DW4eBKa4yfVd
+  secret_key: iiEYghmxyWYbCkxC2IB1nAm95MVEKy2VCJ1etoBR
+  ssl: false
+  buckets:
+    - name: "uploads"
+      region: "eu-west-1"
+      lock: true
+
+inference:
+  host: 192.168.1.70
+  port: 50051

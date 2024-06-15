@@ -102,7 +102,7 @@ migration-down:
 
 
 
-VERSION := 0.0.1
+VERSION := 0.0.3
 
 
 .PHONY: docker-build-amd64
@@ -132,3 +132,6 @@ docker-publish-amd64: docker-build-amd64 docker-push-amd64
 
 .PHONY: docker-publish-arm64
 docker-publish-arm64: docker-build-arm64 docker-push-arm64
+
+.PHONY: docker-publish
+docker-publish:	docker-publish-amd64 docker-publish-arm64
