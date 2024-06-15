@@ -25,31 +25,9 @@ class Response(_message.Message):
     def __init__(self, predictions: _Optional[_Iterable[_Union[Prediction, _Mapping]]] = ...) -> None: ...
 
 class Prediction(_message.Message):
-    __slots__ = ("unom", "date", "p1", "p2", "t1", "t2", "no", "noHeating", "leak", "strongLeak", "tempLow", "tempLowCommon", "leakSystem")
+    __slots__ = ("unom", "prediction_id")
     UNOM_FIELD_NUMBER: _ClassVar[int]
-    DATE_FIELD_NUMBER: _ClassVar[int]
-    P1_FIELD_NUMBER: _ClassVar[int]
-    P2_FIELD_NUMBER: _ClassVar[int]
-    T1_FIELD_NUMBER: _ClassVar[int]
-    T2_FIELD_NUMBER: _ClassVar[int]
-    NO_FIELD_NUMBER: _ClassVar[int]
-    NOHEATING_FIELD_NUMBER: _ClassVar[int]
-    LEAK_FIELD_NUMBER: _ClassVar[int]
-    STRONGLEAK_FIELD_NUMBER: _ClassVar[int]
-    TEMPLOW_FIELD_NUMBER: _ClassVar[int]
-    TEMPLOWCOMMON_FIELD_NUMBER: _ClassVar[int]
-    LEAKSYSTEM_FIELD_NUMBER: _ClassVar[int]
+    PREDICTION_ID_FIELD_NUMBER: _ClassVar[int]
     unom: int
-    date: _timestamp_pb2.Timestamp
-    p1: float
-    p2: float
-    t1: float
-    t2: float
-    no: float
-    noHeating: float
-    leak: float
-    strongLeak: float
-    tempLow: float
-    tempLowCommon: float
-    leakSystem: float
-    def __init__(self, unom: _Optional[int] = ..., date: _Optional[_Union[_timestamp_pb2.Timestamp, _Mapping]] = ..., p1: _Optional[float] = ..., p2: _Optional[float] = ..., t1: _Optional[float] = ..., t2: _Optional[float] = ..., no: _Optional[float] = ..., noHeating: _Optional[float] = ..., leak: _Optional[float] = ..., strongLeak: _Optional[float] = ..., tempLow: _Optional[float] = ..., tempLowCommon: _Optional[float] = ..., leakSystem: _Optional[float] = ...) -> None: ...
+    prediction_id: int
+    def __init__(self, unom: _Optional[int] = ..., prediction_id: _Optional[int] = ...) -> None: ...

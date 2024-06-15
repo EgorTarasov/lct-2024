@@ -31,9 +31,9 @@ type Incident struct {
 	CreatedAt time.Time `db:"created_at" json:"createdAt"`
 	UpdatedAt time.Time `db:"updated_at" json:"updatedAt"`
 
-	Consumer         *MKDConsumer      `json:"mkdConsumer"`
-	DispatchServices *DispatchServices `json:"dispatchServices"`
-	HeatingPoint     *HeatingPoint     `json:"heatingPoint"`
+	Consumer         *MKDConsumer      `json:"mkdConsumer,omitempty"`
+	DispatchServices *DispatchServices `json:"dispatchServices,omitempty"`
+	HeatingPoint     *HeatingPoint     `json:"heatingPoint,omitempty"`
 
 	HeatingGraph   Graph         `json:"graph"`
 	Measurements   []Measurement `json:"measurements"`

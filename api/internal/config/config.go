@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/EgorTarasov/lct-2024/api/pkg/kafka"
 	"github.com/EgorTarasov/lct-2024/api/pkg/mongo"
 	"github.com/EgorTarasov/lct-2024/api/pkg/postgres"
 	"github.com/EgorTarasov/lct-2024/api/pkg/redis"
@@ -38,6 +39,7 @@ type Config struct {
 	VkAuth    *vkAuth           `yaml:"vk-users"`
 	S3        *s3.Config        `yaml:"s3"`
 	Mongo     *mongo.Config     `yaml:"mongo"`
+	Kafka     *kafka.Config     `yaml:"kafka"`
 	Inference *InferenceClient  `yaml:"inference"`
 }
 

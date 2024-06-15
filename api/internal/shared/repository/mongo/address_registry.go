@@ -238,9 +238,9 @@ func (r *addressRegistryRepository) GetAllObjectsByUnom(ctx context.Context, uno
 	if err != nil {
 		log.Info().Err(err).Msg("error during getting related objects consumers")
 		model.HeatingPoint = nil
+	} else {
+		model.HeatingPoint = &heatPoint
 	}
-	model.HeatingPoint = &heatPoint
-
 	return model, nil
 }
 

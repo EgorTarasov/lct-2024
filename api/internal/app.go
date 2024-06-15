@@ -2,34 +2,33 @@ package internal
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"strings"
 	"sync"
 
 	"github.com/EgorTarasov/lct-2024/api/internal/config"
-	dataPg "github.com/EgorTarasov/lct-2024/api/internal/data/repository/pg"
-	dataHandler "github.com/EgorTarasov/lct-2024/api/internal/data/rest/handler"
-	mapRouter "github.com/EgorTarasov/lct-2024/api/internal/data/rest/router"
-	dataService "github.com/EgorTarasov/lct-2024/api/internal/data/service"
+	eventsHandler "github.com/EgorTarasov/lct-2024/api/internal/data/rest/handler"
+	eventsRouter "github.com/EgorTarasov/lct-2024/api/internal/data/rest/router"
+	events "github.com/EgorTarasov/lct-2024/api/internal/data/service"
 	searchHandler "github.com/EgorTarasov/lct-2024/api/internal/search/rest/handler"
 	searchRouter "github.com/EgorTarasov/lct-2024/api/internal/search/rest/router"
 	search "github.com/EgorTarasov/lct-2024/api/internal/search/service"
 	"github.com/EgorTarasov/lct-2024/api/internal/shared"
 	sharedMongo "github.com/EgorTarasov/lct-2024/api/internal/shared/repository/mongo"
-	pb "github.com/EgorTarasov/lct-2024/api/internal/stubs"
+	dataPg "github.com/EgorTarasov/lct-2024/api/internal/shared/repository/pg"
 	authModels "github.com/EgorTarasov/lct-2024/api/internal/users/models"
 	authPgRepo "github.com/EgorTarasov/lct-2024/api/internal/users/repository/pg"
 	authRedisRepo "github.com/EgorTarasov/lct-2024/api/internal/users/repository/redis"
 	authHandler "github.com/EgorTarasov/lct-2024/api/internal/users/rest/handler"
 	authRouter "github.com/EgorTarasov/lct-2024/api/internal/users/rest/router"
 	auth "github.com/EgorTarasov/lct-2024/api/internal/users/service"
+	"github.com/EgorTarasov/lct-2024/api/pkg/kafka"
 	mongoDB "github.com/EgorTarasov/lct-2024/api/pkg/mongo"
 	pkgs3 "github.com/EgorTarasov/lct-2024/api/pkg/s3"
+	"github.com/IBM/sarama"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-
 	// подключение swagger для документации api.
 	_ "github.com/EgorTarasov/lct-2024/api/internal/docs"
 	"github.com/EgorTarasov/lct-2024/api/pkg/postgres"
@@ -95,13 +94,18 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 		return fmt.Errorf("can't create s3: %v", err)
 	}
 
-	// inferenceClient (grpc)
-	grpcOptions := grpc.WithTransportCredentials(insecure.NewCredentials())
-	grpcClient, err := grpc.NewClient(fmt.Sprintf("%s:%d", cfg.Inference.Host, cfg.Inference.Port), grpcOptions)
-	if err != nil {
-		return fmt.Errorf("can't establish connection with grpc: %v", err)
+	// kafka
+	if err = initKafka(cfg); err != nil {
+		return fmt.Errorf("can't init kafka: %v", err)
 	}
-	inferenceClient := pb.NewInferenceClient(grpcClient)
+
+	// inferenceClient (grpc)
+	//grpcOptions := grpc.WithTransportCredentials(insecure.NewCredentials())
+	//grpcClient, err := grpc.NewClient(fmt.Sprintf("%s:%d", cfg.Inference.Host, cfg.Inference.Port), grpcOptions)
+	//if err != nil {
+	//	return fmt.Errorf("can't establish connection with grpc: %v", err)
+	//}
+	//inferenceClient := pb.NewInferenceClient(grpcClient)
 
 	redisClient := redis.NewClient(cfg.Redis)
 
@@ -132,13 +136,18 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 		return err
 	}
 
-	// map
+	// data
+	producer, err := kafka.NewProducer(cfg.Kafka.Brokers)
+	if err != nil {
+		return fmt.Errorf("can't create producer: %v", err)
+	}
+
 	ar := sharedMongo.NewAddressRegistryRepository(mongo, tracer)
 	ev := sharedMongo.NewEventRepo(mongo, tracer)
 	ir := dataPg.NewIncidentRepo(pg, tracer)
-	ms := dataService.NewService(ar, ev, ir, inferenceClient, tracer)
-	mc := dataHandler.NewDataController(ctx, ms, tracer)
-	mapRouter.InitRoutes(app, mc)
+	ms := events.NewService(ar, ev, ir, producer, cfg.Kafka.Topic, tracer)
+	mc := eventsHandler.NewDataController(ctx, ms, tracer)
+	eventsRouter.InitRoutes(app, mc)
 
 	// search
 	statePropertyRepo := sharedMongo.NewStatePropertyRepo(mongo, tracer)
@@ -147,19 +156,25 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 	searchController := searchHandler.New(searchService, tracer)
 	searchRouter.InitRoutes(app, searchController)
 
-	// geo.
-	// 	objectRepo := dataMongo.NewObjectRepo(pg, tracer)
-	// propertyRepo := geoMongo.NewPropertyRepository(&mongo, tracer)
-	// moeksRepo := geoMongo.NewMoekRepository(&mongo, tracer)
-	// odsRepo := geoMongo.NewOdsRepository(&mongo, tracer)
-	// dataService := geo.New(ctx, cfg, propertyRepo, moeksRepo, odsRepo, tracer)
-	// mapController := dataHandler.NewDataController(ctx, dataService, tracer)
-	// if err = mapRouter.InitMapRouter(ctx, app, mapController); err != nil {
-	// 	return err
-	// }
-
 	if err = app.Listen(fmt.Sprintf(":%d", cfg.Server.Port)); err != nil {
 		return err
+	}
+	return nil
+}
+
+func initKafka(cfg *config.Config) error {
+	saramaCfg := sarama.NewConfig()
+
+	admin, err := sarama.NewClusterAdmin(cfg.Kafka.Brokers, saramaCfg)
+	if err != nil {
+		return fmt.Errorf("can't create cluster admin: %v", err)
+	}
+	err = admin.CreateTopic(cfg.Kafka.Topic, &sarama.TopicDetail{
+		NumPartitions:     1,
+		ReplicationFactor: 1,
+	}, false)
+	if err != nil && !errors.Is(err, sarama.ErrTopicAlreadyExists) {
+		log.Info().Msg("topic already exists")
 	}
 	return nil
 }

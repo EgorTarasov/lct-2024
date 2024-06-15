@@ -15,7 +15,7 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0finference.proto\x12\tinference\x1a\x1fgoogle/protobuf/timestamp.proto\"\x85\x01\n\x05Query\x12\r\n\x05unoms\x18\x01 \x03(\x03\x12-\n\tstartDate\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12+\n\x07\x65ndDate\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x11\n\tthreshold\x18\x04 \x01(\x02\"6\n\x08Response\x12*\n\x0bpredictions\x18\x01 \x03(\x0b\x32\x15.inference.Prediction\"\xf1\x01\n\nPrediction\x12\x0c\n\x04unom\x18\x01 \x01(\x03\x12(\n\x04\x64\x61te\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\n\n\x02p1\x18\x03 \x01(\x01\x12\n\n\x02p2\x18\x04 \x01(\x01\x12\n\n\x02t1\x18\x05 \x01(\x01\x12\n\n\x02t2\x18\x06 \x01(\x01\x12\n\n\x02no\x18\x07 \x01(\x01\x12\x11\n\tnoHeating\x18\x08 \x01(\x01\x12\x0c\n\x04leak\x18\t \x01(\x01\x12\x12\n\nstrongLeak\x18\n \x01(\x01\x12\x0f\n\x07tempLow\x18\x0b \x01(\x01\x12\x15\n\rtempLowCommon\x18\x0c \x01(\x01\x12\x12\n\nleakSystem\x18\r \x01(\x01\x32\x41\n\tInference\x12\x34\n\tInference\x12\x10.inference.Query\x1a\x13.inference.Response\"\x00\x42\x07Z\x05./;pbb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0finference.proto\x12\tinference\x1a\x1fgoogle/protobuf/timestamp.proto\"\x85\x01\n\x05Query\x12\r\n\x05unoms\x18\x01 \x03(\x03\x12-\n\tstartDate\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12+\n\x07\x65ndDate\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x11\n\tthreshold\x18\x04 \x01(\x02\"6\n\x08Response\x12*\n\x0bpredictions\x18\x01 \x03(\x0b\x32\x15.inference.Prediction\"1\n\nPrediction\x12\x0c\n\x04unom\x18\x01 \x01(\x03\x12\x15\n\rprediction_id\x18\x02 \x01(\x03\x32\x41\n\tInference\x12\x34\n\tInference\x12\x10.inference.Query\x1a\x13.inference.Response\"\x00\x42\x07Z\x05./;pbb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -27,8 +27,8 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_QUERY']._serialized_end=197
   _globals['_RESPONSE']._serialized_start=199
   _globals['_RESPONSE']._serialized_end=253
-  _globals['_PREDICTION']._serialized_start=256
-  _globals['_PREDICTION']._serialized_end=497
-  _globals['_INFERENCE']._serialized_start=499
-  _globals['_INFERENCE']._serialized_end=564
+  _globals['_PREDICTION']._serialized_start=255
+  _globals['_PREDICTION']._serialized_end=304
+  _globals['_INFERENCE']._serialized_start=306
+  _globals['_INFERENCE']._serialized_end=371
 # @@protoc_insertion_point(module_scope)

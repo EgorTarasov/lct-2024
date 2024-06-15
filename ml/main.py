@@ -1,97 +1,92 @@
+import os
+import dotenv
 import logging
+from kafka import KafkaConsumer
+from typing import TypedDict
 import datetime as dt
-import time
+import json
 
-import pandas as pd
-import grpc
-from google.protobuf.timestamp_pb2 import Timestamp
-from concurrent import futures
-
-from stubs import inference_pb2_grpc
-import stubs.inference_pb2 as pb
 from inference import ModelInference
 
-# TODO: загрузка features из s3
+
+dotenv.load_dotenv()
 
 
-def decode_unom_dt(indexStr: str) -> tuple[int, dt.datetime]:
-    indexStr = indexStr.replace("(", "").replace(")", "").replace("Timestamp", "")
-    unom, date = indexStr.split(",")
-    return int(unom), dt.datetime.fromisoformat(date.strip().replace("'", ""))
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+ch = logging.StreamHandler()
+ch.setFormatter(formatter)
+logger.addHandler(ch)
 
 
-def record_to_pb(record: tuple) -> pb.Prediction:
-    unom, date = record[0]
-    return pb.Prediction(
-        unom=unom,
-        date=Timestamp(seconds=int(date.timestamp())),
-        p1=record[1],
-        p2=record[2],
-        t1=record[3],
-        t2=record[4],
-        no=record[5],
-        noHeating=record[6],
-        leak=record[7],
-        strongLeak=record[8],
-        tempLow=record[9],
-        tempLowCommon=record[10],
-        leakSystem=record[11],
+class PredictionRequest(TypedDict):
+    adm_area: str
+    start_date: dt.datetime
+    end_date: dt.datetime
+    threshold: float
+
+
+def serialize(msg) -> PredictionRequest:
+    msg = msg.decode("utf-8")
+    data = json.loads(msg)
+
+    return PredictionRequest(
+        adm_area=data["admArea"],
+        start_date=dt.datetime.fromisoformat(data["startDate"]),
+        end_date=dt.datetime.fromisoformat(data["endDate"]),
+        threshold=data["threshold"],
     )
 
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
+class Contoller:
 
-log = logging.getLogger(__name__)
+    def __init__(self, consumer: KafkaConsumer, model: ModelInference):
+        self.consumer = consumer
+        self.model = model
+
+    def run(self):
+        for msg in self.consumer:
+            try:
+                data = msg.value
+                adm_area = data["adm_area"]
+                start_date = data["start_date"]
+                end_date = data["end_date"]
+                threshold = data["threshold"]
+
+                prediction = self.model.predict(
+                    adm_area, start_date, end_date, threshold
+                )
+                logger.info(f"Prediction: {prediction}")
+                logger.info(f"Prediction type: {type(prediction)}")
+                logger.info(f"Prediction shape: {prediction.shape}")
+            except Exception as e:
+                logger.error(f"Error: {e}")
 
 
-class InferenceService(inference_pb2_grpc.InferenceServicer):
-    def __init__(self):
-        log.info("Loading model")
-        self.model = ModelInference()
-        self.model.load()
-        log.info("Model loaded")
+def main():
+    dotenv.load_dotenv()
+    logger.info("Starting the main function")
+    kafka_topic = os.getenv("KAFKA_TOPIC")
+    kafka_servers = os.getenv("KAFKA_SERVERS")
+    pg_dsn = os.getenv("PG_DSN")
 
-    def Inference(self, request: pb.Query, context):
-        # TODO: try except
-        unoms = list(request.unoms)
+    consumer = KafkaConsumer(
+        "prediction",
+        bootstrap_servers="127.0.0.1:9091",
+        value_deserializer=serialize,
+        auto_offset_reset="earliest",
+    )
 
-        dates = []
-        curTimestamp: Timestamp = request.startDate
-        curDate = dt.datetime.fromtimestamp(curTimestamp.seconds)
-        endTimestamp: Timestamp = request.endDate
-        endDate = dt.datetime.fromtimestamp(endTimestamp.seconds)
-        print(endDate, curDate)
-        if endDate < curDate:
-            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-            context.set_details("endDate must be greater than startDate")
-            return pb.Response(predictions=[])
+    logger.info("Consumer created")
+    model = ModelInference()
+    model.load()
+    logger.info("Model created")
 
-        while curDate < endDate:
-            dates.append(curDate)
-            curDate += pd.Timedelta(days=1)
-        predictions = []
-        try:
-            start = time.time()
-            outs = self.model.predict(unoms, dates)
-            df_tuples = [tuple(row) for row in outs.to_records(index=True)]
-            predictions = [record_to_pb(record) for record in df_tuples]
-            log.info(f"predicted in : {time.time() - start}")
-        except Exception as e:
-            log.error(f"Error: {e}")
-            context.set_code(grpc.StatusCode.INTERNAL)
-            context.set_details("Internal error")
-        finally:
-            return pb.Response(predictions=predictions)
+    controller = Contoller(consumer, model)
+    controller.run()
 
 
 if __name__ == "__main__":
-    log.info("Starting server")
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    inference_pb2_grpc.add_InferenceServicer_to_server(InferenceService(), server)
-    log.info("Server started")
-    server.add_insecure_port("[::]:50051")
-    server.start()
-    server.wait_for_termination()
+    main()
+    logger.info("Ending the main function")

@@ -11,11 +11,11 @@ import (
 )
 
 type dataService interface {
-	GetEmergencyPredictions(ctx context.Context, admArea string, startDate, endDate time.Time, threshold float32) ([]models.PredictionResult, error)
 	GetRecentIncidents(ctx context.Context, limit, offset int) ([]models.Incident, error)
 	GetIncidentByID(ctx context.Context, id int64) (models.Incident, error)
 	CreateIncident(ctx context.Context, title, status string, priority int, unom int64) (int64, error)
 	GetIncedentsByHeatingPoint(ctx context.Context, unom int64) ([]models.Incident, error)
+	GetEmergencyPredictions(ctx context.Context, admArea string, startDate, endDate time.Time, threshold float32) error
 }
 
 type dataController struct {
@@ -89,13 +89,13 @@ func (mc *dataController) GetPredictions(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid format for endDate required: dd-mm-YYYY"})
 	}
 
-	result, err := mc.s.GetEmergencyPredictions(ctx, req.AdmArea, startDate, endDate, req.Threshold)
+	err = mc.s.GetEmergencyPredictions(ctx, req.AdmArea, startDate, endDate, req.Threshold)
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.JSON(result)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "ok"})
 }
 
 // GetRecent godoc
@@ -109,19 +109,13 @@ func (mc *dataController) GetPredictions(c *fiber.Ctx) error {
 // @Tags issue
 // @Produce  json
 // @Success 200 {object} []models.Incident
-// @Router /issue/recent [get].
+// @Router /issue/list [get].
 func (mc *dataController) GetRecent(c *fiber.Ctx) error {
 	ctx, span := mc.tr.Start(c.Context(), "fiber.GetRecentIncidents")
 	defer span.End()
 
-	limit, err := c.ParamsInt("limit")
-	if err != nil {
-		limit = 10
-	}
-	offset, err := c.ParamsInt("offset")
-	if err != nil {
-		offset = 0
-	}
+	limit := c.QueryInt("limit", 10)
+	offset := c.QueryInt("offset", 0)
 
 	result, err := mc.s.GetRecentIncidents(ctx, limit, offset)
 	if err != nil {

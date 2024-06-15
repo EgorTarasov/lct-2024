@@ -2,14 +2,16 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"math"
 	"time"
 
 	shared "github.com/EgorTarasov/lct-2024/api/internal/shared/models"
-	pb "github.com/EgorTarasov/lct-2024/api/internal/stubs"
+	"github.com/EgorTarasov/lct-2024/api/pkg/kafka"
+	"github.com/IBM/sarama"
+	"github.com/rs/zerolog/log"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // addressRegistry справочник с гео информацией.
@@ -33,71 +35,84 @@ type incidentRepo interface {
 }
 
 type service struct {
-	ar     addressRegistry
-	ev     eventRepo
-	ir     incidentRepo
-	client pb.InferenceClient
-	tracer trace.Tracer
+	ar       addressRegistry
+	ev       eventRepo
+	ir       incidentRepo
+	producer *kafka.Producer
+	tracer   trace.Tracer
+	topic    string
 }
 
 // NewService конструктор сервиса для работы с картой.
-func NewService(ar addressRegistry, ev eventRepo, ir incidentRepo, client pb.InferenceClient, tracer trace.Tracer) *service {
+func NewService(ar addressRegistry, ev eventRepo, ir incidentRepo, producer *kafka.Producer, kafkaTopic string, tracer trace.Tracer) *service {
 	return &service{
-		ar:     ar,
-		ev:     ev,
-		ir:     ir,
-		client: client,
-		tracer: tracer,
+		ar:       ar,
+		ev:       ev,
+		ir:       ir,
+		producer: producer,
+		topic:    kafkaTopic,
+		tracer:   tracer,
 	}
 }
 
-// GetEmergencyPredictions получение предсказаний аварийных ситуаций.
-func (s *service) GetEmergencyPredictions(ctx context.Context, admArea string, startDate, endDate time.Time, threshold float32) ([]shared.PredictionResult, error) {
-	ctx, span := s.tracer.Start(ctx, "data.GetEmergencyPredictions",
+type predictionMessage struct {
+	AdmArea   string    `json:"admArea"`
+	StartDate time.Time `json:"startDate"`
+	EndDate   time.Time `json:"endDate"`
+	Threshold float32   `json:"threshold"`
+}
+
+func buildSaramaMessage(admArea string, startDate, endDate time.Time, threshold float32) (*sarama.ProducerMessage, error) {
+	jsonMessage := predictionMessage{
+		AdmArea:   admArea,
+		StartDate: startDate,
+		EndDate:   endDate,
+		Threshold: threshold,
+	}
+
+	rawBytes, err := json.Marshal(jsonMessage)
+	if err != nil {
+		return nil, err
+	}
+	messageHeader := sarama.RecordHeader{
+		Key:   []byte("prediction"),
+		Value: []byte("emergency"),
+	}
+
+	return &sarama.ProducerMessage{
+		Topic:     "",
+		Value:     sarama.ByteEncoder(rawBytes),
+		Partition: -1,
+		Headers: []sarama.RecordHeader{
+			messageHeader,
+		},
+	}, nil
+}
+
+func (s *service) GetEmergencyPredictions(ctx context.Context, admArea string, startDate, endDate time.Time, threshold float32) error {
+	_, span := s.tracer.Start(
+		ctx,
+		"data.GetEmergencyPredictions",
 		trace.WithAttributes(
-			attribute.String("start", startDate.String()),
-			attribute.String("end", endDate.String()),
+			attribute.String("admArea", admArea),
+			attribute.String("startDate", startDate.String()),
+			attribute.String("endDate", endDate.String()),
 			attribute.Float64("threshold", float64(threshold)),
 		),
 	)
 	defer span.End()
 
-	addresses, err := s.ar.GetByAdmArea(ctx, admArea)
+	// create message for prediction service
+	// send message to kafka
+	msg, err := buildSaramaMessage(admArea, startDate, endDate, threshold)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	unoms := make([]int64, len(addresses))
-	for idx, value := range addresses {
-		unoms[idx] = value.Unom
-	}
-	res, err := s.client.Inference(ctx, &pb.Query{
-		Unoms:     unoms,
-		StartDate: timestamppb.New(startDate),
-		EndDate:   timestamppb.New(endDate),
-		Threshold: threshold,
-	})
-	if err != nil {
-		return nil, err
-	}
-	results := make([]shared.PredictionResult, len(res.Predictions))
-	for idx, record := range res.Predictions {
-		results[idx] = shared.PredictionResult{
-			Unom:          record.Unom,
-			Date:          record.Date.AsTime(),
-			P1:            record.P1,
-			P2:            record.P2,
-			T1:            record.T1,
-			T2:            record.T2,
-			No:            record.No,
-			NoHeating:     record.NoHeating,
-			Leak:          record.Leak,
-			StrongLeak:    record.StrongLeak,
-			TempLow:       record.TempLow,
-			TempLowCommon: record.TempLowCommon,
-			LeakSystem:    record.LeakSystem,
-		}
-	}
-	return results, nil
+	msg.Topic = s.topic
+
+	s.producer.SendAsyncMessage(msg)
+
+	return nil
 }
 
 // GetRecentIncidents получение списка недавних инцидентов.
@@ -115,6 +130,24 @@ func (s *service) GetRecentIncidents(ctx context.Context, limit, offset int) ([]
 	recent, err := s.ir.GetRecent(ctx, limit, offset)
 	if err != nil {
 		return nil, err
+	}
+	for i, incident := range recent {
+
+		result, er := s.ar.GetAllObjectsByUnom(ctx, incident.Unom)
+		if er != nil {
+			log.Error().Err(er).Msg("can't get objects by unom")
+		}
+		if result.Consumer != nil {
+			recent[i].Consumer = result.Consumer
+		} else {
+			recent[i].Consumer = nil
+		}
+		if result.HeatingPoint != nil {
+			recent[i].HeatingPoint = result.HeatingPoint
+		} else {
+			recent[i].HeatingPoint = nil
+		}
+
 	}
 
 	return recent, nil
