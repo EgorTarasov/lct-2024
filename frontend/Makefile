@@ -1,6 +1,7 @@
 VERSION := 0.0.1
 
 
+
 .PHONY: docker-build-amd64
 docker-build-amd64:
 	docker build \
@@ -31,3 +32,4 @@ docker-publish-arm64: docker-build-arm64 docker-push-arm64
 
 .PHONY: docker-publish
 docker-publish:	docker-publish-amd64 docker-publish-arm64
+
