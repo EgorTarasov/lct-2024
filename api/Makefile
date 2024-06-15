@@ -62,6 +62,14 @@ build:
 		-o ./bin/main$(shell go env GOEXE) ./cmd/main.go
 
 
+.PHONY:go-create-grpc
+go-create-grpc:
+	protoc \
+	--go_out=./internal/stubs/ \
+	--go-grpc_out=./internal/stubs/ \
+	--proto_path ../proto/  inference.proto
+
+
 ifeq (,$(wildcard .env))
     # Если файл .env отсутствует, устанавливаем параметры по умолчанию
     POSTGRES_USER := 'SuperPuperUser'

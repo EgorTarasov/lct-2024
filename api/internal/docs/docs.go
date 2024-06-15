@@ -116,6 +116,32 @@ const docTemplate = `{
                 }
             }
         },
+        "/data/predict": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "data"
+                ],
+                "summary": "получение предсказание аварийных ситуаций и информации об объекте",
+                "parameters": [
+                    {
+                        "description": "predictionRequest",
+                        "name": "predictionRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.predictionRequest"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/geo/location/unom": {
             "get": {
                 "produces": [
@@ -136,10 +162,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/handler.Address"
-                        }
+                        "description": "OK"
                     }
                 }
             }
@@ -168,13 +191,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/handler.Address"
-                            }
-                        }
+                        "description": "OK"
                     }
                 }
             }
@@ -295,32 +312,6 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/map/events": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "map"
-                ],
-                "summary": "получение аварийных ситуаций и информации об объекте",
-                "parameters": [
-                    {
-                        "description": "emergencyRequest",
-                        "name": "emergencyRequest",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handler.emergencyRequest"
-                        }
-                    }
-                ],
-                "responses": {}
             }
         },
         "/search/objects": {
@@ -607,52 +598,6 @@ const docTemplate = `{
                 "Moderator"
             ]
         },
-        "handler.Address": {
-            "type": "object",
-            "required": [
-                "address",
-                "municipalDistrict"
-            ],
-            "properties": {
-                "address": {
-                    "description": "Полный Адрес в реестре.",
-                    "type": "string"
-                },
-                "border": {
-                    "description": "Граница объекта на карте."
-                },
-                "center": {
-                    "description": "Центр объекта на карте.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/handler.Point"
-                        }
-                    ]
-                },
-                "municipalDistrict": {
-                    "description": "Район округ.",
-                    "type": "string"
-                },
-                "unom": {
-                    "description": "Уникальный номер объекта недвижимости.",
-                    "type": "integer"
-                }
-            }
-        },
-        "handler.Point": {
-            "type": "object",
-            "properties": {
-                "coordinates": {
-                    "type": "array",
-                    "items": {
-                        "type": "number"
-                    }
-                },
-                "type": {
-                    "type": "string"
-                }
-            }
-        },
         "handler.RegisterData": {
             "type": "object",
             "properties": {
@@ -689,31 +634,6 @@ const docTemplate = `{
                 }
             }
         },
-        "handler.emergencyRequest": {
-            "type": "object",
-            "required": [
-                "distance",
-                "latitude",
-                "longitude"
-            ],
-            "properties": {
-                "distance": {
-                    "type": "integer",
-                    "maximum": 10000,
-                    "minimum": 0
-                },
-                "latitude": {
-                    "type": "number",
-                    "maximum": 90,
-                    "minimum": -90
-                },
-                "longitude": {
-                    "type": "number",
-                    "maximum": 180,
-                    "minimum": -180
-                }
-            }
-        },
         "handler.errResponse": {
             "type": "object",
             "properties": {
@@ -727,6 +647,29 @@ const docTemplate = `{
             "properties": {
                 "id": {
                     "type": "integer"
+                }
+            }
+        },
+        "handler.predictionRequest": {
+            "type": "object",
+            "required": [
+                "admArea",
+                "endDate",
+                "startDate",
+                "threshold"
+            ],
+            "properties": {
+                "admArea": {
+                    "type": "string"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "threshold": {
+                    "type": "number"
                 }
             }
         },
@@ -814,29 +757,29 @@ const docTemplate = `{
         "models.HeatingPointDTO": {
             "type": "object",
             "properties": {
-                "Адрес потребителя": {
+                "balance_holder": {
+                    "type": "string"
+                },
+                "commissioning_date": {},
+                "consumer_full_address": {
                     "$ref": "#/definitions/internal_search_models.Address"
                 },
-                "Адрес строения": {
+                "heating_point_full_address": {
                     "$ref": "#/definitions/internal_search_models.Address"
                 },
-                "Балансодержатель": {
+                "heating_point_location_type": {
                     "type": "string"
                 },
-                "Вид ТП": {
+                "heating_point_number": {
                     "type": "string"
                 },
-                "Дата ввода в эксплуатацию": {},
-                "Источник теплоснабжения": {
+                "heating_point_src": {
                     "type": "string"
                 },
-                "Муниципальный район": {
+                "heating_point_type": {
                     "type": "string"
                 },
-                "Номер ТП (тепловой пункт)": {
-                    "type": "string"
-                },
-                "Тип по размещению": {
+                "municipal_district": {
                     "type": "string"
                 }
             }

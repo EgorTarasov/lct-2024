@@ -24,6 +24,11 @@ type vkAuth struct {
 	VkRedirectURI  string `yaml:"vk-redirect-uri"`
 }
 
+type InferenceClient struct {
+	Host string `yaml:"host"`
+	Port int    `yaml:"port"`
+}
+
 // Config для работы приложения.
 type Config struct {
 	Server    *server           `yaml:"http-server"`
@@ -33,6 +38,7 @@ type Config struct {
 	VkAuth    *vkAuth           `yaml:"vk-users"`
 	S3        *s3.Config        `yaml:"s3"`
 	Mongo     *mongo.Config     `yaml:"mongo"`
+	Inference *InferenceClient  `yaml:"inference"`
 }
 
 // MustNew создает новый конфиг из файла и завершает программу в случае ошибки.

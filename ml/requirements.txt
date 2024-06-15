@@ -1,0 +1,12 @@
+catboost
+pandas
+tqdm
+fastparquet
+pyarrow
+openpyxl
+scikit-learn
+psycopg[binary]
+minio
+grpcio
+grpcio-tools
+python-dotenv

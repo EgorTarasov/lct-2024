@@ -52,7 +52,7 @@ func (repo *userDataRepo) CreateUpload(ctx context.Context, filename, idempotenc
 	}
 
 	const q = `
-insert into uploads(filename, status, idempotency_key, s3_key, user_id) values ($1, 'processing', $2, $3, $4) returning id;
+insert into uploads(filename, status, idempotency_key, s3_key, user_id) values ($1, 'pending', $2, $3, $4) returning id;
 `
 	if err := repo.pg.Get(ctx, &id, q, filename, idempotencyKey, s3Key, userID); err != nil {
 		return 0, fmt.Errorf("can't create upload: %w", err)

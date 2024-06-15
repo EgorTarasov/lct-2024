@@ -10,36 +10,6 @@ definitions:
     - User
     - Admin
     - Moderator
-  handler.Address:
-    properties:
-      address:
-        description: Полный Адрес в реестре.
-        type: string
-      border:
-        description: Граница объекта на карте.
-      center:
-        allOf:
-        - $ref: '#/definitions/handler.Point'
-        description: Центр объекта на карте.
-      municipalDistrict:
-        description: Район округ.
-        type: string
-      unom:
-        description: Уникальный номер объекта недвижимости.
-        type: integer
-    required:
-    - address
-    - municipalDistrict
-    type: object
-  handler.Point:
-    properties:
-      coordinates:
-        items:
-          type: number
-        type: array
-      type:
-        type: string
-    type: object
   handler.RegisterData:
     properties:
       email:
@@ -63,25 +33,6 @@ definitions:
       password:
         type: string
     type: object
-  handler.emergencyRequest:
-    properties:
-      distance:
-        maximum: 10000
-        minimum: 0
-        type: integer
-      latitude:
-        maximum: 90
-        minimum: -90
-        type: number
-      longitude:
-        maximum: 180
-        minimum: -180
-        type: number
-    required:
-    - distance
-    - latitude
-    - longitude
-    type: object
   handler.errResponse:
     properties:
       error:
@@ -91,6 +42,22 @@ definitions:
     properties:
       id:
         type: integer
+    type: object
+  handler.predictionRequest:
+    properties:
+      admArea:
+        type: string
+      endDate:
+        type: string
+      startDate:
+        type: string
+      threshold:
+        type: number
+    required:
+    - admArea
+    - endDate
+    - startDate
+    - threshold
     type: object
   internal_search_models.Address:
     properties:
@@ -148,22 +115,22 @@ definitions:
     type: object
   models.HeatingPointDTO:
     properties:
-      Адрес потребителя:
+      balance_holder:
+        type: string
+      commissioning_date: {}
+      consumer_full_address:
         $ref: '#/definitions/internal_search_models.Address'
-      Адрес строения:
+      heating_point_full_address:
         $ref: '#/definitions/internal_search_models.Address'
-      Балансодержатель:
+      heating_point_location_type:
         type: string
-      Вид ТП:
+      heating_point_number:
         type: string
-      Дата ввода в эксплуатацию: {}
-      Источник теплоснабжения:
+      heating_point_src:
         type: string
-      Муниципальный район:
+      heating_point_type:
         type: string
-      Номер ТП (тепловой пункт):
-        type: string
-      Тип по размещению:
+      municipal_district:
         type: string
     type: object
   models.MoekDTO:
@@ -324,6 +291,23 @@ paths:
       summary: поиск по объектам consumers с учетом фильтров
       tags:
       - search consumers
+  /data/predict:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: predictionRequest
+        in: body
+        name: predictionRequest
+        required: true
+        schema:
+          $ref: '#/definitions/handler.predictionRequest'
+      produces:
+      - application/json
+      responses: {}
+      summary: получение предсказание аварийных ситуаций и информации об объекте
+      tags:
+      - data
   /geo/location/unom:
     get:
       parameters:
@@ -337,8 +321,6 @@ paths:
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/handler.Address'
       summary: получение гео данных по unom
       tags:
       - location
@@ -358,10 +340,6 @@ paths:
       responses:
         "200":
           description: OK
-          schema:
-            items:
-              $ref: '#/definitions/handler.Address'
-            type: array
       summary: получение гео данных по unoms
       tags:
       - location
@@ -443,23 +421,6 @@ paths:
       summary: тестовая ручка на проверку postgis
       tags:
       - geo
-  /map/events:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: emergencyRequest
-        in: body
-        name: emergencyRequest
-        required: true
-        schema:
-          $ref: '#/definitions/handler.emergencyRequest'
-      produces:
-      - application/json
-      responses: {}
-      summary: получение аварийных ситуаций и информации об объекте
-      tags:
-      - map
   /search/objects:
     get:
       parameters:

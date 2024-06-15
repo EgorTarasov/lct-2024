@@ -8,12 +8,13 @@ volumes:
   elasticsearch-data:
   mongo-data:
   s3-data:
+  gotify-data:
 
 
 services:
   backend:
     container_name: backend
-    image: ghcr.io/egortarasov/lct-2024/api:amd64-0.0.2.3
+    image: ghcr.io/egortarasov/lct-2024/api:amd64-0.0.2.5
     command: ./main
     restart:  always
     volumes:
@@ -66,6 +67,17 @@ services:
     volumes:
       - 'redis-data:/root/redis'
 
+  notifications:
+    container_name: notifications
+    image: gotify/server
+    restart: always
+    environment:
+      - GOTIFY_DEFAULTUSER_PASS=${GOTIFY_DEFAULTUSER_PASS}
+      - GOTIFY_DEFAULTUSER_NAME=${GOTIFY_DEFAULTUSER_NAME}
+    ports:
+      - "55000:80"
+    volumes:
+        - gotify-data:/app/data
 
 
   jaeger:

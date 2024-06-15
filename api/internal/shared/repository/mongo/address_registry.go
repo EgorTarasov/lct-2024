@@ -35,6 +35,28 @@ func NewAddressRegistryRepository(mongo mongo.Mongo, tracer trace.Tracer) *addre
 	}
 }
 
+// GetByAdmArea возвращает список объектов недвижимости по району.
+func (r *addressRegistryRepository) GetByAdmArea(ctx context.Context, admArea string) (result []models.Address, err error) {
+	ctx, span := r.tracer.Start(ctx, "addressRegistry.GetByDistrict", trace.WithAttributes(attribute.String("admArea", admArea)))
+	defer span.End()
+
+	filter := bson.M{
+		"adm_area": bson.M{
+			"$eq": admArea,
+		},
+	}
+
+	findOptions := options.Find()
+	findOptions.SetLimit(10)
+
+	err = r.mongo.FindMany(ctx, addressCollectionName, filter, &result, findOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 // GetGeoDataByUnom возвращает геоданные по уникальному номеру объекта недвижимости.
 func (r *addressRegistryRepository) GetGeoDataByUnom(ctx context.Context, unom int64) (result models.Address, err error) {
 	ctx, span := r.tracer.Start(ctx, "addressRegistry.GetGeoDataByUnom", trace.WithAttributes(attribute.Int64("unom", unom)))
