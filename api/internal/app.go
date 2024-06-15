@@ -8,7 +8,8 @@ import (
 	"sync"
 
 	"github.com/EgorTarasov/lct-2024/api/internal/config"
-	chpRepos "github.com/EgorTarasov/lct-2024/api/internal/data/repository/mongo"
+	dataMongo "github.com/EgorTarasov/lct-2024/api/internal/data/repository/mongo"
+	dataPg "github.com/EgorTarasov/lct-2024/api/internal/data/repository/pg"
 	dataHandler "github.com/EgorTarasov/lct-2024/api/internal/data/rest/handler"
 	mapRouter "github.com/EgorTarasov/lct-2024/api/internal/data/rest/router"
 	dataService "github.com/EgorTarasov/lct-2024/api/internal/data/service"
@@ -135,8 +136,9 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 
 	// map
 	ar := sharedMongo.NewAddressRegistryRepository(mongo, tracer)
-	ev := chpRepos.NewEventRepo(mongo, tracer)
-	ms := dataService.NewService(ar, ev, inferenceClient, tracer)
+	ev := dataMongo.NewEventRepo(mongo, tracer)
+	ir := dataPg.NewIncidentRepo(pg, tracer)
+	ms := dataService.NewService(ar, ev, ir, inferenceClient, tracer)
 	mc := dataHandler.NewDataController(ctx, ms, tracer)
 	mapRouter.InitRoutes(app, mc)
 
@@ -148,7 +150,7 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 	searchRouter.InitRoutes(app, searchController)
 
 	// geo.
-	// 	objectRepo := chpRepos.NewObjectRepo(pg, tracer)
+	// 	objectRepo := dataMongo.NewObjectRepo(pg, tracer)
 	// propertyRepo := geoMongo.NewPropertyRepository(&mongo, tracer)
 	// moeksRepo := geoMongo.NewMoekRepository(&mongo, tracer)
 	// odsRepo := geoMongo.NewOdsRepository(&mongo, tracer)

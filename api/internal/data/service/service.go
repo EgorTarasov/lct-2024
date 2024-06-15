@@ -21,18 +21,26 @@ type eventRepo interface {
 	GetEmergencyEvents(ctx context.Context, unoms []int64) (events []models.Event, err error)
 }
 
+type incidentRepo interface {
+	GetByID(ctx context.Context, id int64) (models.Incident, error)
+	Create(ctx context.Context, title, status string, priority int, unom int64) (int64, error)
+	GetRecent(ctx context.Context, limit, offset int) ([]models.Incident, error)
+}
+
 type service struct {
 	ar     addressRegistry
 	ev     eventRepo
+	ir     incidentRepo
 	client pb.InferenceClient
 	tracer trace.Tracer
 }
 
 // NewService конструктор сервиса для работы с картой.
-func NewService(ar addressRegistry, ev eventRepo, client pb.InferenceClient, tracer trace.Tracer) *service {
+func NewService(ar addressRegistry, ev eventRepo, ir incidentRepo, client pb.InferenceClient, tracer trace.Tracer) *service {
 	return &service{
 		ar:     ar,
 		ev:     ev,
+		ir:     ir,
 		client: client,
 		tracer: tracer,
 	}
@@ -85,4 +93,66 @@ func (s *service) GetEmergencyPredictions(ctx context.Context, admArea string, s
 		}
 	}
 	return results, nil
+}
+
+// GetRecentIncidents получение списка недавних инцидентов.
+func (s *service) GetRecentIncidents(ctx context.Context, limit, offset int) ([]models.Incident, error) {
+	ctx, span := s.tracer.Start(
+		ctx,
+		"data.GetRecentIncidents",
+		trace.WithAttributes(
+			attribute.Int("limit", limit),
+			attribute.Int("offset", offset),
+		),
+	)
+	defer span.End()
+
+	recent, err := s.ir.GetRecent(ctx, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	return recent, nil
+}
+
+// GetIncidentByID получение дополнительной информации об инциденте с данными о потребителе и производителя энергии.
+func (s *service) GetIncidentByID(ctx context.Context, id int64) (models.Incident, error) {
+	ctx, span := s.tracer.Start(
+		ctx,
+		"data.GetIncidentByID",
+		trace.WithAttributes(
+			attribute.Int64("id", id),
+		),
+	)
+	defer span.End()
+
+	result, err := s.ir.GetByID(ctx, id)
+	if err != nil {
+		return models.Incident{}, err
+	}
+	// TODO: add mongo requests for buildings data
+
+	return result, nil
+}
+
+// CreateIncident создание нового инцидента.
+func (s *service) CreateIncident(ctx context.Context, title, status string, priority int, unom int64) (int64, error) {
+	ctx, span := s.tracer.Start(
+		ctx,
+		"data.CreateIncident",
+		trace.WithAttributes(
+			attribute.String("title", title),
+			attribute.String("status", status),
+			attribute.Int("priority", priority),
+			attribute.Int64("unom", unom),
+		),
+	)
+	defer span.End()
+
+	id, err := s.ir.Create(ctx, title, status, priority, unom)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }
