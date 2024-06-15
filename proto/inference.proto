@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "./;pb";
+package inference;
+
+service Inference {
+  rpc Inference (Query) returns (Response) {}
+}
+
+message Query {
+  repeated int64 unoms = 1;
+  google.protobuf.Timestamp startDate = 2;
+  google.protobuf.Timestamp endDate = 3;
+  float threshold = 4; // 0.0 - 1.0
+}
+
+message Response {
+  repeated Prediction predictions = 1;
+}
+
+message Prediction {
+  int64 unom = 1;
+  google.protobuf.Timestamp date = 2;
+  double p1 = 3;
+  double p2 = 4;
+  double t1 = 5;
+  double t2 = 6;
+  double no = 7;
+  double noHeating = 8;
+  double leak = 9;
+  double strongLeak = 10;
+  double tempLow = 11;
+  double tempLowCommon = 12;
+  double leakSystem = 13;
+}
+

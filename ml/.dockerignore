@@ -1,0 +1,6 @@
+*.ipynb
+data/
+catboost_info/
+artifact/
+__pycache__/
+features/

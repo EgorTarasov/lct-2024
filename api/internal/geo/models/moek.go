@@ -74,6 +74,6 @@ func (consumer *ConsumerDAO) ToDTO() *ConsumerDTO {
 
 // CHP Combined heat and power plant.
 type CHP struct {
-	Name      string        `bson:"ctp" json:"chp"`
+	Name      string        `bson:"ctp" json:"data"`
 	Consumers []ConsumerDTO `bson:"consumers" json:"consumers"`
 }

@@ -35,7 +35,7 @@ import (
 // @Tags location
 // @Param unom query int true "уникальный номер объекта"
 // @Produce  json
-// @Success 200 {object} Address
+// @Success 200
 // @Router /geo/location/unom [get].
 func (h *handler) GetLocationByUnom(c *fiber.Ctx) error {
 	ctx, span := h.tr.Start(c.Context(), "handler.GetLocationByUnom")
@@ -67,7 +67,7 @@ func (h *handler) GetLocationByUnom(c *fiber.Ctx) error {
 // @Tags location
 // @Param unoms query []int true "уникальные номера объектов"
 // @Produce  json
-// @Success 200 {array} Address
+// @Success 200
 // @Router /geo/location/unoms [get].
 func (h *handler) GetLocationsByUnoms(c *fiber.Ctx) error {
 	ctx, span := h.tr.Start(c.Context(), "handler.GetLocationsByUnoms")

@@ -7,3 +7,5 @@ openpyxl
 scikit-learn
 psycopg[binary]
 minio
+grpcio
+grpcio-tools

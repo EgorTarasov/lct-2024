@@ -7,17 +7,18 @@ import (
 	"strings"
 	"sync"
 
-	chpRepos "github.com/EgorTarasov/lct-2024/api/internal/chp/repository/mongo"
-	mapHandler "github.com/EgorTarasov/lct-2024/api/internal/chp/rest/handler"
-	mapRouter "github.com/EgorTarasov/lct-2024/api/internal/chp/rest/router"
-	mapService "github.com/EgorTarasov/lct-2024/api/internal/chp/service"
 	"github.com/EgorTarasov/lct-2024/api/internal/config"
+	chpRepos "github.com/EgorTarasov/lct-2024/api/internal/data/repository/mongo"
+	dataHandler "github.com/EgorTarasov/lct-2024/api/internal/data/rest/handler"
+	mapRouter "github.com/EgorTarasov/lct-2024/api/internal/data/rest/router"
+	dataService "github.com/EgorTarasov/lct-2024/api/internal/data/service"
 	searchRepos "github.com/EgorTarasov/lct-2024/api/internal/search/repository"
 	searchHandler "github.com/EgorTarasov/lct-2024/api/internal/search/rest/handler"
 	searchRouter "github.com/EgorTarasov/lct-2024/api/internal/search/rest/router"
 	search "github.com/EgorTarasov/lct-2024/api/internal/search/service"
 	"github.com/EgorTarasov/lct-2024/api/internal/shared"
 	sharedMongo "github.com/EgorTarasov/lct-2024/api/internal/shared/repository/mongo"
+	pb "github.com/EgorTarasov/lct-2024/api/internal/stubs"
 	authModels "github.com/EgorTarasov/lct-2024/api/internal/users/models"
 	authPgRepo "github.com/EgorTarasov/lct-2024/api/internal/users/repository/pg"
 	authRedisRepo "github.com/EgorTarasov/lct-2024/api/internal/users/repository/redis"
@@ -27,6 +28,9 @@ import (
 	mongoDB "github.com/EgorTarasov/lct-2024/api/pkg/mongo"
 	pkgs3 "github.com/EgorTarasov/lct-2024/api/pkg/s3"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
 	// подключение swagger для документации api.
 	_ "github.com/EgorTarasov/lct-2024/api/internal/docs"
 	"github.com/EgorTarasov/lct-2024/api/pkg/postgres"
@@ -92,6 +96,14 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 		return fmt.Errorf("can't create s3: %v", err)
 	}
 
+	// inferenceClient (grpc)
+	grpcOptions := grpc.WithTransportCredentials(insecure.NewCredentials())
+	grpcClient, err := grpc.NewClient(fmt.Sprintf("%s:%d", cfg.Inference.Host, cfg.Inference.Port), grpcOptions)
+	if err != nil {
+		return fmt.Errorf("can't establish connection with grpc: %v", err)
+	}
+	inferenceClient := pb.NewInferenceClient(grpcClient)
+
 	redisClient := redis.NewClient(cfg.Redis)
 
 	app.Use(cors.New(cors.Config{
@@ -124,8 +136,8 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 	// map
 	ar := sharedMongo.NewAddressRegistryRepository(mongo, tracer)
 	ev := chpRepos.NewEventRepo(mongo, tracer)
-	ms := mapService.NewService(ar, ev)
-	mc := mapHandler.NewMapController(ctx, ms, tracer)
+	ms := dataService.NewService(ar, ev, inferenceClient, tracer)
+	mc := dataHandler.NewDataController(ctx, ms, tracer)
 	mapRouter.InitRoutes(app, mc)
 
 	// search
@@ -140,8 +152,8 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 	// propertyRepo := geoMongo.NewPropertyRepository(&mongo, tracer)
 	// moeksRepo := geoMongo.NewMoekRepository(&mongo, tracer)
 	// odsRepo := geoMongo.NewOdsRepository(&mongo, tracer)
-	// mapService := geo.New(ctx, cfg, propertyRepo, moeksRepo, odsRepo, tracer)
-	// mapController := mapHandler.NewMapController(ctx, mapService, tracer)
+	// dataService := geo.New(ctx, cfg, propertyRepo, moeksRepo, odsRepo, tracer)
+	// mapController := dataHandler.NewDataController(ctx, dataService, tracer)
 	// if err = mapRouter.InitMapRouter(ctx, app, mapController); err != nil {
 	// 	return err
 	// }

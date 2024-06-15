@@ -21,7 +21,7 @@ class ModelInference:
         self.model = cb.CatBoostClassifier()
         self.model.load_model("artifact/model.cbm")
 
-    def predict(self, unoms: list[int], dates: list[dt.date]):
+    def predict(self, unoms: list[int], dates: list[dt.date]) -> pd.DataFrame:
         base_df = load_inference_base(unoms, dates)
         base_df = base_df.set_index(["unom", "date"])
         for feat in self.features:
@@ -45,9 +45,10 @@ if __name__ == "__main__":
     # "..data/dataset/13. Адресный реестр объектов недвижимости города Москвы.xlsx",
 
     unoms = [
-        302, 
+        302,
     ]
     dates = [dt.date(2024, 6, date) for date in range(1, 30)]
     outs = pred.predict(unoms, dates)
     outs.to_excel("artifact/predictions.xlsx")
     print(outs)
+    outs.to_csv("artifact/foo.csv")
