@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"math"
 	"time"
 
 	"github.com/EgorTarasov/lct-2024/api/internal/data/models"
@@ -115,6 +116,26 @@ func (s *service) GetRecentIncidents(ctx context.Context, limit, offset int) ([]
 	return recent, nil
 }
 
+func createGraph(hours int) models.Graph {
+	const a = 74
+	f := func(x int) float64 {
+		//y\ =\ \frac{a}{\sqrt{\left(x+25\right)}}\cdot3\ -\ 19
+		return (a/math.Sqrt(float64(x)+25))*3 - 19
+	}
+
+	points := make([]models.GraphDataPoint, hours)
+	for i := 0; i < hours; i++ {
+		points[i] = models.GraphDataPoint{
+			Temp:       f(i + 1),
+			TimeString: i,
+		}
+	}
+	return models.Graph{
+		Name:   "Температура",
+		Points: points,
+	}
+}
+
 // GetIncidentByID получение дополнительной информации об инциденте с данными о потребителе и производителя энергии.
 func (s *service) GetIncidentByID(ctx context.Context, id int64) (models.Incident, error) {
 	ctx, span := s.tracer.Start(
@@ -131,6 +152,8 @@ func (s *service) GetIncidentByID(ctx context.Context, id int64) (models.Inciden
 		return models.Incident{}, err
 	}
 	// TODO: add mongo requests for buildings data
+
+	result.HeatingGraph = createGraph(20)
 
 	return result, nil
 }

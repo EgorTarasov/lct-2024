@@ -10,8 +10,13 @@ import (
 // https://recharts.org/en-US/examples
 
 type GraphDataPoint struct {
-	Temp       float32 `json:"temp"`
-	TimeString string  `json:"time"` // время (1 час, 3 часа и т.п.)
+	Temp       float64 `json:"temp"`
+	TimeString int     `json:"time"` // время (1 час, 3 часа и т.п.)
+}
+
+type Graph struct {
+	Name   string           `json:"name"`
+	Points []GraphDataPoint `json:"values"`
 }
 
 type Incident struct {
@@ -31,5 +36,5 @@ type Incident struct {
 	DispatchServices *models.DispatchServices `json:"dispatchServices"`
 	HeatingPoint     *models.HeatingPoint     `json:"heatingPoint"`
 
-	HeatingGraph []interface{} `json:"heatingGraph"`
+	HeatingGraph Graph `json:"graph"`
 }

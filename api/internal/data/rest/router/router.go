@@ -19,5 +19,5 @@ func InitRoutes(app *fiber.App, h handler) {
 
 	issueRouter := app.Group("/issue")
 	issueRouter.Get("/recent", middleware.UserClaimsMiddleware, h.GetRecent)
-	issueRouter.Get("/id/:id", middleware.UserClaimsMiddleware)
+	issueRouter.Get("/id/:id", middleware.UserClaimsMiddleware, h.GetByID)
 }
