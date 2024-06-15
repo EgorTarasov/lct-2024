@@ -72,14 +72,14 @@ go-create-grpc:
 
 ifeq (,$(wildcard .env))
     # Если файл .env отсутствует, устанавливаем параметры по умолчанию
-    POSTGRES_USER := 'SuperPuperUser'
-    POSTGRES_PASSWORD := 'SuperStrongPassword'
+    POSTGRES_USER := 'Dino'
+    POSTGRES_PASSWORD := 'Dino-misos2024'
     POSTGRES_DB := 'dev'
     POSTGRES_HOST := '127.0.0.1'
-    POSTGRES_PORT := 5432
+    POSTGRES_PORT := 54000
 else
     # Иначе, подключаем переменные из файла .env
-    include .env
+    include ../configs/.env
     export
 endif
 POSTGRES_SETUP_TEST := user=${POSTGRES_USER} password=${POSTGRES_PASSWORD} dbname=${POSTGRES_DB} host=${POSTGRES_HOST} port=${POSTGRES_PORT} sslmode=disable
