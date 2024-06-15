@@ -1,4 +1,5 @@
-FROM node:18-alpine
+# Build stage
+FROM node:18-alpine as builder
 
 WORKDIR /app
 
@@ -10,8 +11,20 @@ RUN pnpm install
 
 RUN pnpm run build
 
-RUN npm add serve -g
+
+CMD ["npm", "run", "serve"]
+
+# Final stage
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy built artifacts from the builder stage
+COPY --from=builder /app/dist ./dist
+
+# Install serve to serve the application, if necessary
+RUN npm install -g serve
 
 EXPOSE 3000
 
-CMD ["npm", "run", "serve"]
+CMD ["serve", "-s", "dist"]
