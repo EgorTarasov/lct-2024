@@ -95,3 +95,28 @@ where id = $1;
 	}
 	return incident, nil
 }
+
+func (repo *incidentRepo) GetByConsumerUnom(ctx context.Context, unom int64) ([]models.Incident, error) {
+	ctx, span := repo.tracer.Start(ctx, "data.GetByConsumerUnom")
+	defer span.End()
+
+	const q = `
+select
+	id,
+	opened_at,
+	closed_at,
+	title, 
+	status,
+	priority,
+	unom,
+	created_at,
+	updated_at
+from incidents
+where unom = $1;
+`
+	var incidents []models.Incident
+	if err := repo.pg.Select(ctx, &incidents, q, unom); err != nil {
+		return nil, err
+	}
+	return incidents, nil
+}

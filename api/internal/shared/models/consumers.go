@@ -35,7 +35,6 @@ type Event struct {
 // HeatingPointDTO DTO для объекта теплоснабжения.
 type HeatingPointDTO struct {
 	HeatingPoint
-
 	// models.Address
 }
 
@@ -105,7 +104,7 @@ type MKDConsumer struct {
 // DispatchServices данные о диспетчерской службе.
 type DispatchServices struct {
 	Address              string  `bson:"address" json:"address"`
-	HeatDispatcherNumber string  `bson:"data" json:"heatDispatcherNumber"`
+	HeatDispatcherNumber string  `bson:"chp" json:"heatDispatcherNumber"`
 	ConsumerName         string  `bson:"consumer" json:"consumer"`
 	ConsumerGroup        string  `bson:"consumer_group" json:"consumerGroup"`
 	Country              string  `bson:"country" json:"country"`

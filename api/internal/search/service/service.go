@@ -26,6 +26,8 @@ type addressRegistry interface {
 	GetUnomsInRadius(ctx context.Context, latitude, longitude float64, distance int) ([]int64, error)
 	GetMunicipalDistricts(ctx context.Context) ([]string, error)
 	GetByMunicipalDistrict(ctx context.Context, municipalDistricts []string) ([]shared.Address, error)
+	GetHeatSourceByConsumerUnom(ctx context.Context, unom int64) (shared.HeatingPoint, error)
+	GetHetSourceBySrcUnom(ctx context.Context, unom int64) (shared.HeatingPoint, error)
 }
 
 type consumerRepo interface {
@@ -129,6 +131,23 @@ func (s *service) GeoDataByUnoms(ctx context.Context, unoms []int64) ([]shared.A
 	return s.ar.GetGeoDataByUnoms(ctx, unoms)
 }
 
+// GetHeatingPointByConsumerUnom получение данных о теплоснабжающем объекте по уникальному номеру.
+func (s *service) GetHeatingPointByConsumerUnom(ctx context.Context, unom int64) (shared.HeatingPoint, error) {
+	ctx, span := s.tr.Start(ctx, "service.GetHeatingPointByConsumerUnom", trace.WithAttributes(attribute.Int64("unom", unom)))
+	defer span.End()
+
+	return s.ar.GetHeatSourceByConsumerUnom(ctx, unom)
+}
+
+// GetHeatingPointBySrcUnom получение данных о теплоснабжающем объекте по уникальному номеру.
+func (s *service) GetHeatingPointBySrcUnom(ctx context.Context, unom int64) (shared.HeatingPoint, error) {
+	ctx, span := s.tr.Start(ctx, "service.GetHeatingPointBySrcUnom", trace.WithAttributes(attribute.Int64("unom", unom)))
+	defer span.End()
+
+	return s.ar.GetHetSourceBySrcUnom(ctx, unom)
+}
+
+// GetConsumersInfo получение информации о потребителях.
 func (s *service) GetConsumersInfo(ctx context.Context, unoms []int64) (interface{}, error) {
 	ctx, span := s.tr.Start(ctx, "service.GetConsuerInfo", trace.WithAttributes(attribute.Int64Slice("unoms", unoms)))
 	defer span.End()

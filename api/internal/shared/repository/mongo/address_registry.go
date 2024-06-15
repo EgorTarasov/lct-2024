@@ -192,6 +192,31 @@ func (r *addressRegistryRepository) GetGeoDataInRadius(ctx context.Context, lati
 	return result, nil
 }
 
+func (r *addressRegistryRepository) GetHeatSourceByConsumerUnom(ctx context.Context, unom int64) (result models.HeatingPoint, err error) {
+	ctx, span := r.tracer.Start(ctx, "addressRegistry.GetHeatSourceByConsumerUnom", trace.WithAttributes(attribute.Int64("unom", unom)))
+	defer span.End()
+
+	filter := bson.M{"consumer_full_address.unom": bson.M{"$eq": unom}}
+	err = r.mongo.FindOne(ctx, "consumers", filter, &result)
+	if err != nil {
+		return models.HeatingPoint{}, err
+	}
+	return result, nil
+}
+
+func (r *addressRegistryRepository) GetHetSourceBySrcUnom(ctx context.Context, unom int64) (result models.HeatingPoint, err error) {
+	ctx, span := r.tracer.Start(ctx, "addressRegistry.GetHetSourceBySrcUnom", trace.WithAttributes(attribute.Int64("unom", unom)))
+	defer span.End()
+
+	filter := bson.M{"heating_point_full_address.unom": bson.M{"$eq": unom}}
+	err = r.mongo.FindOne(ctx, "consumers", filter, &result)
+	if err != nil {
+		return models.HeatingPoint{}, err
+	}
+	return result, nil
+}
+
+// GetAllObjectsByUnom возвращает все объекты по уникальному номеру.
 func (r *addressRegistryRepository) GetAllObjectsByUnom(ctx context.Context, unom int64) (models.UnomResult, error) {
 	ctx, span := r.tracer.Start(ctx, "addressRegistry.GetAllObjectsByUnom", trace.WithAttributes(attribute.Int64("unom", unom)))
 	defer span.End()
@@ -209,11 +234,31 @@ func (r *addressRegistryRepository) GetAllObjectsByUnom(ctx context.Context, uno
 		log.Info().Err(err).Msg("error during getting related objects mkd")
 		model.Consumer = nil
 	}
-	err = r.mongo.FindOne(ctx, "consumers", filter, &model.HeatingPoint)
+	heatPoint, err := r.GetHeatSourceByConsumerUnom(ctx, unom)
 	if err != nil {
 		log.Info().Err(err).Msg("error during getting related objects consumers")
 		model.HeatingPoint = nil
 	}
+	model.HeatingPoint = &heatPoint
 
 	return model, nil
+}
+
+// GetConsumersUnomsByHeatingPoint возвращает список уникальных номеров потребителей по уникальному номеру теплового пункта.
+func (r *addressRegistryRepository) GetConsumersUnomsByHeatingPoint(ctx context.Context, unom int64) ([]int64, error) {
+	ctx, span := r.tracer.Start(ctx, "addressRegistry.GetConsumersUnomsByHeatingPoint", trace.WithAttributes(attribute.Int64("unom", unom)))
+	defer span.End()
+
+	var result []models.HeatingPoint
+	filter := bson.M{"heating_point_full_address.unom": unom}
+	err := r.mongo.FindMany(ctx, "consumers", filter, &result)
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]int64, len(result))
+	for i, v := range result {
+		ids[i] = v.ConsumerAddress.Unom
+	}
+
+	return ids, nil
 }

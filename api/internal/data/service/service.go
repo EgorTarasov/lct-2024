@@ -17,6 +17,7 @@ type addressRegistry interface {
 	GetByAdmArea(ctx context.Context, admArea string) ([]shared.Address, error)
 	GetGeoDataByUnom(ctx context.Context, unom int64) (result shared.Address, err error)
 	GetAllObjectsByUnom(ctx context.Context, unom int64) (shared.UnomResult, error)
+	GetConsumersUnomsByHeatingPoint(ctx context.Context, unom int64) ([]int64, error)
 }
 
 type eventRepo interface {
@@ -28,6 +29,7 @@ type incidentRepo interface {
 	GetByID(ctx context.Context, id int64) (shared.Incident, error)
 	Create(ctx context.Context, title, status string, priority int, unom int64) (int64, error)
 	GetRecent(ctx context.Context, limit, offset int) ([]shared.Incident, error)
+	GetByConsumerUnom(ctx context.Context, unom int64) ([]shared.Incident, error)
 }
 
 type service struct {
@@ -191,4 +193,31 @@ func (s *service) CreateIncident(ctx context.Context, title, status string, prio
 	}
 
 	return id, nil
+}
+
+func (s *service) GetIncedentsByHeatingPoint(ctx context.Context, unom int64) ([]shared.Incident, error) {
+	ctx, span := s.tracer.Start(
+		ctx,
+		"data.GetIncedentsByHeatingPoint",
+		trace.WithAttributes(
+			attribute.Int64("unom", unom),
+		),
+	)
+	defer span.End()
+
+	consumerUnoms, err := s.ar.GetConsumersUnomsByHeatingPoint(ctx, unom)
+	if err != nil {
+		return nil, err
+	}
+
+	incidents := make([]shared.Incident, 0)
+	for _, consumerUnom := range consumerUnoms {
+		consumerIncidents, err := s.ir.GetByConsumerUnom(ctx, consumerUnom)
+		if err != nil || len(consumerIncidents) == 0 {
+			continue
+		}
+		incidents = append(incidents, consumerIncidents...)
+	}
+
+	return incidents, nil
 }

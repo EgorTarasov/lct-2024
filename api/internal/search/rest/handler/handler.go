@@ -16,6 +16,8 @@ type searchEngine interface {
 	GeoDataByUnom(ctx context.Context, unom int64) (shared.Address, error)
 	GeoDataByUnoms(ctx context.Context, unoms []int64) ([]shared.Address, error)
 	GetConsumersInfo(ctx context.Context, unoms []int64) (interface{}, error)
+	GetHeatingPointByConsumerUnom(ctx context.Context, unom int64) (shared.HeatingPoint, error)
+	GetHeatingPointBySrcUnom(ctx context.Context, unom int64) (shared.HeatingPoint, error)
 }
 
 // Обработчик http запросов для поиска по данным.
@@ -104,6 +106,34 @@ func (h *handler) SearchWithFilters(c *fiber.Ctx) error {
 	}
 
 	res, err := h.se.SearchWithFilters(ctx, filters)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(res)
+}
+
+// GetHeatingPointByUnom godoc
+//
+// получение данных о ТП по уникальным номерам
+//
+// @Summary получение данных о ТП по уникальным номерам
+// @Description
+// @Tags search consumers
+// @Produce  json
+// @Param unoms query int true "уникальные номера объектов"
+// @Success 200 {object} models.Address
+// @Router /source/q/:unom [get].
+func (h *handler) GetHeatingPointByUnom(c *fiber.Ctx) error {
+	ctx, span := h.tr.Start(c.Context(), "handler.GetHeatingPointByConsumerUnom")
+	defer span.End()
+
+	unom, err := c.ParamsInt("unom")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	res, err := h.se.GetHeatingPointBySrcUnom(ctx, int64(unom))
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}

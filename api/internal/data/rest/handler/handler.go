@@ -4,17 +4,18 @@ import (
 	"context"
 	"time"
 
-	models2 "github.com/EgorTarasov/lct-2024/api/internal/shared/models"
+	models "github.com/EgorTarasov/lct-2024/api/internal/shared/models"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"go.opentelemetry.io/otel/trace"
 )
 
 type dataService interface {
-	GetEmergencyPredictions(ctx context.Context, admArea string, startDate, endDate time.Time, threshold float32) ([]models2.PredictionResult, error)
-	GetRecentIncidents(ctx context.Context, limit, offset int) ([]models2.Incident, error)
-	GetIncidentByID(ctx context.Context, id int64) (models2.Incident, error)
+	GetEmergencyPredictions(ctx context.Context, admArea string, startDate, endDate time.Time, threshold float32) ([]models.PredictionResult, error)
+	GetRecentIncidents(ctx context.Context, limit, offset int) ([]models.Incident, error)
+	GetIncidentByID(ctx context.Context, id int64) (models.Incident, error)
 	CreateIncident(ctx context.Context, title, status string, priority int, unom int64) (int64, error)
+	GetIncedentsByHeatingPoint(ctx context.Context, unom int64) ([]models.Incident, error)
 }
 
 type dataController struct {
@@ -192,4 +193,30 @@ func (mc *dataController) CreateIncident(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.JSON(id)
+}
+
+// GetByHeatingPoint godoc
+//
+// # Получение информации об инцидетнах по уникальному номеру объекта
+//
+// @Summary получение информации об инцидетнах по уникальному номеру объекта
+// @Description
+// @Param unom path int true "unom"
+// @Tags issue
+// @Produce  json
+// @Success 200 {object} []models.Incident
+// @Router /issue/heating-point/{unom} [get].
+func (mc *dataController) GetByHeatingPoint(c *fiber.Ctx) error {
+	ctx, span := mc.tr.Start(c.Context(), "fiber.GetByHeatingPoint")
+	defer span.End()
+
+	unom, err := c.ParamsInt("unom")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+	issue, err := mc.s.GetIncedentsByHeatingPoint(ctx, int64(unom))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+	return c.JSON(issue)
 }
