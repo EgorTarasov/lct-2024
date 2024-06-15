@@ -1,13 +1,18 @@
 import datetime as dt
 from typing import NamedTuple
 import logging
+import os
 
 import time
 
+import minio
 import psycopg
 import pandas as pd
 from minio import Minio
+import dotenv
 
+
+dotenv.load_dotenv()
 
 from heat_features import load_heat_df, gen_features_heat_for_group
 from address import load_address, process_address
@@ -181,17 +186,47 @@ class ProcessorService:
 
 
 if __name__ == "__main__":
+    minio_host = os.getenv("MINIO_HOST")
+    print(minio_host)
+    if minio_host is None:
+        log.error("MINIO_HOST is not set")
+        exit(1)
+
+    minio_access_key = os.getenv("MINIO_ACCESS_KEY")
+    if minio_access_key is None:
+        log.error("MINIO_ACCESS_KEY is not set")
+        exit(1)
+
+    minio_secret_key = os.getenv("MINIO_SECRET_KEY")
+    if minio_secret_key is None:
+        log.error("MINIO_SECRET_KEY is not set")
+        exit(1)
+
+    minio_secure = os.getenv("MINIO_SECURE")
+    if minio_secure is None:
+        log.error("MINIO_SECURE is not set")
+        exit(1)
+
+    minio_region = os.getenv("MINIO_REGION")
+    if minio_region is None:
+        log.error("MINIO_REGION is not set")
+        exit(1)
+
+    postgres_dns = os.getenv("POSTGRES_DSN")
+    if postgres_dns is None:
+        log.error("POSTGRES_DSN is not set")
+        exit(1)
 
     client = Minio(
-        "localhost:9000",
-        access_key="key",
-        secret_key="key",
-        secure=False,
-        region="eu-west-1",
+        minio_host,
+        access_key=minio_access_key,
+        secret_key=minio_secret_key,
+        secure=minio_secure.lower() == "true",
+        region=minio_region,
     )
-    dsn = "postgresql://user:passord@localhost:5432/dev"
-    log.info(f"pg connection {dsn}")
+    # dsn = "postgresql://Dino:Dino-misos2024@192.168.1.70:54000/dev"
+    log.info(f"pg connection {postgres_dns}")
 
-    service = ProcessorService(dsn, client)
+    service = ProcessorService(postgres_dns, client)
     log.info("Starting service")
     service.run()
