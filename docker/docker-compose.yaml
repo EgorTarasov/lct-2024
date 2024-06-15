@@ -12,15 +12,38 @@ volumes:
 
 
 services:
+  ui:
+    container_name: ui
+    image: ghcr.io/egortarasov/lct-2024/ui:amd64-0.0.1
+    restart: always
+    ports:
+      - "54900:3000"
+    depends_on:
+      - backend
+
   backend:
     container_name: backend
-    image: ghcr.io/egortarasov/lct-2024/api:amd64-0.0.2.5
+    image: ghcr.io/egortarasov/lct-2024/api:amd64-0.0.3
     command: ./main
     restart:  always
     volumes:
-      - /home/etarasov/lct.yaml:/root/config.yaml
+      - ../configs/api.yaml:/root/config.yaml
     ports:
       - "9999:9999" # container port defined in config.yaml
+    depends_on:
+      - postgres
+      - mongo
+
+  ml:
+    image: ghcr.io/egortarasov/lct-2024/ml:amd64-0.0.1
+    container_name: ml
+    restart: always
+    command: python3 main.py
+    volumes:
+      - "../features:/code/features"
+      - "../artifact:/code/artifact"
+    ports:
+      - '50051:50051' #grpc application on 50051
 
   postgres:
     image: "postgres:16"
@@ -38,6 +61,7 @@ services:
   mongo:
     image: mongo:5.0.27
     restart: always
+    container_name: mongo
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
@@ -48,11 +72,12 @@ services:
 
   s3:
     image: minio/minio
+    container_name: s3
     ports:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - s3_data:/data
+      - s3-data:/data
     environment:
       MINIO_ROOT_USER: ${MINIO_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
@@ -77,7 +102,7 @@ services:
     ports:
       - "55000:80"
     volumes:
-        - gotify-data:/app/data
+      - gotify-data:/app/data
 
 
   jaeger:
@@ -99,10 +124,10 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    depends_on:
-      - prometheus
+    # depends_on:
+    #   - prometheus
     ports:
-      - "55000:3000"
+      - "54200:3000"
     volumes:
       - grafana-storage:/var/lib/grafana
     environment:
