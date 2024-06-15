@@ -86,13 +86,11 @@ const PageBreadcrumbs: FC<{
 
 const Page = observer(() => {
   const heatDistributorId = Route.useParams().heatDistributorId;
-  const heatSource = MapStore.heatSourceVm.items.find((v) => v.id.toString() === heatDistributorId);
+  // const heatSource = MapStore.heatSourceVm.items.find((v) => v.id.toString() === heatDistributorId);
   const vm = MapStore.consumersVm;
 
   useEffect(() => {
-    if (heatSource) {
-      MapStore.consumersVm = new ConsumersViewModel(heatSource);
-    }
+    MapStore.consumersVm = new ConsumersViewModel(heatDistributorId);
   }, [heatDistributorId]);
 
   return (
@@ -100,14 +98,24 @@ const Page = observer(() => {
       <MainSidebar>
         <div className="gap-3 h-full overflow-hidden flex flex-col">
           <Text.UiMedium className="px-4 text-muted-foreground">Реестр объектов</Text.UiMedium>
-          <PageBreadcrumbs heatDistributorId={heatDistributorId} heatSource={heatSource ?? null} />
-          {heatSource && vm ? (
+          <PageBreadcrumbs
+            heatDistributorId={heatDistributorId}
+            heatSource={vm?.heatSource ?? null}
+          />
+          {vm?.heatSource ? (
             <>
               <PriorityDropdown vm={vm} />
               <ScrollArea>
                 {vm.items.map((v) => (
                   <React.Fragment key={v.id}>
-                    <ConsumerCard heatDistributorId={heatDistributorId} data={v} />
+                    <Link
+                      to="/heat_distributor/$heatDistributorId/consumers/$consumerId"
+                      params={{
+                        heatDistributorId,
+                        consumerId: v.id.toString()
+                      }}>
+                      <ConsumerCard data={v} />
+                    </Link>
                     <Separator />
                   </React.Fragment>
                 ))}

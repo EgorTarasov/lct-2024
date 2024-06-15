@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { MapStore } from "@/stores/map.store";
 import { MainSidebar } from "@/widgets/layoutMainSidebar/main-sidebar.widget";
 import { PaginationWidget } from "@/widgets/pagination/pagination.widget";
-import { Outlet, createLazyFileRoute } from "@tanstack/react-router";
+import { Link, Outlet, createLazyFileRoute } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { observer } from "mobx-react-lite";
 import React from "react";
@@ -40,7 +40,13 @@ const Page = observer(() => {
           <ScrollArea>
             {vm.items.map((v) => (
               <React.Fragment key={v.id}>
-                <HeatDistributorCard data={v} />
+                <Link
+                  to="/heat_distributor/$heatDistributorId"
+                  params={{
+                    heatDistributorId: v.id.toString()
+                  }}>
+                  <HeatDistributorCard data={v} />
+                </Link>
                 <Separator />
               </React.Fragment>
             ))}

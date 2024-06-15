@@ -1,12 +1,16 @@
 import { GrantsService } from "@/stores/grant.service";
 import { MapLoading } from "@/widgets/map/map-loading";
-import { Outlet, createFileRoute } from "@tanstack/react-router";
+import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import React, { Suspense, useState } from "react";
 import {
   SidebarContent,
   MainSidebarContext
 } from "@/widgets/layoutMainSidebar/main-sidebar.context";
 import { checkGrant } from "@/utils/check-grant";
+import { Text } from "@/components/typography/Text";
+import { ELEVATION } from "@/constants/elevation";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/utils/cn";
 
 const MainSidebarView = React.lazy(() =>
   import("@/widgets/layoutMainSidebar/main-sidebar.view").then((x) => ({
@@ -45,16 +49,24 @@ const Page = () => {
         setSecondaryContent
       }}>
       <div className="h-full w-full relative">
+        <div
+          className="flex md:hidden flex-col absolute inset-0 bg-background items-center justify-center text-center"
+          style={{ zIndex: ELEVATION.NAVIGATE_INCIDENTS }}>
+          <Text.H3>Карта доступна только с компьютера</Text.H3>
+          <Link to="/incidents" className={cn(buttonVariants({ variant: "default" }), "mt-4")}>
+            <Text.UiMedium>Перейти к инцидентам</Text.UiMedium>
+          </Link>
+        </div>
         <Suspense fallback={<MapLoading />}>
           <Map />
         </Suspense>
-        <Suspense fallback={null}>
-          <MainSidebarView />
-          <BottomRightBar />
-          <ProfileBar />
-        </Suspense>
         <Outlet />
       </div>
+      <Suspense fallback={null}>
+        <MainSidebarView />
+        <BottomRightBar />
+        <ProfileBar />
+      </Suspense>
     </MainSidebarContext.Provider>
   );
 };

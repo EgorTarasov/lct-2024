@@ -2,6 +2,8 @@ export const ELEVATION = {
   SIDEBAR: 3,
   SEARCHBAR: 4,
   FILTERS: 2,
-  PROFILE: 2,
-  MAP: 2
+  PROFILE: 6,
+  MAP: 2,
+  NAVIGATE_INCIDENTS: 5,
+  WEATHER: 4
 };

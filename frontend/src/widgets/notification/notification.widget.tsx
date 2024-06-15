@@ -6,7 +6,7 @@ import { NotificationStore } from "@/stores/notification.store";
 import { cn } from "@/utils/cn";
 import { BellIcon } from "lucide-react";
 import { observer } from "mobx-react-lite";
-import { LayerSelect } from "./NotificationSort";
+import { NotificationSort } from "./NotificationSort";
 import { useEffect, useState } from "react";
 import { NotificationCard } from "@/components/cards/notification.card";
 
@@ -39,7 +39,7 @@ export const NotificationWidget = observer(() => {
         <SheetHeader>
           <SheetTitle>Уведомления</SheetTitle>
         </SheetHeader>
-        {vm.notifications.length > 0 && <LayerSelect />}
+        {vm.notifications.length > 0 && <NotificationSort />}
         <ScrollArea className="flex-1 space-y-2 flex flex-col gap-2">
           {vm.notifications.map((n) => (
             <NotificationCard

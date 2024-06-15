@@ -27,9 +27,7 @@ export const WeatherWidget = observer(() => {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div
-          className="appear flex items-center justify-center bg-card border rounded-xl px-2 gap-2 cursor-default"
-          style={{ zIndex: ELEVATION.FILTERS }}>
+        <div className="appear flex items-center justify-center bg-card border rounded-xl px-2 gap-2 cursor-default">
           <WeatherIcon />
           {weather.temperature ? (
             `${weather.temperature}°С`

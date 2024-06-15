@@ -2,11 +2,14 @@ import { z } from "zod";
 
 export namespace MapDto {
   export const Property = z.object({
-    number: z.string(),
-    Source: z.string(),
-    balanceHolder: z.string(),
-    commissioningDate: z.number(),
-    consumerAddress: z.object({
+    balance_holder: z.string(),
+    commissioning_date: z.number(),
+    heating_point_src: z.string(),
+    heating_point_number: z.string(),
+    heating_point_type: z.string(),
+    heating_point_location_type: z.string(),
+    municipal_district: z.string(),
+    consumer_full_address: z.object({
       unom: z.number(),
       address: z.string(),
       border: z
@@ -20,13 +23,10 @@ export namespace MapDto {
       municipalDistrict: z.string(),
       center: z.object({
         type: z.string(),
-        coordinates: z.array(z.number())
+        coordinates: z.array(z.number()).nullable()
       })
     }),
-    district: z.string(),
-    type: z.string(),
-    locationType: z.string(),
-    heatingPointAddress: z.object({
+    heating_point_full_address: z.object({
       unom: z.number(),
       address: z.string(),
       municipalDistrict: z.string(),
@@ -40,7 +40,7 @@ export namespace MapDto {
         .nullable(),
       center: z.object({
         type: z.string(),
-        coordinates: z.array(z.number())
+        coordinates: z.array(z.number()).nullable()
       })
     })
   });

@@ -12,7 +12,7 @@ import { NotificationStore } from "@/stores/notification.store";
 import { ChevronDownIcon } from "lucide-react";
 import { observer } from "mobx-react-lite";
 
-export const LayerSelect = observer(() => {
+export const NotificationSort = observer(() => {
   const vm = NotificationStore;
 
   return (

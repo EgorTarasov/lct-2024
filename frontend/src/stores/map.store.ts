@@ -1,5 +1,5 @@
 import { DisposableVm } from "@/utils/vm";
-import { makeAutoObservable, when } from "mobx";
+import { makeAutoObservable, toJS, when } from "mobx";
 import { Map } from "leaflet";
 import { MapEndpoint } from "@/api/endpoints/map.endpoint";
 import { ConsumersViewModel } from "../widgets/map/vm/consumers.vm";
@@ -13,6 +13,9 @@ import L from "leaflet";
 import "leaflet.vectorgrid";
 import { buildPropertyFeature, buildSlicerLayer } from "@/utils/map";
 import { MapConstants } from "@/constants/map";
+import { MapDto } from "@/api/models/map.model";
+import { cloneDeep, debounce } from "lodash";
+import { ConsumersEndpoint } from "@/api/endpoints/consumers.endpoint";
 
 // patch canvas for click events
 L.Canvas.Tile.include({
@@ -51,10 +54,22 @@ class mapStore implements DisposableVm {
   filters: Filter<string>[] = [];
   search = "";
   async init() {
-    // const filters = await ConsumersEndpoint.getFilters();
-    // this.filters = filters.map((f) => new Filter(f.filterName, f.values));
+    const filters = await ConsumersEndpoint.getFilters();
+    this.filters = filters.map((f) => new Filter(f.filterName, f.values));
 
-    this.fetchVisiblePart();
+    const res = await MapEndpoint.getProperty(0, 0, 0);
+    const polygons: MapConstants.PolygonFeature[] = [];
+    res.forEach((v) => {
+      const feature = buildPropertyFeature(v);
+
+      if (feature) {
+        polygons.push(feature);
+      }
+    });
+
+    this.consumers = polygons;
+
+    this.buildFeatureLayer();
   }
   dateRange: DateRange = {
     from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
@@ -71,11 +86,13 @@ class mapStore implements DisposableVm {
     this.layer = MapFilters.Layer.AllObjects;
     this.filters.forEach((f) => f.reset());
   }
+
+  get filteredConsumers() {
+    return this.consumers;
+  }
   //#endregion
 
   //#region map
-  allGeozones: FeatureCollection | null = null;
-
   // get filteredGeozones() {
   // }
 
@@ -88,75 +105,67 @@ class mapStore implements DisposableVm {
     }
 
     this.map = m;
-    // if (this.vectorTileLayer) {
-    //   console.log("set 2");
-    //   this.vectorTileLayer?.addTo(this.map);
-    // } else {
-    //   console.log("ye");
-    //   when(() => this.vectorTileLayer !== null).then(() => {
-    //     console.log(this.vectorTileLayer, "yo");
-    //     this.vectorTileLayer.addTo(this.map);
-    //   });
-    // }
     this.map.addEventListener("moveend", () => {
-      const zoom = this.map?.getZoom();
-      // this.fetchVisiblePart();
+      this.fetchVisiblePart();
     });
+
+    if (this.featureLayer) {
+      this.featureLayer.addTo(this.map);
+    } else {
+      when(() => this.featureLayer !== null).then(() => {
+        this.featureLayer!.addTo(this.map!);
+        console.log(this.featureLayer);
+      });
+    }
   }
 
-  async fetchVisiblePart() {
-    // const zoom = this.map.getZoom();
-    // const center = this.map.getCenter();
+  consumers: MapConstants.PolygonFeature[] = [];
 
-    // const radiusKm = 0.5 * Math.pow(2, 14 - zoom);
-    // if (radiusKm > 0.4) {
-    //   this.shouldZoomIn = true;
-    //   return;
-    // }
-    // this.shouldZoomIn = false;
-    console.log("running");
-    const res = await MapEndpoint.getProperty(0, 0, 0);
-    const polygons: MapConstants.PolygonFeature[] = [];
-    res.forEach((v) => {
-      const feature = buildPropertyFeature(v);
+  featureLayer: L.VectorGrid.Slicer | null = null;
+  buildFeatureLayer() {
+    if (this.featureLayer) {
+      console.log("disposed");
+      this.featureLayer.remove();
+    }
 
-      if (feature) {
-        polygons.push(feature);
-      }
-    });
-
-    // const layer = buildSlicerLayer(polygons, MapConstants.PolygonProperties.priority.high);
+    if (!this.filteredConsumers.length) {
+      return null;
+    }
 
     const featureCollection = {
       type: "FeatureCollection" as const,
-      features: polygons
+      features: this.filteredConsumers
     };
-    this.allGeozones = featureCollection;
 
-    const layer = L.vectorGrid.slicer(featureCollection, {
-      rendererFactory: L.canvas.tile,
-      vectorTileLayerStyles: {
-        sliced: {
-          weight: 2,
-          color: "#ff0000",
-          opacity: 1,
-          fillOpacity: 1,
-          fillColor: "#ff0000"
-        }
-      },
-      maxZoom: 24,
-      maxNativeZoom: 24,
-      interactive: true
-    });
-    if (!this.map) {
-      await when(() => this.map !== null);
-    }
-    layer.on("click", (e: L.LeafletEvent) => {
-      console.log(e);
-    });
-    layer.addTo(this.map!);
-    // this.setGeozones();
+    const layer = buildSlicerLayer(
+      toJS(this.filteredConsumers),
+      MapConstants.PolygonProperties.priority.high,
+      {
+        onClick: (v) => this.onLayerClick(v)
+      }
+    );
+
+    this.featureLayer = layer;
   }
+
+  onLayerClick(v: MapConstants._ConsumerFeatureProperty) {
+    console.log(v);
+  }
+
+  fetchVisiblePart = debounce(() => {
+    if (!this.map) return;
+
+    const zoom = this.map.getZoom();
+    const center = this.map.getCenter();
+    const radiusKm = 0.5 * Math.pow(2, 14 - zoom);
+    if (radiusKm > 0.4) {
+      this.shouldZoomIn = true;
+      return;
+    }
+    this.shouldZoomIn = false;
+
+    console.log(zoom, center);
+  }, 1000);
   //#endregion
 
   dispose(): void {

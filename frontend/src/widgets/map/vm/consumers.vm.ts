@@ -5,7 +5,7 @@ import { Priority } from "@/types/priority.type";
 import { makeAutoObservable } from "mobx";
 
 export class ConsumersViewModel {
-  constructor(private heatSource: HeatDistributor.Item) {
+  constructor(private heatDistributorId: string) {
     makeAutoObservable(this);
   }
 
@@ -23,6 +23,8 @@ export class ConsumersViewModel {
       unom: "123"
     }
   ];
+
   loading = false;
   showPriorityFirst = true;
+  heatSource: HeatDistributor.Item | null = null;
 }

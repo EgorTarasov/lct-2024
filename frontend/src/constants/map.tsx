@@ -62,15 +62,15 @@ export namespace MapConstants {
 
   export type _ConsumerFeatureProperty = Omit<
     z.infer<typeof MapDto.Property>,
-    "consumerAddress" | "heatingPointAddress" | "border"
+    "consumer_full_address" | "heating_point_full_address"
   > & {
     consumerAddress: {
       unom: number;
       address: string;
       municipalDistrict: string;
       center: {
+        coordinates: number[] | null;
         type: string;
-        coordinates: [number, number];
       };
     };
     heatingPointAddress: {

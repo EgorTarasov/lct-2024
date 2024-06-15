@@ -22,12 +22,7 @@ function pluralizeConsumer(count: number): string {
 
 export const HeatDistributorCard: FC<{ data: HeatDistributor.Item; className?: string }> = (x) => {
   return (
-    <Link
-      to="/heat_distributor/$heatDistributorId"
-      params={{
-        heatDistributorId: x.data.id.toString()
-      }}
-      className={cn("flex flex-col px-4 py-2 hover:bg-muted/50 w-full", x.className)}>
+    <div className={cn("flex flex-col px-4 py-2 hover:bg-muted/50 w-full", x.className)}>
       <div className="flex items-center justify-between w-full flex-wrap gap-3">
         <Text.SubtleMedium className="text-muted-foreground">{x.data.number}</Text.SubtleMedium>
         <PriorityIcon data={x.data.priority} />
@@ -42,7 +37,7 @@ export const HeatDistributorCard: FC<{ data: HeatDistributor.Item; className?: s
           <IssueIcon key={i} className="*:size-4" data={v} />
         ))}
       </div>
-    </Link>
+    </div>
   );
 };
 
