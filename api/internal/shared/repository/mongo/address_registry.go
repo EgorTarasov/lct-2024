@@ -191,3 +191,29 @@ func (r *addressRegistryRepository) GetGeoDataInRadius(ctx context.Context, lati
 
 	return result, nil
 }
+
+func (r *addressRegistryRepository) GetAllObjectsByUnom(ctx context.Context, unom int64) (models.UnomResult, error) {
+	ctx, span := r.tracer.Start(ctx, "addressRegistry.GetAllObjectsByUnom", trace.WithAttributes(attribute.Int64("unom", unom)))
+	defer span.End()
+
+	filter := bson.M{"unom": unom}
+	var model models.UnomResult
+	model.Unom = unom
+	err := r.mongo.FindOne(ctx, "dispatch_services", filter, &model.DispatchService)
+	if err != nil {
+		log.Info().Err(err).Msg("error during getting related objects dispatch_services")
+		model.DispatchService = nil
+	}
+	err = r.mongo.FindOne(ctx, "mkd", filter, &model.Consumer)
+	if err != nil {
+		log.Info().Err(err).Msg("error during getting related objects mkd")
+		model.Consumer = nil
+	}
+	err = r.mongo.FindOne(ctx, "consumers", filter, &model.HeatingPoint)
+	if err != nil {
+		log.Info().Err(err).Msg("error during getting related objects consumers")
+		model.HeatingPoint = nil
+	}
+
+	return model, nil
+}

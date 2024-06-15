@@ -1,9 +1,9 @@
-package repository
+package mongo
 
 import (
 	"context"
 
-	"github.com/EgorTarasov/lct-2024/api/internal/search/models"
+	"github.com/EgorTarasov/lct-2024/api/internal/shared/models"
 	mongoDB "github.com/EgorTarasov/lct-2024/api/pkg/mongo"
 	"github.com/rs/zerolog/log"
 	"go.mongodb.org/mongo-driver/bson"

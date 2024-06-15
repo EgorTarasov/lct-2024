@@ -5,7 +5,6 @@ import (
 	"math"
 	"time"
 
-	"github.com/EgorTarasov/lct-2024/api/internal/data/models"
 	shared "github.com/EgorTarasov/lct-2024/api/internal/shared/models"
 	pb "github.com/EgorTarasov/lct-2024/api/internal/stubs"
 	"go.opentelemetry.io/otel/attribute"
@@ -16,16 +15,19 @@ import (
 // addressRegistry справочник с гео информацией.
 type addressRegistry interface {
 	GetByAdmArea(ctx context.Context, admArea string) ([]shared.Address, error)
+	GetGeoDataByUnom(ctx context.Context, unom int64) (result shared.Address, err error)
+	GetAllObjectsByUnom(ctx context.Context, unom int64) (shared.UnomResult, error)
 }
 
 type eventRepo interface {
-	GetEmergencyEvents(ctx context.Context, unoms []int64) (events []models.Event, err error)
+	GetEmergencyEvents(ctx context.Context, unoms []int64) (events []shared.Event, err error)
+	GetMeasurementsByUnom(ctx context.Context, unom int64, limit int64) (measurements []shared.Measurement, err error)
 }
 
 type incidentRepo interface {
-	GetByID(ctx context.Context, id int64) (models.Incident, error)
+	GetByID(ctx context.Context, id int64) (shared.Incident, error)
 	Create(ctx context.Context, title, status string, priority int, unom int64) (int64, error)
-	GetRecent(ctx context.Context, limit, offset int) ([]models.Incident, error)
+	GetRecent(ctx context.Context, limit, offset int) ([]shared.Incident, error)
 }
 
 type service struct {
@@ -48,7 +50,7 @@ func NewService(ar addressRegistry, ev eventRepo, ir incidentRepo, client pb.Inf
 }
 
 // GetEmergencyPredictions получение предсказаний аварийных ситуаций.
-func (s *service) GetEmergencyPredictions(ctx context.Context, admArea string, startDate, endDate time.Time, threshold float32) ([]models.PredictionResult, error) {
+func (s *service) GetEmergencyPredictions(ctx context.Context, admArea string, startDate, endDate time.Time, threshold float32) ([]shared.PredictionResult, error) {
 	ctx, span := s.tracer.Start(ctx, "data.GetEmergencyPredictions",
 		trace.WithAttributes(
 			attribute.String("start", startDate.String()),
@@ -75,9 +77,9 @@ func (s *service) GetEmergencyPredictions(ctx context.Context, admArea string, s
 	if err != nil {
 		return nil, err
 	}
-	results := make([]models.PredictionResult, len(res.Predictions))
+	results := make([]shared.PredictionResult, len(res.Predictions))
 	for idx, record := range res.Predictions {
-		results[idx] = models.PredictionResult{
+		results[idx] = shared.PredictionResult{
 			Unom:          record.Unom,
 			Date:          record.Date.AsTime(),
 			P1:            record.P1,
@@ -97,7 +99,7 @@ func (s *service) GetEmergencyPredictions(ctx context.Context, admArea string, s
 }
 
 // GetRecentIncidents получение списка недавних инцидентов.
-func (s *service) GetRecentIncidents(ctx context.Context, limit, offset int) ([]models.Incident, error) {
+func (s *service) GetRecentIncidents(ctx context.Context, limit, offset int) ([]shared.Incident, error) {
 	ctx, span := s.tracer.Start(
 		ctx,
 		"data.GetRecentIncidents",
@@ -116,28 +118,28 @@ func (s *service) GetRecentIncidents(ctx context.Context, limit, offset int) ([]
 	return recent, nil
 }
 
-func createGraph(hours int) models.Graph {
+func createGraph(hours int) shared.Graph {
 	const a = 74
 	f := func(x int) float64 {
-		//y\ =\ \frac{a}{\sqrt{\left(x+25\right)}}\cdot3\ -\ 19
+		// y\ =\ \frac{a}{\sqrt{\left(x+25\right)}}\cdot3\ -\ 19
 		return (a/math.Sqrt(float64(x)+25))*3 - 19
 	}
 
-	points := make([]models.GraphDataPoint, hours)
+	points := make([]shared.GraphDataPoint, hours)
 	for i := 0; i < hours; i++ {
-		points[i] = models.GraphDataPoint{
+		points[i] = shared.GraphDataPoint{
 			Temp:       f(i + 1),
 			TimeString: i,
 		}
 	}
-	return models.Graph{
+	return shared.Graph{
 		Name:   "Температура",
 		Points: points,
 	}
 }
 
 // GetIncidentByID получение дополнительной информации об инциденте с данными о потребителе и производителя энергии.
-func (s *service) GetIncidentByID(ctx context.Context, id int64) (models.Incident, error) {
+func (s *service) GetIncidentByID(ctx context.Context, id int64) (shared.Incident, error) {
 	ctx, span := s.tracer.Start(
 		ctx,
 		"data.GetIncidentByID",
@@ -149,11 +151,22 @@ func (s *service) GetIncidentByID(ctx context.Context, id int64) (models.Inciden
 
 	result, err := s.ir.GetByID(ctx, id)
 	if err != nil {
-		return models.Incident{}, err
+		return shared.Incident{}, err
 	}
 	// TODO: add mongo requests for buildings data
 
 	result.HeatingGraph = createGraph(20)
+
+	measurements, err := s.ev.GetMeasurementsByUnom(ctx, result.Unom, 10)
+	if err != nil {
+		return shared.Incident{}, err
+	}
+	result.Measurements = measurements
+
+	result.RelatedObjects, err = s.ar.GetAllObjectsByUnom(ctx, result.Unom)
+	if err != nil {
+		return shared.Incident{}, err
+	}
 
 	return result, nil
 }

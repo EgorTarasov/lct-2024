@@ -4,16 +4,16 @@ import (
 	"context"
 	"time"
 
-	"github.com/EgorTarasov/lct-2024/api/internal/data/models"
+	models2 "github.com/EgorTarasov/lct-2024/api/internal/shared/models"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"go.opentelemetry.io/otel/trace"
 )
 
 type dataService interface {
-	GetEmergencyPredictions(ctx context.Context, admArea string, startDate, endDate time.Time, threshold float32) ([]models.PredictionResult, error)
-	GetRecentIncidents(ctx context.Context, limit, offset int) ([]models.Incident, error)
-	GetIncidentByID(ctx context.Context, id int64) (models.Incident, error)
+	GetEmergencyPredictions(ctx context.Context, admArea string, startDate, endDate time.Time, threshold float32) ([]models2.PredictionResult, error)
+	GetRecentIncidents(ctx context.Context, limit, offset int) ([]models2.Incident, error)
+	GetIncidentByID(ctx context.Context, id int64) (models2.Incident, error)
 	CreateIncident(ctx context.Context, title, status string, priority int, unom int64) (int64, error)
 }
 

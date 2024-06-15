@@ -3,7 +3,7 @@ package pg
 import (
 	"context"
 
-	"github.com/EgorTarasov/lct-2024/api/internal/data/models"
+	"github.com/EgorTarasov/lct-2024/api/internal/shared/models"
 	"github.com/EgorTarasov/lct-2024/api/pkg/postgres"
 	"go.opentelemetry.io/otel/trace"
 )

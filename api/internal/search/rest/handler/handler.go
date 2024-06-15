@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 
-	"github.com/EgorTarasov/lct-2024/api/internal/search/models"
 	shared "github.com/EgorTarasov/lct-2024/api/internal/shared/models"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
@@ -11,9 +10,9 @@ import (
 )
 
 type searchEngine interface {
-	SearchStateProperties(ctx context.Context, query string) ([]models.StatePropertySearchResult, error)
-	ListFilters(ctx context.Context) ([]models.Filter, error)
-	SearchWithFilters(ctx context.Context, filters []models.Filter) ([]models.HeatingPointDTO, error)
+	SearchStateProperties(ctx context.Context, query string) ([]shared.StatePropertySearchResult, error)
+	ListFilters(ctx context.Context) ([]shared.Filter, error)
+	SearchWithFilters(ctx context.Context, filters []shared.Filter) ([]shared.HeatingPointDTO, error)
 	GeoDataByUnom(ctx context.Context, unom int64) (shared.Address, error)
 	GeoDataByUnoms(ctx context.Context, unoms []int64) ([]shared.Address, error)
 	GetConsumersInfo(ctx context.Context, unoms []int64) (interface{}, error)
@@ -99,7 +98,7 @@ func (h *handler) SearchWithFilters(c *fiber.Ctx) error {
 	ctx, span := h.tr.Start(c.Context(), "handler.SearchWithFilters")
 	defer span.End()
 
-	var filters []models.Filter
+	var filters []shared.Filter
 	if err := c.BodyParser(&filters); err != nil {
 		log.Info().Err(err).Msg("failed to parse filters")
 	}

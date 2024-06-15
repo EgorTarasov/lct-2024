@@ -4,7 +4,6 @@ import (
 	"context"
 	"sync"
 
-	"github.com/EgorTarasov/lct-2024/api/internal/search/models"
 	shared "github.com/EgorTarasov/lct-2024/api/internal/shared/models"
 	"github.com/rs/zerolog/log"
 	"go.opentelemetry.io/otel/attribute"
@@ -30,16 +29,16 @@ type addressRegistry interface {
 }
 
 type consumerRepo interface {
-	GetSearchFilter(ctx context.Context) (filters []models.Filter, err error)
-	SearchWithFilters(ctx context.Context, filters []models.Filter) ([]models.HeatingPoint, error)
-	GetDispatcherInfoByUnoms(ctx context.Context, unoms []int64) ([]models.DispatchServices, error)
-	GetMKDConsumersByUnoms(ctx context.Context, unoms []int64) ([]models.MKDConsumer, error)
-	GetStateConsumersByUnoms(ctx context.Context, unoms []int64) (values []models.StateConsumer, err error)
+	GetSearchFilter(ctx context.Context) (filters []shared.Filter, err error)
+	SearchWithFilters(ctx context.Context, filters []shared.Filter) ([]shared.HeatingPoint, error)
+	GetDispatcherInfoByUnoms(ctx context.Context, unoms []int64) ([]shared.DispatchServices, error)
+	GetMKDConsumersByUnoms(ctx context.Context, unoms []int64) ([]shared.MKDConsumer, error)
+	GetStateConsumersByUnoms(ctx context.Context, unoms []int64) (values []shared.StateConsumer, err error)
 }
 
 // statePropertyRepo доступ к данным о потребителях.
 type statePropertyRepo interface {
-	SearchSimilarObjects(ctx context.Context, query string) (result []models.StateProperty, err error)
+	SearchSimilarObjects(ctx context.Context, query string) (result []shared.StateProperty, err error)
 }
 
 // NewService конструктор сервиса для поиска по данным.
@@ -53,11 +52,11 @@ func NewService(ar addressRegistry, cr statePropertyRepo, fr consumerRepo, trace
 }
 
 // SearchStateProperties поиск по тексту социальных / промышленных объектов.
-func (s *service) SearchStateProperties(ctx context.Context, query string) ([]models.StatePropertySearchResult, error) {
+func (s *service) SearchStateProperties(ctx context.Context, query string) ([]shared.StatePropertySearchResult, error) {
 	ctx, span := s.tr.Start(ctx, "service.SearchObjects", trace.WithAttributes(attribute.String("query", query)))
 	defer span.End()
 	stateProperties, err := s.cr.SearchSimilarObjects(ctx, query)
-	result := make([]models.StatePropertySearchResult, len(stateProperties))
+	result := make([]shared.StatePropertySearchResult, len(stateProperties))
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +84,7 @@ func (s *service) SearchStateProperties(ctx context.Context, query string) ([]mo
 }
 
 // ListFilters получение списка всех фильтров для поиска по коллекции consumers.
-func (s *service) ListFilters(ctx context.Context) ([]models.Filter, error) {
+func (s *service) ListFilters(ctx context.Context) ([]shared.Filter, error) {
 	ctx, span := s.tr.Start(ctx, "service.ListFilters")
 	defer span.End()
 
@@ -97,7 +96,7 @@ func (s *service) ListFilters(ctx context.Context) ([]models.Filter, error) {
 }
 
 // SearchWithFilters поиск по коллекции consumers с учетом фильтров.
-func (s *service) SearchWithFilters(ctx context.Context, filters []models.Filter) (response []models.HeatingPointDTO, err error) {
+func (s *service) SearchWithFilters(ctx context.Context, filters []shared.Filter) (response []shared.HeatingPointDTO, err error) {
 	ctx, span := s.tr.Start(ctx, "service.SearchWithFilters")
 	defer span.End()
 
@@ -107,7 +106,7 @@ func (s *service) SearchWithFilters(ctx context.Context, filters []models.Filter
 	}
 
 	for _, value := range result {
-		response = append(response, models.HeatingPointDTO{
+		response = append(response, shared.HeatingPointDTO{
 			HeatingPoint: value,
 		})
 	}
@@ -136,9 +135,9 @@ func (s *service) GetConsumersInfo(ctx context.Context, unoms []int64) (interfac
 	// бежим в 3 места и собираем ифнормацию
 
 	var (
-		stateConsumers []models.StateConsumer
-		dispatchers    []models.DispatchServices
-		mkdConsumers   []models.MKDConsumer
+		stateConsumers []shared.StateConsumer
+		dispatchers    []shared.DispatchServices
+		mkdConsumers   []shared.MKDConsumer
 	)
 
 	wg := sync.WaitGroup{}
@@ -174,9 +173,9 @@ func (s *service) GetConsumersInfo(ctx context.Context, unoms []int64) (interfac
 	wg.Wait()
 
 	return struct {
-		StateConsumers []models.StateConsumer    `json:"stateHeatConsumers"`
-		Dispatchers    []models.DispatchServices `json:"dispatchers"`
-		MKDConsumers   []models.MKDConsumer      `json:"mkdConsumers"`
+		StateConsumers []shared.StateConsumer    `json:"stateHeatConsumers"`
+		Dispatchers    []shared.DispatchServices `json:"dispatchers"`
+		MKDConsumers   []shared.MKDConsumer      `json:"mkdConsumers"`
 	}{
 		StateConsumers: stateConsumers,
 		Dispatchers:    dispatchers,

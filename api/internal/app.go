@@ -8,12 +8,10 @@ import (
 	"sync"
 
 	"github.com/EgorTarasov/lct-2024/api/internal/config"
-	dataMongo "github.com/EgorTarasov/lct-2024/api/internal/data/repository/mongo"
 	dataPg "github.com/EgorTarasov/lct-2024/api/internal/data/repository/pg"
 	dataHandler "github.com/EgorTarasov/lct-2024/api/internal/data/rest/handler"
 	mapRouter "github.com/EgorTarasov/lct-2024/api/internal/data/rest/router"
 	dataService "github.com/EgorTarasov/lct-2024/api/internal/data/service"
-	searchRepos "github.com/EgorTarasov/lct-2024/api/internal/search/repository"
 	searchHandler "github.com/EgorTarasov/lct-2024/api/internal/search/rest/handler"
 	searchRouter "github.com/EgorTarasov/lct-2024/api/internal/search/rest/router"
 	search "github.com/EgorTarasov/lct-2024/api/internal/search/service"
@@ -136,15 +134,15 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 
 	// map
 	ar := sharedMongo.NewAddressRegistryRepository(mongo, tracer)
-	ev := dataMongo.NewEventRepo(mongo, tracer)
+	ev := sharedMongo.NewEventRepo(mongo, tracer)
 	ir := dataPg.NewIncidentRepo(pg, tracer)
 	ms := dataService.NewService(ar, ev, ir, inferenceClient, tracer)
 	mc := dataHandler.NewDataController(ctx, ms, tracer)
 	mapRouter.InitRoutes(app, mc)
 
 	// search
-	statePropertyRepo := searchRepos.NewStatePropertyRepo(mongo, tracer)
-	filterRepo := searchRepos.NewSearchFilterRepo(mongo, tracer)
+	statePropertyRepo := sharedMongo.NewStatePropertyRepo(mongo, tracer)
+	filterRepo := sharedMongo.NewSearchFilterRepo(mongo, tracer)
 	searchService := search.NewService(ar, statePropertyRepo, filterRepo, tracer)
 	searchController := searchHandler.New(searchService, tracer)
 	searchRouter.InitRoutes(app, searchController)
