@@ -1,7 +1,7 @@
 import { GrantsService } from "@/stores/grant.service";
 import { MapLoading } from "@/widgets/map/map-loading";
-import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
-import React, { Suspense, useState } from "react";
+import { Link, Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
+import React, { Suspense, useEffect, useState } from "react";
 import {
   SidebarContent,
   MainSidebarContext
@@ -11,6 +11,8 @@ import { Text } from "@/components/typography/Text";
 import { ELEVATION } from "@/constants/elevation";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/utils/cn";
+import { observer } from "mobx-react-lite";
+import { MapStore } from "@/stores/map.store";
 
 const MainSidebarView = React.lazy(() =>
   import("@/widgets/layoutMainSidebar/main-sidebar.view").then((x) => ({
@@ -28,7 +30,8 @@ const ProfileBar = React.lazy(() =>
   import("@/widgets/layoutProfileBar/profile-bar.widget").then((m) => ({ default: m.ProfileBar }))
 );
 
-const Page = () => {
+const Page = observer(() => {
+  const navigate = useNavigate();
   const [content, _setContent] = useState<SidebarContent | null>(null);
   const [secondaryContent, setSecondaryContent] = useState<SidebarContent | null>(null);
   const [isOpen, setIsOpen] = useState(true);
@@ -37,6 +40,10 @@ const Page = () => {
     setIsOpen(true);
     _setContent(v);
   };
+
+  useEffect(() => {
+    MapStore.navigateFn = navigate;
+  }, []);
 
   return (
     <MainSidebarContext.Provider
@@ -48,7 +55,7 @@ const Page = () => {
         secondaryContent,
         setSecondaryContent
       }}>
-      <div className="h-full w-full relative">
+      <div className="h-full w-full relative appear">
         <div
           className="flex md:hidden flex-col absolute inset-0 bg-background items-center justify-center text-center"
           style={{ zIndex: ELEVATION.NAVIGATE_INCIDENTS }}>
@@ -69,9 +76,11 @@ const Page = () => {
       </Suspense>
     </MainSidebarContext.Provider>
   );
-};
+});
 
 export const Route = createFileRoute("/_map")({
   component: Page,
-  beforeLoad: () => checkGrant(GrantsService.canReadMap)
+  loader: () => {
+    checkGrant(GrantsService.canReadMap);
+  }
 });

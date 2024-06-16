@@ -26,14 +26,14 @@ export const IssueLocaleMap: LocaleExtended<Issue> = {
     borderColor: "rgba(22, 163, 74, 0.4)",
     color: "#16A34A",
     icon: <WrenchIcon />,
-    locale: "Аварийная ситуация"
+    locale: "Ремонтные работы"
   },
   [Issue.TEMPERATURE]: {
     backgroundColor: "rgba(14, 165, 233, 0.2)",
     borderColor: "rgba(14, 165, 233, 0.4)",
     color: "#0EA5E9",
     icon: <ThermometerSnowflakeIcon />,
-    locale: "Аварийная ситуация"
+    locale: "Снижение температуры"
   },
   [Issue.PREDICTION]: {
     backgroundColor: "rgba(147, 51, 234, 0.2)",

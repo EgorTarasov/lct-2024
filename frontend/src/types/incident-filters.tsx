@@ -5,5 +5,5 @@ export namespace IncidentFilters {
     Priority = "priority"
   }
 
-  export type Tab = "heat-sources" | "consumers";
+  export type Tab = "heat-source" | "consumer";
 }

@@ -3,12 +3,12 @@ import ReactDOM from "react-dom/client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import "./globals.css";
 import { configure } from "mobx";
-import * as VKID from "@vkid/sdk";
+// import * as VKID from "@vkid/sdk";
 
-VKID.Config.set({
-  app: import.meta.env.VITE_APP_ID,
-  redirectUrl: window.location.origin + "/login-vk"
-});
+// VKID.Config.set({
+//   app: import.meta.env.VITE_APP_ID,
+//   redirectUrl: window.location.origin + "/login-vk"
+// });
 
 configure({
   enforceActions: "never"
@@ -17,7 +17,7 @@ configure({
 import { routeTree } from "../routeTree.gen";
 
 // Create a new router instance
-const router = createRouter({ routeTree });
+const router = createRouter({ routeTree, defaultStaleTime: Infinity });
 
 // Register the router instance for type safety
 declare module "@tanstack/react-router" {
@@ -30,9 +30,5 @@ declare module "@tanstack/react-router" {
 const rootElement = document.getElementById("app")!;
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
-  root.render(
-    <StrictMode>
-      <RouterProvider router={router} />
-    </StrictMode>
-  );
+  root.render(<RouterProvider router={router} />);
 }

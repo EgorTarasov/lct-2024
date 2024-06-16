@@ -13,6 +13,7 @@ import { useIsPresent, motion } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { throttle } from "@/utils/debounce";
 import { SecondarySidebarView } from "./SecondarySidebar/secondary-sidebar.view";
+import { MapStore } from "@/stores/map.store";
 
 const transitionProps = {
   initial: { opacity: 0, translateY: 20 },
@@ -41,7 +42,9 @@ export const MainSidebarView = observer(() => {
           containerClassName="flex-1"
           className={ctx.isOpen ? "bg-background shadow-none" : "bg-card"}
           rightIcon={<SearchIcon />}
-          placeholder="Введите данные объекта"
+          value={MapStore.search}
+          onChange={(v) => (MapStore.search = v.target.value)}
+          placeholder="Введите unom"
         />
         <Button
           onClick={() => {

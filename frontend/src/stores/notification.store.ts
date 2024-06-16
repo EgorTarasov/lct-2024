@@ -1,11 +1,35 @@
+import { NotificationEndpoint } from "@/api/endpoints/notification.endpoint";
 import { NotificationFilters } from "@/constants/notification-filters";
 import { Notification } from "@/types/notification.type";
 import { Priority } from "@/types/priority.type";
 import { makeAutoObservable } from "mobx";
+import { toast } from "sonner";
 
 class notificationStore {
+  ws: WebSocket = new WebSocket('wss://push.larek.tech/stream?token="CqYaYW-WeaviCpP"');
+
   constructor() {
     makeAutoObservable(this);
+    this.ws.onopen = () => {
+      console.log("Connected to Gotify WebSocket");
+    };
+
+    this.ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      toast(message.message);
+      console.log("New message:", JSON.stringify(message));
+    };
+
+    this.ws.onerror = (error) => {
+      toast.error("WebSocket error", {
+        description: JSON.stringify(error)
+      });
+      console.error("WebSocket error:", error);
+    };
+
+    this.ws.onclose = () => {
+      console.log("WebSocket connection closed");
+    };
   }
 
   _notifications: Notification[] = [
@@ -25,7 +49,7 @@ class notificationStore {
 
     if (this.sort === NotificationFilters.Sort.Priority) {
       notifications.sort((a, b) => {
-        return a.priority.localeCompare(b.priority);
+        return b.priority - a.priority;
       });
     }
 
