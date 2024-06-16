@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { MapDto } from "./map.model";
+import { ConsumersDto } from "./consumers.model";
 
 export namespace IncidentDto {
   export const Item = z.object({
@@ -28,6 +29,7 @@ export namespace IncidentDto {
     heatingPoint: MapDto.Property.optional(),
     relatedObjects: z.object({
       unom: z.number(),
+      consumers: ConsumersDto.Item.array().optional(),
       heatingPoint: MapDto.Property.optional()
     })
   });

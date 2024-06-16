@@ -1,5 +1,4 @@
 import { IssueCard } from "@/components/cards/issue.card";
-import { useIncidentsContext } from "@/components/hoc/incidents-context";
 import {
   Accordion,
   AccordionContent,
@@ -13,15 +12,17 @@ import { CoolingChart } from "@/widgets/incidents/components/cooling-chart";
 import { IncidentCardWrapper } from "@/widgets/incidents/components/incident-card-wrapper";
 import { IncidentsMap } from "@/widgets/incidents/components/incidents.map";
 import { IncidentInfo } from "@/widgets/incidents/incident-info";
+import { IncidentsPageViewModel } from "@/widgets/incidents/incidents.page.vm";
 import { DependentObjectsSection } from "@/widgets/incidents/setions/DependentObjects.section";
-import { createLazyFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 
+const vm = IncidentsPageViewModel;
+
 const Page = observer(() => {
   const unom = Route.useParams().unom;
-  const vm = useIncidentsContext();
 
   useEffect(() => {
     vm.select(unom);
@@ -32,7 +33,7 @@ const Page = observer(() => {
   const item = vm.selected;
 
   return (
-    <div className="flex flex-col gap-6 px-4 appear">
+    <div className="flex flex-col gap-6 px-4 w-full">
       <Button variant="outline" className="w-fit">
         Задача решена
       </Button>
@@ -56,7 +57,7 @@ const Page = observer(() => {
           <AccordionTrigger>Зависимые объекты</AccordionTrigger>
           <AccordionContent className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <DependentObjectsSection data={item} selectedUnom={unom} />
-            <IncidentsMap vm={vm} />
+            <IncidentsMap />
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="math" defaultChecked>
@@ -74,6 +75,6 @@ const Page = observer(() => {
   );
 });
 
-export const Route = createLazyFileRoute("/_incidents/incidents/$unom")({
+export const Route = createFileRoute("/_base/_incidents/incidents/$unom")({
   component: Page
 });

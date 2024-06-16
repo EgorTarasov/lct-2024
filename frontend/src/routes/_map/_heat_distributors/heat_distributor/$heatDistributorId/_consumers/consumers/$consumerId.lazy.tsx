@@ -16,7 +16,7 @@ import { ConsumerViewModel } from "@/stores/consumer.vm";
 import { MapStore } from "@/stores/map.store";
 import { cn } from "@/utils/cn";
 import { SecondarySidebar } from "@/widgets/layoutMainSidebar/SecondarySidebar/secondary-sidebar.widget";
-import { Link, createLazyFileRoute, useMatches, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute, useMatches, useNavigate } from "@tanstack/react-router";
 import { ChevronRightIcon } from "lucide-react";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
@@ -93,7 +93,7 @@ const Page = observer(() => {
   );
 });
 
-export const Route = createLazyFileRoute(
+export const Route = createFileRoute(
   "/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers/consumers/$consumerId"
 )({
   component: Page

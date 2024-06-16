@@ -15,7 +15,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { HeatDistributorViewModel } from "@/stores/heat-distributor.vm";
 import { cn } from "@/utils/cn";
 import { SecondarySidebar } from "@/widgets/layoutMainSidebar/SecondarySidebar/secondary-sidebar.widget";
-import { Link, createLazyFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { ChevronRightIcon } from "lucide-react";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
@@ -88,7 +88,7 @@ const Page = observer(() => {
   );
 });
 
-export const Route = createLazyFileRoute(
+export const Route = createFileRoute(
   "/_map/_heat_distributors/heat_distributor/$heatDistributorId/"
 )({
   component: Page

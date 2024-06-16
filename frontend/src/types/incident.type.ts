@@ -36,7 +36,12 @@ export namespace Incident {
     data: Consumer.Item;
   }
 
-  export type Item = HeatItem | ConsumerItem;
+  export interface GarbageItem extends BaseProps {
+    type: "unknown";
+    data: null;
+  }
+
+  export type Item = HeatItem | ConsumerItem | GarbageItem;
 
   export const convertDto = (dto: IncidentDto.Item): Incident.Item => {
     const dependentObjects: Incident.DependentObjects = {
@@ -53,27 +58,38 @@ export namespace Incident {
         // Add more info based on dto
       ],
       incidentTitle: dto.title,
-      incidentIssue: dto.status as Issue,
+      incidentIssue: Issue.EMERGENCY,
       incidentStatus: dto.closedAt ? "closed" : "active",
       date: new Date(dto.createdAt),
       comments: [], // Add comments if available
       unom: dto.unom,
-      dependentObjects
+      dependentObjects: {
+        tps: dto.heatingPoint?.heating_point_src ?? "ТЭЦ-21",
+        heatSource: dto.heatingPoint ? HeatDistributor.convertDto(dto.heatingPoint) : null,
+        consumers: []
+        // consumers: dto.relatedObjects.heatingPoint ? dto.relatedObjects.heatingPoint.consumers?.map(v =)
+      }
     };
 
     // Assuming we need to determine the type based on some DTO fields
-    if (dto.relatedObjects.heatingPoint) {
+    if (dto.heatingPoint) {
       return {
         ...baseProps,
         type: "heat-source",
-        data: dependentObjects.heatSource
+        data: HeatDistributor.convertDto(dto.heatingPoint)
       } as Incident.HeatItem;
-    } else {
+    } else if (dto.mkdConsumer) {
       return {
         ...baseProps,
         type: "consumer",
-        data: dependentObjects.consumers[0] // Assuming first consumer for simplicity
+        data: dto.mkdConsumer // Assuming first consumer for simplicity
       } as Incident.ConsumerItem;
+    } else {
+      return {
+        ...baseProps,
+        type: "unknown",
+        data: null
+      };
     }
   };
 }

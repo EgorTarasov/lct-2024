@@ -7,6 +7,7 @@ import { IssueCard } from "./issue.card";
 import { TitleInfo } from "./title-info";
 import { cn } from "@/utils/cn";
 import { toJS } from "mobx";
+import { observer } from "mobx-react-lite";
 
 export const ConsumerCard: FC<{
   data: Consumer.Item;
@@ -25,7 +26,7 @@ export const ConsumerCard: FC<{
   );
 };
 
-export const ConsumerCardReadonly: FC<{ data: Consumer.Item }> = (x) => {
+export const ConsumerCardReadonly: FC<{ data: Consumer.Item }> = observer((x) => {
   return (
     <div className="flex flex-col px-4 w-full pb-3">
       <Text.SubtleMedium className="text-muted-foreground">{x.data.address}</Text.SubtleMedium>
@@ -37,4 +38,4 @@ export const ConsumerCardReadonly: FC<{ data: Consumer.Item }> = (x) => {
       <PriorityCard data={x.data.priority} />
     </div>
   );
-};
+});

@@ -1,13 +1,13 @@
-import { useIncidentsContext } from "@/components/hoc/incidents-context";
 import { Text } from "@/components/typography/Text";
 import { Button } from "@/components/ui/button";
-import { createLazyFileRoute } from "@tanstack/react-router";
+import { IncidentsPageViewModel } from "@/widgets/incidents/incidents.page.vm";
+import { createFileRoute } from "@tanstack/react-router";
+
+const vm = IncidentsPageViewModel;
 
 const Page = () => {
-  const vm = useIncidentsContext();
-
   return (
-    <div className="flex items-center justify-center size-full pt-40 appear flex-col gap-10">
+    <div className="flex items-center justify-center size-full pt-40 flex-col gap-10">
       <Text.H3>Выберите объект из списка</Text.H3>
       <Button className="flex md:hidden" onClick={() => (vm.drawerOpen = true)}>
         Открыть список
@@ -16,6 +16,6 @@ const Page = () => {
   );
 };
 
-export const Route = createLazyFileRoute("/_incidents/incidents/")({
+export const Route = createFileRoute("/_base/_incidents/incidents/")({
   component: Page
 });

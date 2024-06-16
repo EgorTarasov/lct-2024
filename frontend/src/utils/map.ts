@@ -1,7 +1,6 @@
 import { MapDto } from "@/api/models/map.model";
 import { MapConstants } from "@/constants/map";
 import { FeatureCollection } from "geojson";
-import geojsonvt from "geojson-vt";
 import L from "leaflet";
 import "leaflet.vectorgrid";
 
@@ -35,6 +34,7 @@ export const buildPropertyFeature = (v: MapDto.Property): MapConstants.PolygonFe
             municipalDistrict: v.consumer_full_address.municipalDistrict,
             unom: v.consumer_full_address.unom
           },
+          consumers: [],
           heatingPointAddress: {
             address: v.heating_point_full_address.address,
             municipalDistrict: v.heating_point_full_address.municipalDistrict,

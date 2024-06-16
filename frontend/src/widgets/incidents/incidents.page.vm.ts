@@ -6,17 +6,17 @@ import { Priority } from "@/types/priority.type";
 import { debounce } from "@/utils/debounce";
 import { makeAutoObservable, toJS } from "mobx";
 
-export class IncidentsPageViewModel {
+class incidentsPageViewModel {
   drawerOpen = false;
   selected: Incident.Item | null = null;
 
   constructor() {
     makeAutoObservable(this);
-
-    void this.init();
   }
 
   async init() {
+    if (this.items.length > 0) return;
+
     this.loading = true;
     try {
       const res = await IncidentsEndpoint.getRecents();
@@ -36,65 +36,7 @@ export class IncidentsPageViewModel {
     this.search = v;
   }, 300);
 
-  items: Incident.Item[] = [
-    {
-      address: "ул. Ленина, 1",
-      comments: ["Комментарий 1", "Комментарий 2"],
-      type: "heat-source",
-      unom: 123,
-      dependentObjects: {
-        tps: "ТП-1",
-        heatSource: {
-          address: "ул. Ленина, 1",
-          consumerCount: 10,
-          id: 1,
-          issue: Issue.EMERGENCY,
-          issues: [Issue.EMERGENCY, Issue.REPAIR],
-          number: "ТЭЦ-1",
-          priority: Priority.HIGH,
-          incidentCount: 3,
-          unom: "123"
-        },
-        consumers: [
-          {
-            address: "10-я Парковая ул., д. 15",
-            name: 'ГБУ "ЖИЛИЩНИК РАЙОНА ИЗМАЙЛОВО"',
-            id: 1,
-            info: {
-              type: "социальный"
-            },
-            issue: Issue.PREDICTION,
-            priority: Priority.LOW,
-            incidentCount: 2,
-            unom: "123",
-            consumerType: "социальный"
-          }
-        ]
-      },
-      data: {
-        address: "ул. Ленина, 1",
-        consumerCount: 10,
-        id: 1,
-        issue: Issue.EMERGENCY,
-        issues: [Issue.EMERGENCY, Issue.REPAIR],
-        number: "ТЭЦ-1",
-        priority: Priority.HIGH,
-        incidentCount: 3,
-        unom: "123"
-      },
-      date: new Date(),
-      incidentStatus: "active",
-      incidentTitle: "Инцидент 1",
-      incidentIssue: Issue.EMERGENCY,
-      info: [
-        ["Тип ТП", "ТЭЦ"],
-        ["Балансодержатель", "ООО Рога и копыта"],
-        ["Дата ввода в эксплуатацию", "01.01.2000"]
-      ],
-      number: "123",
-      priority: Priority.HIGH
-    }
-  ];
+  items: Incident.Item[] = [];
 
   get heatSources(): Incident.HeatItem[] {
     if (this.selectedTab !== "heat-source") {
@@ -127,3 +69,5 @@ export class IncidentsPageViewModel {
     console.log("resolve");
   }
 }
+
+export const IncidentsPageViewModel = new incidentsPageViewModel();

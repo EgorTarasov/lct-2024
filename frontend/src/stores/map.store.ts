@@ -4,7 +4,7 @@ import { Map as MapType } from "leaflet";
 import { MapEndpoint } from "@/api/endpoints/map.endpoint";
 import { Priority } from "@/types/priority.type";
 import { DateRange } from "react-day-picker";
-import { Filter } from "./filter.vm";
+import { Filter, buildFilterKey } from "./filter.vm";
 import { MapFilters } from "@/types/map-filters";
 import L from "leaflet";
 import "leaflet.vectorgrid";
@@ -17,6 +17,7 @@ import { HeatDistributor } from "@/types/heat.type";
 import { Issue } from "@/types/issue.type";
 import { Consumer } from "@/types/consumer.type";
 import { PagedViewModel } from "./paged.vm";
+import { NavigateFn } from "@tanstack/react-router";
 
 // patch canvas for click events
 L.Canvas.Tile.include({
@@ -42,6 +43,7 @@ L.Canvas.Tile.include({
 });
 
 class mapStore implements DisposableVm {
+  navigateFn: NavigateFn | null = null;
   constructor() {
     makeAutoObservable(this);
     void this.init();
@@ -56,6 +58,8 @@ class mapStore implements DisposableVm {
       () => {
         this.consumersPaged.loading = true;
         this.heatSourcesPaged.loading = true;
+        this.consumersPaged.updateItems([]);
+        this.heatSourcesPaged.updateItems([]);
         this.filterConsumers();
         this.filterHeatSources();
       }
@@ -64,28 +68,60 @@ class mapStore implements DisposableVm {
 
   // heatSourceVm = new HeatDistributorsViewModel();
   datesWithEvents: Date[] = [new Date()];
-  selectedConsumer: MapConstants._ConsumerFeatureProperty | null = null;
 
   //#region filters
-  filters: Filter<string>[] = [];
+  filters: Filter<MapConstants.PolygonFeature>[] = [];
   search = "";
   showPriorityFirst = false;
   async init() {
-    ConsumersEndpoint.getFilters().then((f) => {
-      this.filters = f.map((f) => new Filter(f.filterName, f.values));
-    });
-
     const res = await MapEndpoint.getProperty(0, 0, 0);
     const polygons: MapConstants.PolygonFeature[] = [];
+
+    const filters: Map<string, Set<string>> = new Map();
+    const keys: {
+      getValue: (v: MapConstants.PolygonFeature) => string | null;
+      name: string;
+    }[] = [
+      {
+        name: "Районы",
+        getValue: (v) => v.properties.data.municipal_district.split("район ")[1] || null
+      },
+      {
+        name: "Подключение к ТЭЦ",
+        getValue: (v) => v.properties.data.heating_point_src || null
+      },
+      {
+        name: "Тип источника",
+        getValue: (v) => v.properties.data.heating_point_type || null
+      },
+      {
+        name: "Муниципальный район адреса потребителя",
+        getValue: (v) => v.properties.data.consumerAddress.municipalDistrict || null
+      },
+      {
+        name: "Дата ввода в эксплуатацию",
+        getValue: (v) => new Date(v.properties.data.commissioning_date).toLocaleDateString() || null
+      },
+      {
+        name: "Номер теплового пункта",
+        getValue: (v) => v.properties.data.heating_point_number || null
+      }
+    ];
+
     res.forEach((v) => {
       const feature = buildPropertyFeature(v);
 
       if (feature) {
+        buildFilterKey(feature, keys, filters);
         polygons.push(feature);
       }
     });
 
     this.consumers = polygons;
+    this.filters = Array.from(filters.entries()).map(
+      ([name, values]) =>
+        new Filter(name, Array.from(values), keys.find((k) => k.name === name)!.getValue)
+    );
   }
   dateRange: DateRange = {
     from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
@@ -117,7 +153,9 @@ class mapStore implements DisposableVm {
     this.consumers.forEach((v) => {
       if (v.properties.data.consumerAddress.address) {
         if (!filteredConsumers.get(v.properties.data.consumerAddress.unom.toString())) {
-          if (v.properties.data.consumerAddress.unom.toString().includes(this.search)) {
+          const valid = this.filters.every((f) => f.values.includes(f.getValue(v)!));
+          if (valid && v.properties.data.consumerAddress.unom.toString().includes(this.search)) {
+            filteredConsumersPolygons.push(v);
             filteredConsumers.set(v.properties.data.consumerAddress.unom.toString(), {
               address: v.properties.data.consumerAddress.address,
               consumerType: "социальный",
@@ -132,7 +170,6 @@ class mapStore implements DisposableVm {
           }
         }
       }
-      filteredConsumersPolygons.push(v);
     });
 
     const v = Array.from(filteredConsumers.values());
@@ -157,7 +194,8 @@ class mapStore implements DisposableVm {
     this.consumers.forEach((v) => {
       const heatSourceUnom = v.properties.data.heatingPointAddress.unom;
       if (!heatSources.get(heatSourceUnom)) {
-        if (heatSourceUnom.toString().includes(this.search)) {
+        const valid = this.filters.every((f) => f.values.includes(f.getValue(v)!));
+        if (valid && heatSourceUnom.toString().includes(this.search)) {
           heatSources.set(heatSourceUnom, {
             address: v.properties.data.heatingPointAddress.address,
             consumerCount: 1,
@@ -181,7 +219,7 @@ class mapStore implements DisposableVm {
   //#endregion
 
   //#region map
-  private map: MapType | null = null;
+  map: MapType | null = null;
 
   setMap(m: MapType) {
     if (this.map) {
@@ -208,23 +246,47 @@ class mapStore implements DisposableVm {
     }
 
     if (!this.filteredConsumersPolygons?.length) {
+      this.featureLayer?.remove();
       return;
     }
 
     const layer = buildSlicerLayer(
       toJS(this.filteredConsumersPolygons),
-      MapConstants.PolygonProperties.priority.high
-      // {
-      //   onClick: (v) => this.onLayerClick(v)
-      // }
+      MapConstants.PolygonProperties.priority.high,
+      {
+        onClick: (v) => this.onLayerClick(v)
+      }
     );
 
+    console.log(this.filteredConsumersPolygons.length);
+
     this.featureLayer = layer;
+    if (this.map) {
+      if (this.map.hasLayer(this.featureLayer)) {
+        this.featureLayer.remove();
+      }
+      this.featureLayer.addTo(this.map);
+    }
   }
 
-  // onLayerClick(v: MapConstants._ConsumerFeatureProperty) {
-  //   // this.selectedConsumer = v;
-  // }
+  onLayerClick(v: MapConstants._ConsumerFeatureProperty) {
+    this.navigateFn?.({
+      to: "/heat_distributor/$heatDistributorId/consumers/$consumerId",
+      params: {
+        heatDistributorId: v.heatingPointAddress.unom.toString(),
+        consumerId: v.consumerAddress.unom.toString()
+      }
+    });
+  }
+
+  selectedConsumer: Consumer.Polygon | null = null;
+  setHighlightedConsumer(v: Consumer.Polygon | null) {
+    if (this.selectedConsumer) {
+      this.selectedConsumer = null;
+    }
+
+    this.selectedConsumer = v;
+  }
   //#endregion
 
   dispose(): void {

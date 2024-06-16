@@ -20,7 +20,7 @@ export namespace ConsumersDto {
         floors: z.string(),
         propertyClass: z.string(),
         unom: z.number(),
-        События: EventDto.Item.array()
+        События: EventDto.Item.array().nullable()
       })
       .array(),
     mkdConsumers: z
@@ -45,11 +45,12 @@ export namespace ConsumersDto {
         roofMaterials: z.number(),
         totalLivingArea: z.number(),
         serviceElevator: z.number(),
-        totalNonLivingArea: z.string(),
+        totalNonLivingArea: z.number().or(z.string()),
         typesOfHousingStock: z.number(),
-        События: EventDto.Item.array()
+        События: EventDto.Item.array().nullable()
       })
       .array()
+      .nullable()
   });
   export type Item = z.infer<typeof Item>;
 }

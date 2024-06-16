@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { MapStore } from "@/stores/map.store";
 import { MainSidebar } from "@/widgets/layoutMainSidebar/main-sidebar.widget";
 import { PaginationWidget } from "@/widgets/pagination/pagination.widget";
-import { Link, Outlet, createLazyFileRoute, useMatch, useMatches } from "@tanstack/react-router";
+import { Link, Outlet, createFileRoute, useMatch, useMatches } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { observer } from "mobx-react-lite";
 import React from "react";
@@ -59,7 +59,7 @@ const Page = observer(() => {
             {vm.heatSourcesPaged.loading && <LoadingWrapper />}
           </ScrollArea>
           <AnimatePresence mode="popLayout" initial={false}>
-            {!vm.heatSourcesPaged.loading && (
+            {vm.heatSourcesPaged.totalPages > 1 && (
               <motion.div className="mt-auto mb-4" {...transitionProps}>
                 <PaginationWidget
                   currentPage={vm.heatSourcesPaged.currentPage}
@@ -76,6 +76,6 @@ const Page = observer(() => {
   );
 });
 
-export const Route = createLazyFileRoute("/_map/_heat_distributors")({
+export const Route = createFileRoute("/_map/_heat_distributors")({
   component: Page
 });

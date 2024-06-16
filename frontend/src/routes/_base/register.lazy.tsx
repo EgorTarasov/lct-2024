@@ -1,4 +1,4 @@
-import { Link, createLazyFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -44,7 +44,7 @@ export const Page = () => {
   const disabled = form.formState.isSubmitting;
 
   return (
-    <Card className="m-auto max-w-md w-full appear">
+    <Card className="m-auto max-w-md w-full">
       <CardHeader>
         <CardTitle className="text-2xl">Регистрация</CardTitle>
         <CardDescription>Введите информацию для создания аккаунта</CardDescription>
@@ -122,6 +122,6 @@ export const Page = () => {
   );
 };
 
-export const Route = createLazyFileRoute("/_base/register")({
+export const Route = createFileRoute("/_base/register")({
   component: () => <Page />
 });

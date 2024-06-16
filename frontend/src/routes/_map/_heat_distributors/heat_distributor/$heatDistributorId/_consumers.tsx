@@ -97,7 +97,7 @@ const Page = observer(() => {
             {vm.consumersPaged.loading && <LoadingWrapper />}
           </ScrollArea>
           <AnimatePresence mode="popLayout" initial={false}>
-            {!vm.consumersPaged.loading && (
+            {vm.consumersPaged.totalPages > 1 && (
               <motion.div className="mt-auto mb-4" {...transitionProps}>
                 <PaginationWidget
                   currentPage={vm.consumersPaged.currentPage}

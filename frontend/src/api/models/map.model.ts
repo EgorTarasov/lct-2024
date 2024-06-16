@@ -46,7 +46,8 @@ export namespace MapDto {
     heating_point_location_type: z.string(),
     municipal_district: z.string(),
     consumer_full_address: ConsumerPointAddress,
-    heating_point_full_address: HeatingPointAddress
+    heating_point_full_address: HeatingPointAddress,
+    consumers: ConsumerPointAddress.array().nullable()
   });
   export type Property = z.infer<typeof Property>;
 }

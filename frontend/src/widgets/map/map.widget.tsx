@@ -1,21 +1,13 @@
 import "leaflet/dist/leaflet.css";
 import "./draw/draw-locale";
 import "./map.css";
+import "geojson-vt";
 import { observer } from "mobx-react-lite";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-  ZoomControl,
-  Polygon,
-  GeoJSON
-} from "react-leaflet";
+import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
 import { MapInitializer } from "./map-initializer";
 import { MapStore } from "@/stores/map.store";
-import { useEffect } from "react";
-import { toast } from "sonner";
 import { ELEVATION } from "@/constants/elevation";
+import { ConsumerPolygon } from "./polygon";
 
 const vm = MapStore;
 
@@ -54,6 +46,7 @@ const Map = observer(() => {
         />
         <ZoomControl position="topright" />
         <MapInitializer setMap={(v) => vm.setMap(v)} />
+        {vm.selectedConsumer && <ConsumerPolygon data={vm.selectedConsumer} />}
       </MapContainer>
     </>
   );

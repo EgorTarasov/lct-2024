@@ -1,5 +1,5 @@
 import { AssistantPage } from "@/widgets/assistant/assistant.page";
-import { createLazyFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
 {
   /* <div className="w-full h-96 flex items-center justify-center text-2xl gap-8 mx-auto text-center flex-col">
@@ -13,6 +13,6 @@ import { createLazyFileRoute } from "@tanstack/react-router";
   </Link>
 </div> */
 }
-export const Route = createLazyFileRoute("/_base/profile")({
+export const Route = createFileRoute("/_base/profile")({
   component: AssistantPage
 });

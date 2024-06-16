@@ -12,6 +12,7 @@ export namespace Consumer {
       source: string;
       balanceHolder: string;
       commissioningDate: number;
+      priority: Priority;
     };
   }
 
@@ -43,19 +44,42 @@ export namespace Consumer {
   }
 
   export const convertDto = (dto: ConsumersDto.Item): Item => {
-    const item = dto.mkdConsumers[0];
-    return {
-      id: item.externalID,
-      address: item.fullAddress,
-      name: item.district,
-      priority: Priority.HIGH,
-      issue: Issue.EMERGENCY,
-      info: {
-        type: item.typesOfHousingStock.toString()
-      },
-      incidentCount: item.События.length,
-      unom: item.unom.toString(),
-      consumerType: item.wallMaterial.toString()
-    };
+    if (dto.mkdConsumers && dto.mkdConsumers.length > 1) {
+      const item = dto.mkdConsumers[0];
+
+      console.log(item);
+
+      return {
+        id: item.externalID,
+        address: item.fullAddress,
+        name: item.district,
+        priority: Priority.HIGH,
+        issue: Issue.EMERGENCY,
+        info: {
+          type: item.typesOfHousingStock.toString()
+        },
+        incidentCount: item.События?.length ?? 0,
+        unom: item.unom.toString(),
+        consumerType: item.wallMaterial.toString()
+      };
+    } else {
+      const item = dto.stateHeatConsumers[0];
+
+      console.log(item);
+
+      return {
+        id: item.unom,
+        address: item.admDistrict,
+        name: item.municupalDistrict,
+        priority: Priority.LOW,
+        issue: Issue.EMERGENCY,
+        info: {
+          type: item.type
+        },
+        incidentCount: item.События?.length ?? 0,
+        unom: item.unom.toString(),
+        consumerType: item.material
+      };
+    }
   };
 }

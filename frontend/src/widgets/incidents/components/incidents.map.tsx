@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import { ELEVATION } from "@/constants/elevation";
 
-export const IncidentsMap: FCVM<IncidentsPageViewModel> = observer(() => {
+export const IncidentsMap = observer(() => {
   return (
     <MapContainer center={[51.505, -0.09]} zoom={13} style={{ height: 450, zIndex: ELEVATION.MAP }}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -17,7 +17,7 @@ export const IncidentsMap: FCVM<IncidentsPageViewModel> = observer(() => {
   );
 });
 
-export const MyMap: FCVM<IncidentsPageViewModel> = observer(() => {
+export const MyMap = observer(() => {
   const [map, setMap] = useState<Map | null>(null);
 
   useEffect(() => {}, []);

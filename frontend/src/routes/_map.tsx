@@ -1,7 +1,7 @@
 import { GrantsService } from "@/stores/grant.service";
 import { MapLoading } from "@/widgets/map/map-loading";
-import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
-import React, { Suspense, useState } from "react";
+import { Link, Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
+import React, { Suspense, useEffect, useState } from "react";
 import {
   SidebarContent,
   MainSidebarContext
@@ -12,6 +12,7 @@ import { ELEVATION } from "@/constants/elevation";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/utils/cn";
 import { observer } from "mobx-react-lite";
+import { MapStore } from "@/stores/map.store";
 
 const MainSidebarView = React.lazy(() =>
   import("@/widgets/layoutMainSidebar/main-sidebar.view").then((x) => ({
@@ -30,6 +31,7 @@ const ProfileBar = React.lazy(() =>
 );
 
 const Page = observer(() => {
+  const navigate = useNavigate();
   const [content, _setContent] = useState<SidebarContent | null>(null);
   const [secondaryContent, setSecondaryContent] = useState<SidebarContent | null>(null);
   const [isOpen, setIsOpen] = useState(true);
@@ -38,6 +40,10 @@ const Page = observer(() => {
     setIsOpen(true);
     _setContent(v);
   };
+
+  useEffect(() => {
+    MapStore.navigateFn = navigate;
+  }, []);
 
   return (
     <MainSidebarContext.Provider

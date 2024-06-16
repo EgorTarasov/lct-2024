@@ -11,7 +11,7 @@ export const AssistantPage = observer(() => {
   return (
     <>
       <IncidentsOverlay />
-      <div className="relative flex h-full w-full py-6 px-4 flex-col gap-4 mx-auto max-w-screen-desktop overflow-hidden max-w-[860px] appear">
+      <div className="relative flex h-full w-full py-6 px-4 flex-col gap-4 mx-auto max-w-screen-desktop overflow-hidden max-w-[860px]">
         <div className="flex-1 flex flex-col-reverse overflow-y-auto h-full">
           <ul className="flex flex-col gap-3">
             {vm.messages.map((item, index) => (

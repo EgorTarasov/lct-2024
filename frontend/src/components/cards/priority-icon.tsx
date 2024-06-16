@@ -12,7 +12,7 @@ export const PriorityCard: FC<{ data: Priority }> = (x) => {
     <div className="flex gap-1 items-center">
       {v.icon}
       <span className="text-sm" style={{ color: v.color }}>
-        {v.alternateLocale} влажность
+        {v.alternateLocale} важность
       </span>
     </div>
   );
