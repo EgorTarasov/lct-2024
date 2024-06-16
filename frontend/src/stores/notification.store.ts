@@ -1,24 +1,29 @@
+import { NotificationEndpoint } from "@/api/endpoints/notification.endpoint";
 import { NotificationFilters } from "@/constants/notification-filters";
 import { Notification } from "@/types/notification.type";
 import { Priority } from "@/types/priority.type";
 import { makeAutoObservable } from "mobx";
+import { toast } from "sonner";
 
 class notificationStore {
-  ws: WebSocket = new WebSocket("wss://push.larek.tech/stream?token=CqYaYW-WeaviCpP");
+  ws: WebSocket = new WebSocket('wss://push.larek.tech/stream?token="CqYaYW-WeaviCpP"');
 
   constructor() {
     makeAutoObservable(this);
-
     this.ws.onopen = () => {
       console.log("Connected to Gotify WebSocket");
     };
 
     this.ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      console.log("New message:", message);
+      toast(message.message);
+      console.log("New message:", JSON.stringify(message));
     };
 
     this.ws.onerror = (error) => {
+      toast.error("WebSocket error", {
+        description: JSON.stringify(error)
+      });
       console.error("WebSocket error:", error);
     };
 

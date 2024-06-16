@@ -1,4 +1,5 @@
-import { createFileRoute, useMatch, useMatches } from "@tanstack/react-router";
+import { IncidentsOverlay } from "@/widgets/incidents/incidents-overlay";
+import { createFileRoute, createLazyFileRoute, useMatch, useMatches } from "@tanstack/react-router";
 import React from "react";
 
 const AnimatedOutlet = React.lazy(() =>
@@ -15,13 +16,18 @@ const Page = () => {
   const nextMatchIndex = matches.findIndex((d) => d.id === match.id) + 1;
   const nextMatch = matches[nextMatchIndex];
 
+  const hasSidebar = matches.some((d) => d.pathname.includes("incidents"));
+
   return (
-    <AnimatePresence mode="popLayout">
-      <AnimatedOutlet key={nextMatch.id} />
-    </AnimatePresence>
+    <>
+      <IncidentsOverlay hasSidebar={hasSidebar} />
+      <AnimatePresence mode="popLayout">
+        <AnimatedOutlet key={nextMatch.id} />
+      </AnimatePresence>
+    </>
   );
 };
 
-export const Route = createFileRoute("/_base")({
+export const Route = createLazyFileRoute("/_base")({
   component: Page
 });

@@ -24,7 +24,6 @@ const Page = observer(() => {
     <main className="size-full flex">
       <IncidentsSidebarMobile />
       <IncidentsSidebar />
-      <IncidentsOverlay hasSidebar />
       <ScrollArea className="flex-1 pt-[72px] pb-4 h-full">
         <AnimatePresence mode="popLayout">
           <AnimatedOutlet key={nextMatch.id} />

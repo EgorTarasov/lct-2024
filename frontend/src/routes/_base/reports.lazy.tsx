@@ -1,5 +1,4 @@
 import { Text } from "@/components/typography/Text";
-import { IncidentsOverlay } from "@/widgets/incidents/incidents-overlay";
 import { createFileRoute } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 
@@ -93,7 +92,6 @@ export function TableDemo() {
 const Page = observer(() => {
   return (
     <>
-      <IncidentsOverlay />
       <main className="mx-auto flex flex-col w-full max-w-screen-xl pt-20 h-full overflow-hidden">
         <Text.H4>Загруженные данные</Text.H4>
         <ScrollArea className="flex-1">

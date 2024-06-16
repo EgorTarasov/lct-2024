@@ -14,13 +14,13 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as MapImport } from './routes/_map'
-import { Route as BaseImport } from './routes/_base'
 import { Route as MapHeatdistributorsImport } from './routes/_map/_heat_distributors'
 import { Route as BaseIncidentsImport } from './routes/_base/_incidents'
 import { Route as MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersImport } from './routes/_map/_heat_distributors/heat_distributor/$heatDistributorId/_consumers'
 
 // Create Virtual Routes
 
+const BaseLazyImport = createFileRoute('/_base')()
 const BaseReportsLazyImport = createFileRoute('/_base/reports')()
 const BaseRegisterLazyImport = createFileRoute('/_base/register')()
 const BaseProfileLazyImport = createFileRoute('/_base/profile')()
@@ -53,36 +53,36 @@ const MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersConsumersConsu
 
 // Create/Update Routes
 
+const BaseLazyRoute = BaseLazyImport.update({
+  id: '/_base',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/_base.lazy').then((d) => d.Route))
+
 const MapRoute = MapImport.update({
   id: '/_map',
   getParentRoute: () => rootRoute,
 } as any)
 
-const BaseRoute = BaseImport.update({
-  id: '/_base',
-  getParentRoute: () => rootRoute,
-} as any)
-
 const BaseReportsLazyRoute = BaseReportsLazyImport.update({
   path: '/reports',
-  getParentRoute: () => BaseRoute,
+  getParentRoute: () => BaseLazyRoute,
 } as any).lazy(() => import('./routes/_base/reports.lazy').then((d) => d.Route))
 
 const BaseRegisterLazyRoute = BaseRegisterLazyImport.update({
   path: '/register',
-  getParentRoute: () => BaseRoute,
+  getParentRoute: () => BaseLazyRoute,
 } as any).lazy(() =>
   import('./routes/_base/register.lazy').then((d) => d.Route),
 )
 
 const BaseProfileLazyRoute = BaseProfileLazyImport.update({
   path: '/profile',
-  getParentRoute: () => BaseRoute,
+  getParentRoute: () => BaseLazyRoute,
 } as any).lazy(() => import('./routes/_base/profile.lazy').then((d) => d.Route))
 
 const BaseLoginLazyRoute = BaseLoginLazyImport.update({
   path: '/login',
-  getParentRoute: () => BaseRoute,
+  getParentRoute: () => BaseLazyRoute,
 } as any).lazy(() => import('./routes/_base/login.lazy').then((d) => d.Route))
 
 const MapHeatdistributorsRoute = MapHeatdistributorsImport.update({
@@ -92,7 +92,7 @@ const MapHeatdistributorsRoute = MapHeatdistributorsImport.update({
 
 const BaseIncidentsRoute = BaseIncidentsImport.update({
   id: '/_incidents',
-  getParentRoute: () => BaseRoute,
+  getParentRoute: () => BaseLazyRoute,
 } as any)
 
 const MapHeatdistributorsIndexLazyRoute =
@@ -177,13 +177,6 @@ const MapHeatdistributorsHeatdistributorHeatDistributorIdConsumersConsumersConsu
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/_base': {
-      id: '/_base'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof BaseImport
-      parentRoute: typeof rootRoute
-    }
     '/_map': {
       id: '/_map'
       path: ''
@@ -191,12 +184,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MapImport
       parentRoute: typeof rootRoute
     }
+    '/_base': {
+      id: '/_base'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof BaseLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/_base/_incidents': {
       id: '/_base/_incidents'
       path: ''
       fullPath: ''
       preLoaderRoute: typeof BaseIncidentsImport
-      parentRoute: typeof BaseImport
+      parentRoute: typeof BaseLazyImport
     }
     '/_map/_heat_distributors': {
       id: '/_map/_heat_distributors'
@@ -210,28 +210,28 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof BaseLoginLazyImport
-      parentRoute: typeof BaseImport
+      parentRoute: typeof BaseLazyImport
     }
     '/_base/profile': {
       id: '/_base/profile'
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof BaseProfileLazyImport
-      parentRoute: typeof BaseImport
+      parentRoute: typeof BaseLazyImport
     }
     '/_base/register': {
       id: '/_base/register'
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof BaseRegisterLazyImport
-      parentRoute: typeof BaseImport
+      parentRoute: typeof BaseLazyImport
     }
     '/_base/reports': {
       id: '/_base/reports'
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof BaseReportsLazyImport
-      parentRoute: typeof BaseImport
+      parentRoute: typeof BaseLazyImport
     }
     '/_map/_heat_distributors/': {
       id: '/_map/_heat_distributors/'
@@ -295,16 +295,6 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export const routeTree = rootRoute.addChildren({
-  BaseRoute: BaseRoute.addChildren({
-    BaseIncidentsRoute: BaseIncidentsRoute.addChildren({
-      BaseIncidentsIncidentsUnomLazyRoute,
-      BaseIncidentsIncidentsIndexLazyRoute,
-    }),
-    BaseLoginLazyRoute,
-    BaseProfileLazyRoute,
-    BaseRegisterLazyRoute,
-    BaseReportsLazyRoute,
-  }),
   MapRoute: MapRoute.addChildren({
     MapHeatdistributorsRoute: MapHeatdistributorsRoute.addChildren({
       MapHeatdistributorsIndexLazyRoute,
@@ -321,6 +311,16 @@ export const routeTree = rootRoute.addChildren({
         }),
     }),
   }),
+  BaseLazyRoute: BaseLazyRoute.addChildren({
+    BaseIncidentsRoute: BaseIncidentsRoute.addChildren({
+      BaseIncidentsIncidentsUnomLazyRoute,
+      BaseIncidentsIncidentsIndexLazyRoute,
+    }),
+    BaseLoginLazyRoute,
+    BaseProfileLazyRoute,
+    BaseRegisterLazyRoute,
+    BaseReportsLazyRoute,
+  }),
 })
 
 /* prettier-ignore-end */
@@ -331,24 +331,24 @@ export const routeTree = rootRoute.addChildren({
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/_base",
-        "/_map"
-      ]
-    },
-    "/_base": {
-      "filePath": "_base.tsx",
-      "children": [
-        "/_base/_incidents",
-        "/_base/login",
-        "/_base/profile",
-        "/_base/register",
-        "/_base/reports"
+        "/_map",
+        "/_base"
       ]
     },
     "/_map": {
       "filePath": "_map.tsx",
       "children": [
         "/_map/_heat_distributors"
+      ]
+    },
+    "/_base": {
+      "filePath": "_base.lazy.tsx",
+      "children": [
+        "/_base/_incidents",
+        "/_base/login",
+        "/_base/profile",
+        "/_base/register",
+        "/_base/reports"
       ]
     },
     "/_base/_incidents": {

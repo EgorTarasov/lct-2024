@@ -1,7 +1,7 @@
 import "leaflet/dist/leaflet.css";
 import "./draw/draw-locale";
 import "./map.css";
-import "geojson-vt";
+// import "geojson-vt";
 import { observer } from "mobx-react-lite";
 import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
 import { MapInitializer } from "./map-initializer";
