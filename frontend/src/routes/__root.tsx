@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ELEVATION } from "@/constants/elevation";
 import NotFoundPage from "@/pages/not-found.page";
 import { AuthService } from "@/stores/auth.service";
-import { createRootRoute, useMatch, useMatches } from "@tanstack/react-router";
+import { Outlet, createRootRoute, useMatch, useMatches } from "@tanstack/react-router";
 import React from "react";
 
 const Toaster = React.lazy(() =>
@@ -20,10 +20,10 @@ const AnimatePresence = React.lazy(() =>
 );
 
 const Page = () => {
-  const matches = useMatches();
-  const match = useMatch({ strict: false });
-  const nextMatchIndex = matches.findIndex((d) => d.id === match.id) + 1;
-  const nextMatch = matches[nextMatchIndex];
+  // const matches = useMatches();
+  // const match = useMatch({ strict: false });
+  // const nextMatchIndex = matches.findIndex((d) => d.id === match.id) + 1;
+  // const nextMatch = matches[nextMatchIndex];
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
@@ -36,9 +36,7 @@ const Page = () => {
               <LoadingWrapper />
             </div>
           }>
-          <AnimatePresence mode="popLayout">
-            <AnimatedOutlet key={nextMatch.id} />
-          </AnimatePresence>
+          <Outlet />
           <Toaster richColors />
         </React.Suspense>
       </TooltipProvider>

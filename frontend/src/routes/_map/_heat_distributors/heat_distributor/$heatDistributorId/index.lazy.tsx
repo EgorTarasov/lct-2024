@@ -10,22 +10,24 @@ import {
   AccordionContent
 } from "@/components/ui/accordion";
 import { buttonVariants } from "@/components/ui/button";
+import { LoadingWrapper } from "@/components/ui/loaders/LoadingWrapper";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { MapStore } from "@/stores/map.store";
+import { HeatDistributorViewModel } from "@/stores/heat-distributor.vm";
 import { cn } from "@/utils/cn";
-import { pluralizeIncident } from "@/utils/pluralize/incident";
 import { SecondarySidebar } from "@/widgets/layoutMainSidebar/SecondarySidebar/secondary-sidebar.widget";
 import { Link, createLazyFileRoute, useNavigate } from "@tanstack/react-router";
 import { ChevronRightIcon } from "lucide-react";
 import { observer } from "mobx-react-lite";
-
-const vm = MapStore;
+import { useEffect, useState } from "react";
 
 const Page = observer(() => {
   const navigate = useNavigate();
-  const heatDistributorId = Route.useParams().heatDistributorId;
+  const unom = Route.useParams().heatDistributorId;
+  const [vm] = useState(() => new HeatDistributorViewModel());
 
-  const heatSource = vm.heatSourceVm.items.find((v) => v.id.toString() === heatDistributorId);
+  useEffect(() => {
+    vm.init(unom);
+  }, [unom]);
 
   return (
     <SecondarySidebar
@@ -34,9 +36,9 @@ const Page = observer(() => {
           to: "/"
         });
       }}>
-      {heatSource ? (
+      {vm.item ? (
         <div className="flex flex-col">
-          <HeatDistributorCardReadonly data={heatSource} />
+          <HeatDistributorCardReadonly data={vm.item} />
           <Section className="px-0" title={<span className="px-4">Информация об объекте</span>}>
             <ul className="space-y-2 px-4">
               <TitleInfo title="Вид ТП" info="ЦТП" />
@@ -48,9 +50,9 @@ const Page = observer(() => {
               </AccordionItem>
             </Accordion>
           </Section>
-          {heatSource.incidentCount > 0 && (
+          {vm.item.incidentCount > 0 && (
             <Section withoutSeparator className="pt-0.5">
-              <IssueLink unom={heatSource.unom} count={heatSource.incidentCount} />
+              <IssueLink unom={vm.item.unom} count={vm.item.incidentCount} />
             </Section>
           )}
           <Section
@@ -61,7 +63,7 @@ const Page = observer(() => {
                   <TooltipTrigger asChild>
                     <Link
                       to="/heat_distributor/$heatDistributorId/consumers"
-                      params={{ heatDistributorId }}
+                      params={{ heatDistributorId: unom }}
                       className={cn(
                         buttonVariants({ variant: "outline", size: "icon" }),
                         "shadow-none"
@@ -74,6 +76,8 @@ const Page = observer(() => {
               </>
             }></Section>
         </div>
+      ) : vm.loading ? (
+        <LoadingWrapper />
       ) : (
         <div className="flex flex-col gap-2 text-center">
           <Text.Large>Источник тепла не найден</Text.Large>

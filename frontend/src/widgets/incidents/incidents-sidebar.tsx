@@ -15,6 +15,7 @@ import { HeatDistributorCard } from "@/components/cards/heat-distributor.card";
 import { Separator } from "@/components/ui/separator";
 import { LoadingWrapper } from "@/components/ui/loaders/LoadingWrapper";
 import { ConsumerCard } from "@/components/cards/consumer.card";
+import { IssueSelect } from "./IssueSelect";
 
 export const IncidentsContent: FC<{ vm: IncidentsPageViewModel; isMobile?: boolean }> = observer(
   ({ vm, isMobile }) => {
@@ -25,13 +26,14 @@ export const IncidentsContent: FC<{ vm: IncidentsPageViewModel; isMobile?: boole
             containerClassName="flex-1"
             className="bg-background"
             rightIcon={<SearchIcon />}
+            onChange={(v) => vm.setSearch(v.target.value)}
             placeholder="Введите данные UNOM"
           />
           {!isMobile && (
             <Text.UiMedium className="text-muted-foreground pt-2">Инциденты</Text.UiMedium>
           )}
           <IncidentsTabs vm={vm} />
-          <LayerSelect
+          <IssueSelect
             value={vm.issueType}
             onChange={(v) => {
               vm.issueType = v;
@@ -89,11 +91,11 @@ export const IncidentsSidebarMobile: FCVM<IncidentsPageViewModel> = observer(({ 
           <MenuIcon />
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="text-foreground pb-10 max-h-[90%]">
-        <div className="flex flex-col overflow-auto">
+      <DrawerContent className="flex flex-col text-foreground pb-10 max-h-[90%] overflow-hidden">
+        <ScrollArea className="flex-1">
           <DrawerHeader>Инциденты</DrawerHeader>
           <IncidentsContent isMobile vm={vm} />
-        </div>
+        </ScrollArea>
       </DrawerContent>
     </Drawer>
   );

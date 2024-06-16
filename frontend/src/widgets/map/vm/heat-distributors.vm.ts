@@ -58,8 +58,6 @@ export class HeatDistributorsViewModel implements DisposableVm {
       search: this.search,
       heatNetworks: this.heatNetworks.values
     };
-
-    console.log(filters);
   }, 1000);
 
   reset() {

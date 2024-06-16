@@ -9,13 +9,13 @@ import { MapStore } from "@/stores/map.store";
 export const ProfileBar = observer(() => {
   return (
     <div
-      className="absolute top-4 right-4 flex gap-2 flex-col lg:flex-row items-end lg:items-start"
+      className="absolute top-4 right-4 flex gap-2 flex-col lg:flex-row items-end lg:items-start pointer-events-none"
       style={{ zIndex: ELEVATION.PROFILE }}>
-      <div className="hidden md:flex xl:flex-row gap-2 flex-col">
+      <div className="hidden md:flex xl:flex-row gap-2 flex-col pointer-events-auto">
         <TimelineWidget />
         <LayerSelect value={MapStore.layer} onChange={(v) => (MapStore.layer = v)} />
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 pointer-events-auto">
         <ThemeSwitcher />
         <UserNav />
       </div>

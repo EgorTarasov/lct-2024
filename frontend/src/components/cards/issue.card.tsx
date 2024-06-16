@@ -4,17 +4,17 @@ import { Link } from "@tanstack/react-router";
 import { ChevronRightIcon } from "lucide-react";
 import { FC } from "react";
 
-export const IssueCard: FC<{ data: Issue }> = (x) => {
+export const IssueCard: FC<{ data: Issue; text?: string }> = (x) => {
   const v = IssueLocaleMap[x.data];
   return (
     <div
-      className="py-1 px-1.5 w-fit space-x-2 rounded-sm flex gap-1 text-sm items-center"
+      className="py-1 px-1.5 w-fit space-x-2 rounded-sm flex gap-1 text-sm items-center dark:opacity-80"
       style={{
         backgroundColor: v.backgroundColor,
         color: v.color
       }}>
       <span className="*:size-4">{v.icon}</span>
-      {v.locale}
+      {x.text ?? v.locale}
     </div>
   );
 };

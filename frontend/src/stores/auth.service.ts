@@ -9,14 +9,7 @@ class AuthServiceViewModel {
 
   constructor() {
     makeAutoObservable(this);
-    // void this.init();
-    this.auth = {
-      state: "authenticated",
-      user: {
-        firstName: "John",
-        lastName: "Doe"
-      }
-    };
+    void this.init();
   }
 
   private async init() {

@@ -1,5 +1,7 @@
+import { HeatDistributorDto } from "@/api/models/heat-distribution.model";
 import { Issue } from "./issue.type";
 import { Priority } from "./priority.type";
+import { MapDto } from "@/api/models/map.model";
 
 export namespace HeatDistributor {
   export type Info =
@@ -16,13 +18,25 @@ export namespace HeatDistributor {
     id: number;
     number: string;
     address: string;
-    issue: Issue;
+    issue: Issue | null;
     priority: Priority;
     consumerCount: number;
     issues: Issue[];
     incidentCount: number;
     unom: string;
   }
+
+  export const convertDto = (v: MapDto.Property): HeatDistributor.Item => ({
+    id: v.consumer_full_address.unom,
+    number: v.heating_point_number,
+    address: v.heating_point_full_address.address,
+    issue: Issue.EMERGENCY,
+    priority: Priority.HIGH,
+    consumerCount: 1,
+    issues: [Issue.EMERGENCY, Issue.REPAIR],
+    incidentCount: 0,
+    unom: v.heating_point_full_address.unom.toString()
+  });
 }
 
 export namespace HeatDistributorLocaleMap {

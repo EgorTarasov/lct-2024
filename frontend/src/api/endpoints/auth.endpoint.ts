@@ -6,7 +6,7 @@ export namespace AuthEndpoint {
     email: string;
     password: string;
   };
-  export const login = async (v: LoginTemplate) => api.post("/auth/login", AuthDto.Token, v);
+  export const login = async (v: LoginTemplate) => api.post("/users/login", AuthDto.Token, v);
 
   export type RegisterTemplate = {
     email: string;
@@ -15,5 +15,5 @@ export namespace AuthEndpoint {
     lastName: string;
   };
   export const register = async (v: RegisterTemplate) =>
-    api.post("/auth/register", AuthDto.Token, v);
+    api.post("/users/register", AuthDto.Token, v);
 }

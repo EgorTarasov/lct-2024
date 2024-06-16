@@ -6,6 +6,7 @@ import { PriorityCard, PriorityIcon } from "./priority-icon";
 import { IssueCard } from "./issue.card";
 import { TitleInfo } from "./title-info";
 import { cn } from "@/utils/cn";
+import { toJS } from "mobx";
 
 export const ConsumerCard: FC<{
   data: Consumer.Item;

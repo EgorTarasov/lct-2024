@@ -24,11 +24,14 @@ export const HeatDistributorCard: FC<{ data: HeatDistributor.Item; className?: s
   return (
     <div className={cn("flex flex-col px-4 py-2 hover:bg-muted/50 w-full", x.className)}>
       <div className="flex items-center justify-between w-full flex-wrap gap-3">
-        <Text.SubtleMedium className="text-muted-foreground">{x.data.number}</Text.SubtleMedium>
+        <div className="flex gap-2 items-center">
+          <Text.SubtleMedium className="text-muted-foreground">{x.data.number}</Text.SubtleMedium>
+          <Text.Subtle className="text-muted-foreground">UNOM: {x.data.unom}</Text.Subtle>
+        </div>
         <PriorityIcon data={x.data.priority} />
       </div>
       <Text.Large className="pb-1">{x.data.address}</Text.Large>
-      <IssueCard data={x.data.issue} />
+      {x.data.issue && <IssueCard data={x.data.issue} />}
       <div className="flex items-center gap-1 pt-2">
         <p className="text-sm text-muted-foreground">
           {x.data.consumerCount} {pluralizeConsumer(x.data.consumerCount)} тепла
@@ -48,7 +51,7 @@ export const HeatDistributorCardReadonly: FC<{ data: HeatDistributor.Item }> = (
     </div>
     <Text.Large className="pb-1">{x.data.address}</Text.Large>
     <div className="flex items-center justify-between">
-      <IssueCard data={x.data.issue} />
+      {x.data.issue && <IssueCard data={x.data.issue} />}
       <PriorityCard data={x.data.priority} />
     </div>
   </div>

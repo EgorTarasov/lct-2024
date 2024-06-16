@@ -12,11 +12,11 @@ const Page = observer(() => {
 
   return (
     <IncidentsContext.Provider value={{ vm }}>
-      <main className="size-full flex">
+      <main className="size-full flex appear">
         <IncidentsSidebarMobile vm={vm} />
         <IncidentsSidebar vm={vm} />
         <IncidentsOverlay vm={vm} hasSidebar />
-        <ScrollArea className="flex flex-col pt-[72px] flex-1">
+        <ScrollArea className="flex-1 pt-[72px] pb-4 h-full">
           <Outlet />
         </ScrollArea>
       </main>

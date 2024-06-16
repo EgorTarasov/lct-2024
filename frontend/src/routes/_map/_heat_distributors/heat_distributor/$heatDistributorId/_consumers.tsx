@@ -2,7 +2,6 @@ import { ConsumerCard } from "@/components/cards/consumer.card";
 import { Text } from "@/components/typography/Text";
 import {
   Breadcrumb,
-  BreadcrumbEllipsis,
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbPage,
@@ -19,63 +18,47 @@ import { LoadingWrapper } from "@/components/ui/loaders/LoadingWrapper";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { MapStore } from "@/stores/map.store";
-import { HeatDistributor } from "@/types/heat.type";
-import { cn } from "@/utils/cn";
-import { FCVM } from "@/utils/vm";
 import { MainSidebar } from "@/widgets/layoutMainSidebar/main-sidebar.widget";
-import { ConsumersViewModel } from "@/widgets/map/vm/consumers.vm";
 import { PaginationWidget } from "@/widgets/pagination/pagination.widget";
-import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
+import { Link, Outlet, createFileRoute, useMatches } from "@tanstack/react-router";
+import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDownIcon } from "lucide-react";
 import { observer } from "mobx-react-lite";
-import React, { FC, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
-const PriorityDropdown: FCVM<ConsumersViewModel> = observer(({ vm }) => (
+const transitionProps = {
+  initial: { opacity: 0, translateY: 20 },
+  animate: { opacity: 1, translateY: 0 },
+  exit: { opacity: 0, translateY: 20 }
+};
+
+const PriorityDropdown = observer(() => (
   <DropdownMenu>
     <DropdownMenuTrigger asChild>
       <Button variant="outline" className="bg-card flex gap-2 w-56 text-left px-3 mx-4">
         <Text.Subtle className="flex-1">
-          {vm.showPriorityFirst ? "Сначала приоритетные" : "Сначала остывшие"}
+          {MapStore.showPriorityFirst ? "Сначала приоритетные" : "Сначала остывшие"}
         </Text.Subtle>
         <ChevronDownIcon className="size-4 text-muted-foreground" />
       </Button>
     </DropdownMenuTrigger>
     <DropdownMenuContent className="w-56">
-      <DropdownMenuItem onClick={() => (vm.showPriorityFirst = true)}>
+      <DropdownMenuItem onClick={() => (MapStore.showPriorityFirst = true)}>
         Сначала приоритетные
       </DropdownMenuItem>
-      <DropdownMenuItem onClick={() => (vm.showPriorityFirst = false)}>
+      <DropdownMenuItem onClick={() => (MapStore.showPriorityFirst = false)}>
         Сначала остывшие
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>
 ));
 
-const PageBreadcrumbs: FC<{
-  heatDistributorId: string;
-  heatSource: HeatDistributor.Item | null;
-}> = (x) => (
+const PageBreadcrumbs = () => (
   <Breadcrumb className="px-4">
     <BreadcrumbList>
       <BreadcrumbItem>
         <Link to="/">Источники тепла</Link>
       </BreadcrumbItem>
-      <BreadcrumbSeparator />
-      <DropdownMenu>
-        <DropdownMenuTrigger>
-          <BreadcrumbEllipsis className="size-4" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem asChild>
-            <Link
-              to="/heat_distributor/$heatDistributorId"
-              params={{ heatDistributorId: x.heatDistributorId }}
-              className={cn("w-full h-full cursor-pointer", !x.heatSource && "text-destructive")}>
-              {x.heatSource?.number ?? "Неизвестный источник"}
-            </Link>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
       <BreadcrumbSeparator />
       <BreadcrumbItem>
         <BreadcrumbPage className="cursor-default">Потребители тепла</BreadcrumbPage>
@@ -85,55 +68,45 @@ const PageBreadcrumbs: FC<{
 );
 
 const Page = observer(() => {
+  const m = useMatches();
   const heatDistributorId = Route.useParams().heatDistributorId;
   // const heatSource = MapStore.heatSourceVm.items.find((v) => v.id.toString() === heatDistributorId);
-  const vm = MapStore.consumersVm;
-
-  useEffect(() => {
-    MapStore.consumersVm = new ConsumersViewModel(heatDistributorId);
-  }, [heatDistributorId]);
+  const vm = MapStore;
 
   return (
     <>
       <MainSidebar>
         <div className="gap-3 h-full overflow-hidden flex flex-col">
           <Text.UiMedium className="px-4 text-muted-foreground">Реестр объектов</Text.UiMedium>
-          <PageBreadcrumbs
-            heatDistributorId={heatDistributorId}
-            heatSource={vm?.heatSource ?? null}
-          />
-          {vm?.heatSource ? (
-            <>
-              <PriorityDropdown vm={vm} />
-              <ScrollArea>
-                {vm.items.map((v) => (
-                  <React.Fragment key={v.id}>
-                    <Link
-                      to="/heat_distributor/$heatDistributorId/consumers/$consumerId"
-                      params={{
-                        heatDistributorId,
-                        consumerId: v.id.toString()
-                      }}>
-                      <ConsumerCard data={v} />
-                    </Link>
-                    <Separator />
-                  </React.Fragment>
-                ))}
-                {vm.loading && <LoadingWrapper />}
-              </ScrollArea>
-              <PaginationWidget
-                className="mt-auto mb-4"
-                currentPage={1}
-                onPageChange={() => void 0}
-                totalPages={1}
-              />
-            </>
-          ) : (
-            <div className="flex flex-col gap-2 text-center">
-              <Text.Large>Источник тепла не найден</Text.Large>
-              <span className="text-muted-foreground">Возможно он был удалён</span>
-            </div>
-          )}
+          <PageBreadcrumbs />
+          <PriorityDropdown />
+          <ScrollArea>
+            {vm.consumersPaged.paginatedItems.map((v) => (
+              <React.Fragment key={v.id}>
+                <Link
+                  to="/heat_distributor/$heatDistributorId/consumers/$consumerId"
+                  params={{
+                    heatDistributorId,
+                    consumerId: v.id.toString()
+                  }}>
+                  <ConsumerCard data={v} />
+                </Link>
+                <Separator />
+              </React.Fragment>
+            ))}
+            {vm.consumersPaged.loading && <LoadingWrapper />}
+          </ScrollArea>
+          <AnimatePresence mode="popLayout" initial={false}>
+            {!vm.consumersPaged.loading && (
+              <motion.div className="mt-auto mb-4" {...transitionProps}>
+                <PaginationWidget
+                  currentPage={vm.consumersPaged.currentPage}
+                  onPageChange={(v) => vm.consumersPaged.setPage(v)}
+                  totalPages={vm.consumersPaged.totalPages}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </MainSidebar>
       <Outlet />

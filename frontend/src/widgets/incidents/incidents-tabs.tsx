@@ -10,9 +10,9 @@ export const IncidentsTabs: FCVM<IncidentsPageViewModel> = observer(({ vm }) => 
         <button
           className={cn(
             "hover:bg-muted px-3 py-1.5 rounded-sm transition-colors",
-            vm.selectedTab === "heat-sources" && "bg-muted"
+            vm.selectedTab === "heat-source" && "bg-muted"
           )}
-          onClick={() => (vm.selectedTab = "heat-sources")}>
+          onClick={() => (vm.selectedTab = "heat-source")}>
           Источники тепла
         </button>
       </li>
@@ -20,9 +20,9 @@ export const IncidentsTabs: FCVM<IncidentsPageViewModel> = observer(({ vm }) => 
         <button
           className={cn(
             "hover:bg-muted px-3 py-1.5 rounded-sm transition-colors",
-            vm.selectedTab === "consumers" && "bg-muted"
+            vm.selectedTab === "consumer" && "bg-muted"
           )}
-          onClick={() => (vm.selectedTab = "consumers")}>
+          onClick={() => (vm.selectedTab = "consumer")}>
           Потребители
         </button>
       </li>

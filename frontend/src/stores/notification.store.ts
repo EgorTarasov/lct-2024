@@ -25,7 +25,7 @@ class notificationStore {
 
     if (this.sort === NotificationFilters.Sort.Priority) {
       notifications.sort((a, b) => {
-        return a.priority.localeCompare(b.priority);
+        return b.priority - a.priority;
       });
     }
 

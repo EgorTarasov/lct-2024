@@ -12,12 +12,12 @@ import { Separator } from "@/components/ui/separator";
 import { MapStore } from "@/stores/map.store";
 import { MainSidebar } from "@/widgets/layoutMainSidebar/main-sidebar.widget";
 import { PaginationWidget } from "@/widgets/pagination/pagination.widget";
-import { Link, Outlet, createLazyFileRoute } from "@tanstack/react-router";
+import { Link, Outlet, createLazyFileRoute, useMatch, useMatches } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { observer } from "mobx-react-lite";
 import React from "react";
 
-const vm = MapStore.heatSourceVm;
+const vm = MapStore;
 const transitionProps = {
   initial: { opacity: 0, translateY: 20 },
   animate: { opacity: 1, translateY: 0 },
@@ -25,6 +25,12 @@ const transitionProps = {
 };
 
 const Page = observer(() => {
+  const m = useMatches();
+
+  const isConsumersView = m.find((v) => v.pathname.includes("consumers")) !== undefined;
+
+  if (isConsumersView) return <Outlet />;
+
   return (
     <>
       <MainSidebar>
@@ -38,7 +44,7 @@ const Page = observer(() => {
             </BreadcrumbList>
           </Breadcrumb>
           <ScrollArea>
-            {vm.items.map((v) => (
+            {vm.heatSourcesPaged.paginatedItems.map((v) => (
               <React.Fragment key={v.id}>
                 <Link
                   to="/heat_distributor/$heatDistributorId"
@@ -50,15 +56,15 @@ const Page = observer(() => {
                 <Separator />
               </React.Fragment>
             ))}
-            {vm.loading && <LoadingWrapper />}
+            {vm.heatSourcesPaged.loading && <LoadingWrapper />}
           </ScrollArea>
           <AnimatePresence mode="popLayout" initial={false}>
-            {vm.totalPages && (
+            {!vm.heatSourcesPaged.loading && (
               <motion.div className="mt-auto mb-4" {...transitionProps}>
                 <PaginationWidget
-                  currentPage={vm.page + 1}
-                  onPageChange={(v) => (vm.page = v - 1)}
-                  totalPages={vm.totalPages + 1}
+                  currentPage={vm.heatSourcesPaged.currentPage}
+                  onPageChange={(v) => vm.heatSourcesPaged.setPage(v)}
+                  totalPages={vm.heatSourcesPaged.totalPages}
                 />
               </motion.div>
             )}

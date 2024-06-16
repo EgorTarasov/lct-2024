@@ -1,5 +1,6 @@
 import { Toaster as Sonner } from "sonner";
 import { useTheme } from "../hoc/theme-provider";
+import { ELEVATION } from "@/constants/elevation";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
@@ -9,7 +10,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme as ToasterProps["theme"]}
-      className="toaster group bottom-16 right-4 z-[4]"
+      className="toaster group bottom-16 right-4"
+      style={{ zIndex: ELEVATION.TOASTS }}
       toastOptions={{
         classNames: {
           toast:

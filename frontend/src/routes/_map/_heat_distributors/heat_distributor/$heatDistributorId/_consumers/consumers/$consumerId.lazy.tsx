@@ -12,25 +12,23 @@ import {
 } from "@/components/ui/accordion";
 import { buttonVariants } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { ConsumerViewModel } from "@/stores/consumer.vm";
 import { MapStore } from "@/stores/map.store";
 import { cn } from "@/utils/cn";
 import { SecondarySidebar } from "@/widgets/layoutMainSidebar/SecondarySidebar/secondary-sidebar.widget";
-import { Link, createLazyFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createLazyFileRoute, useMatches, useNavigate } from "@tanstack/react-router";
 import { ChevronRightIcon } from "lucide-react";
 import { observer } from "mobx-react-lite";
+import { useEffect, useState } from "react";
 
 const Page = observer(() => {
   const navigate = useNavigate();
+  const [vm] = useState(() => new ConsumerViewModel());
   const { consumerId, heatDistributorId } = Route.useParams();
-  const vm = MapStore.consumersVm;
-  const heatSource = MapStore.heatSourceVm.items.find((v) => v.id.toString() === heatDistributorId);
 
-  if (!vm || !heatSource) {
-    console.error("how ???");
-    return null;
-  }
-
-  const consumer = vm.items.find((v) => v.id.toString() === consumerId);
+  useEffect(() => {
+    vm.init(consumerId, heatDistributorId);
+  }, [consumerId, heatDistributorId]);
 
   return (
     <SecondarySidebar
@@ -40,9 +38,9 @@ const Page = observer(() => {
           params: { heatDistributorId }
         });
       }}>
-      {consumer ? (
+      {vm.item ? (
         <div className="flex flex-col">
-          <ConsumerCardReadonly data={consumer} />
+          <ConsumerCardReadonly data={vm.item} />
           <Section
             className="px-0 pb-2"
             title={<span className="px-4">Информация об объекте</span>}>
@@ -56,9 +54,9 @@ const Page = observer(() => {
               </AccordionItem>
             </Accordion>
           </Section>
-          {consumer.incidentCount > 0 && (
+          {vm.item.incidentCount > 0 && (
             <Section withoutSeparator className="pt-1">
-              <IssueLink unom={consumer.unom} count={consumer.incidentCount} />
+              <IssueLink unom={vm.item.unom} count={vm.item.incidentCount} />
             </Section>
           )}
           <Section
@@ -82,7 +80,7 @@ const Page = observer(() => {
                 </Tooltip>
               </div>
             }>
-            <HeatDistributorCard className="mt-2" data={heatSource} />
+            {/* <HeatDistributorCard className="mt-2" data={heatSource} /> */}
           </Section>
         </div>
       ) : (
