@@ -5,6 +5,7 @@ import { AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { FC } from "react";
 
 const transitionProps = {
   initial: { opacity: 0, translateX: -20 },

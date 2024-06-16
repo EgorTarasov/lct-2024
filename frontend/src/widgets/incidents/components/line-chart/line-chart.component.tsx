@@ -52,7 +52,7 @@ export interface RechartsAxisProps {
 export const AxisTick = (x: RechartsAxisProps) => {
   let content: ReactNode = (
     <>
-      <tspan textAnchor="middle" x="-15" dy="4">
+      <tspan textAnchor="middle" x="-15" dy="4" className="fill-foreground">
         {Math.floor(x.payload.value)}
       </tspan>
     </>
@@ -60,7 +60,7 @@ export const AxisTick = (x: RechartsAxisProps) => {
 
   if (x.tickType === "date") {
     content = (
-      <tspan textAnchor="middle" x="0" dy="5">
+      <tspan textAnchor="middle" x="0" dy="5" className="fill-foreground">
         {x.payload.value}
       </tspan>
     );

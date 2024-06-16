@@ -39,9 +39,9 @@ export const UserNav = observer(() => {
         </TooltipTrigger>
         <TooltipContent>Отчёты</TooltipContent>
       </Tooltip>
-      <Tooltip>
+      {/* <Tooltip>
         <TooltipTrigger asChild>
-          {/* <Link
+          <Link
             to="/profile"
             className="size-10 flex shadow items-center justify-center rounded-full bg-accent text-accent-foreground">
             <Text.p>
@@ -49,13 +49,13 @@ export const UserNav = observer(() => {
                 .map((name) => name[0].toUpperCase())
                 .join("")}
             </Text.p>
-          </Link> */}
+          </Link>
           <Link to="/profile" className={buttonVariants({ variant: "ghost", size: "icon" })}>
             <HelpCircle />
           </Link>
         </TooltipTrigger>
         <TooltipContent>Помощник</TooltipContent>
-      </Tooltip>
+      </Tooltip> */}
       <Tooltip>
         <TooltipTrigger asChild>
           <Button size="icon" variant="ghost" onClick={logout}>

@@ -56,14 +56,14 @@ const Page = observer(() => {
         setSecondaryContent
       }}>
       <div className="h-full w-full relative appear">
-        <div
+        {/* <div
           className="flex md:hidden flex-col absolute inset-0 bg-background items-center justify-center text-center"
           style={{ zIndex: ELEVATION.NAVIGATE_INCIDENTS }}>
           <Text.H3>Карта доступна только с компьютера</Text.H3>
           <Link to="/incidents" className={cn(buttonVariants({ variant: "default" }), "mt-4")}>
             <Text.UiMedium>Перейти к инцидентам</Text.UiMedium>
           </Link>
-        </div>
+        </div> */}
         <Suspense fallback={<MapLoading />}>
           <Map />
         </Suspense>

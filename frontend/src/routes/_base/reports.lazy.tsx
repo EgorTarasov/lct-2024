@@ -89,15 +89,19 @@ export function TableDemo() {
 const Page = observer(() => {
   return (
     <>
-      <main className="mx-auto flex flex-col w-full max-w-screen-xl pt-20 h-full overflow-hidden">
+      <main className="mx-auto flex flex-col w-full max-w-screen-xl pt-20 h-full overflow-hidden px-4">
         <Text.H4>Загруженные данные</Text.H4>
         <ScrollArea className="flex-1 pt-4">
           <TableDemo />
+          <div className="flex pt-4">
+            <div className={cn(buttonVariants({}), "relative ml-auto")}>
+              <input type="file" className="opacity-0 absolute inset-0" />
+              <PlusIcon />
+              <span>Загрузить файл</span>
+            </div>
+          </div>
+          <div className="pb-8" />
         </ScrollArea>
-        <div className={cn("relative", buttonVariants({}))}>
-          <input type="file" className="opacity-0 absolute inset-0" />
-        </div>
-        <div className="flex flex-col">test</div>
       </main>
     </>
   );
