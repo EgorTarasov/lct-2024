@@ -1,4 +1,5 @@
 import { IncidentsOverlay } from "@/widgets/incidents/incidents-overlay";
+import { MobileNav } from "@/widgets/layoutProfileBar/mobile-nav.widget";
 import { createFileRoute, createLazyFileRoute, useMatch, useMatches } from "@tanstack/react-router";
 import React from "react";
 

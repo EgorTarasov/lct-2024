@@ -15,7 +15,7 @@ export const IncidentsOverlay: FC<{ hasSidebar?: boolean }> = observer((x) => {
     <>
       <div
         className={cn(
-          "absolute top-4 left-4 ml-4 flex pointer-events-none",
+          "absolute top-4 md:left-4 lg:ml-4 flex pointer-events-none",
           x.hasSidebar && "md:left-96"
         )}
         style={{ zIndex: ELEVATION.FILTERS }}>
@@ -32,7 +32,9 @@ export const IncidentsOverlay: FC<{ hasSidebar?: boolean }> = observer((x) => {
           </Link>
         )}
       </div>
-      <div className="absolute top-4 right-4 flex gap-2" style={{ zIndex: ELEVATION.FILTERS }}>
+      <div
+        className="absolute top-4 right-4 hidden lg:flex gap-2"
+        style={{ zIndex: ELEVATION.FILTERS }}>
         <div className="flex gap-2">
           <ThemeSwitcher />
           <UserNav />

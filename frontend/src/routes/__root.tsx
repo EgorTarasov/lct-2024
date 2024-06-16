@@ -4,11 +4,15 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ELEVATION } from "@/constants/elevation";
 import NotFoundPage from "@/pages/not-found.page";
 import { AuthService } from "@/stores/auth.service";
-import { Outlet, createRootRoute, useMatch, useMatches } from "@tanstack/react-router";
+import { Outlet, createRootRoute } from "@tanstack/react-router";
 import React from "react";
 
 const Toaster = React.lazy(() =>
   import("@/components/ui/sonner").then((m) => ({ default: m.Toaster }))
+);
+
+const MobileNav = React.lazy(() =>
+  import("@/widgets/layoutProfileBar/mobile-nav.widget").then((m) => ({ default: m.MobileNav }))
 );
 
 const Page = () => {
@@ -24,6 +28,7 @@ const Page = () => {
             </div>
           }>
           <Outlet />
+          <MobileNav />
           <Toaster richColors />
         </React.Suspense>
       </TooltipProvider>
