@@ -9,41 +9,28 @@ volumes:
   mongo-data:
   s3-data:
   gotify-data:
-
+  zoo-data:
+  zoo-logs:
+  zoo-secret:
+  kafka-data:
 
 services:
   ui:
     container_name: ui
-    image: ghcr.io/egortarasov/lct-2024/ui:amd64-0.0.1
+    image: ghcr.io/egortarasov/lct-2024/ui:0.0.1
     restart: always
     ports:
       - "54900:3000"
-    depends_on:
-      - backend
 
   backend:
     container_name: backend
-    image: ghcr.io/egortarasov/lct-2024/api:amd64-0.0.3
+    image: ghcr.io/egortarasov/lct-2024/api:amd64-0.0.7
     command: ./main
     restart:  always
     volumes:
-      - ../configs/api.yaml:/root/config.yaml
+      - /home/etarasov/lct.yaml:/root/config.yaml
     ports:
       - "9999:9999" # container port defined in config.yaml
-    depends_on:
-      - postgres
-      - mongo
-
-  ml:
-    image: ghcr.io/egortarasov/lct-2024/ml:amd64-0.0.1
-    container_name: ml
-    restart: always
-    command: python3 main.py
-    volumes:
-      - "../features:/code/features"
-      - "../artifact:/code/artifact"
-    ports:
-      - '50051:50051' #grpc application on 50051
 
   postgres:
     image: "postgres:16"
@@ -61,7 +48,6 @@ services:
   mongo:
     image: mongo:5.0.27
     restart: always
-    container_name: mongo
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
@@ -72,7 +58,6 @@ services:
 
   s3:
     image: minio/minio
-    container_name: s3
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -81,6 +66,7 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+      MINIO_REGION: eu-west-1
     command: server --console-address ":9001" /data
 
   redis:
@@ -91,6 +77,20 @@ services:
       - '54001:6379'
     volumes:
       - 'redis-data:/root/redis'
+  ml:
+    image: ghcr.io/egortarasov/lct-2024/ml:0.1
+    container_name: ml
+    restart: always
+    command: python3 main.py
+    environment:
+      - POSTGRES_DSN=${POSTGRES_DSN}
+      - KAFKA_TOPIC=${KAFKA_TOPIC}
+      - KAFKA_SERVERS=${KAFKA_SERVERS}
+    volumes:
+      - "/Users/egortarasov/uni/Хакатоны/lct-2024/ml/features:/code/features"
+      - "/Users/egortarasov/uni/Хакатоны/lct-2024/ml/artifact:/code/artifact"
+    ports:
+      - '50051:50051'
 
   notifications:
     container_name: notifications
@@ -99,11 +99,12 @@ services:
     environment:
       - GOTIFY_DEFAULTUSER_PASS=${GOTIFY_DEFAULTUSER_PASS}
       - GOTIFY_DEFAULTUSER_NAME=${GOTIFY_DEFAULTUSER_NAME}
+      - GOTIFY_SERVER_STREAM_ALLOWEDORIGINS=[lct\.larek\.tech\.com, localhost:5173]
     ports:
-      - "55000:80"
+      - "54500:80"
     volumes:
       - gotify-data:/app/data
-
+      - ../push.larek.yaml:/etc/gotify/config.yml
 
   jaeger:
     image: jaegertracing/all-in-one
@@ -124,10 +125,8 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    # depends_on:
-    #   - prometheus
     ports:
-      - "54200:3000"
+      - "55000:3000"
     volumes:
       - grafana-storage:/var/lib/grafana
     environment:
@@ -145,6 +144,49 @@ services:
   #     - "9090:9090"
 
 
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: zookeeper:2888:3888
+    healthcheck:
+      test: echo stat | nc localhost 2181
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    ports:
+      - "2181:2181"
+      - "2888:2888"
+      - "3888:3888"
+    volumes:
+      - zoo-logs:/var/lib/zookeeper/log
+      - zoo-secret:/etc/zookeeper/secrets
+      - zoo-data:/var/lib/zookeeper/data
 
-
-
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    healthcheck:
+      test: ps augwwx | egrep [S]upportedKafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9091:9091"
+      - "29091:29091"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTNERS: LISTNER_INT://kafka:29091,LISTENER_EXT://0.0.0.0:9091
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: LISTNER_INT://kafka:29091,LISTENER_EXT://localhost:9091
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTNER_INT:PLAINTEXT,LISTENER_EXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTNER_INT
+      ZOOKEEPER: zookeeper:2181
+    volumes:
+      - kafka-data:/mnt/shared/config
+      - kafka-data:/var/lib/kafka/data
+      - kafka-data:/etc/kafka/secrets

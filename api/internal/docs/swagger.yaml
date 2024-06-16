@@ -43,13 +43,28 @@ definitions:
       id:
         type: integer
     type: object
+  handler.incidentCreateRequest:
+    properties:
+      priority:
+        type: integer
+      status:
+        type: string
+      title:
+        type: string
+    required:
+    - priority
+    - status
+    - title
+    type: object
   handler.predictionRequest:
     properties:
       admArea:
         type: string
       endDate:
+        description: string in format dd-mm-yyyy
         type: string
       startDate:
+        description: string in format dd-mm-yyyy
         type: string
       threshold:
         type: number
@@ -80,6 +95,27 @@ definitions:
     - address
     - municipalDistrict
     type: object
+  internal_search_models.Event:
+    properties:
+      address:
+        type: string
+      country:
+        type: string
+      ended_at:
+        type: string
+      external_closed_at:
+        type: string
+      external_created_at:
+        type: string
+      external_ended_at:
+        type: string
+      src:
+        type: string
+      title:
+        type: string
+      unom:
+        type: integer
+    type: object
   internal_search_models.Point:
     properties:
       coordinates:
@@ -104,6 +140,33 @@ definitions:
       source:
         type: string
     type: object
+  models.DispatchServices:
+    properties:
+      address:
+        type: string
+      centerAddress:
+        type: string
+      consumer:
+        type: string
+      consumerFullAddress:
+        type: string
+      consumerGroup:
+        type: string
+      country:
+        type: string
+      dispatchNumber:
+        type: string
+      externalID:
+        type: string
+      heatDispatcherNumber:
+        type: string
+      unom:
+        type: integer
+      События:
+        items:
+          $ref: '#/definitions/internal_search_models.Event'
+        type: array
+    type: object
   models.Filter:
     properties:
       filterName:
@@ -112,6 +175,26 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  models.HeatingPoint:
+    properties:
+      balance_holder:
+        type: string
+      commissioning_date: {}
+      consumer_full_address:
+        $ref: '#/definitions/internal_search_models.Address'
+      heating_point_full_address:
+        $ref: '#/definitions/internal_search_models.Address'
+      heating_point_location_type:
+        type: string
+      heating_point_number:
+        type: string
+      heating_point_src:
+        type: string
+      heating_point_type:
+        type: string
+      municipal_district:
+        type: string
     type: object
   models.HeatingPointDTO:
     properties:
@@ -132,6 +215,82 @@ definitions:
         type: string
       municipal_district:
         type: string
+    type: object
+  models.Incident:
+    properties:
+      closedAt:
+        type: string
+      createdAt:
+        type: string
+      dispatchServices:
+        $ref: '#/definitions/models.DispatchServices'
+      heatingPoint:
+        $ref: '#/definitions/models.HeatingPoint'
+      id:
+        type: integer
+      mkdConsumer:
+        $ref: '#/definitions/models.MKDConsumer'
+      openedAt:
+        type: string
+      priority:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      unom:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  models.MKDConsumer:
+    properties:
+      PassengerElevator:
+        type: integer
+      address:
+        type: string
+      apartments:
+        type: integer
+      country:
+        type: string
+      deprecation:
+        type: number
+      district:
+        type: string
+      entrances:
+        type: integer
+      externalID:
+        type: integer
+      feature:
+        type: integer
+      floors:
+        type: integer
+      fullAddress:
+        type: string
+      projectSeries: {}
+      roofCleaningSequence:
+        type: integer
+      roofMaterials:
+        type: integer
+      serviceElevator:
+        type: integer
+      state:
+        type: integer
+      totalArea:
+        type: number
+      totalLivingArea:
+        type: number
+      totalNonLivingArea: {}
+      typesOfHousingStock:
+        type: integer
+      unom:
+        type: integer
+      wallMaterial:
+        type: integer
+      События:
+        items:
+          $ref: '#/definitions/internal_search_models.Event'
+        type: array
     type: object
   models.MoekDTO:
     properties:
@@ -421,6 +580,68 @@ paths:
       summary: тестовая ручка на проверку postgis
       tags:
       - geo
+  /issue/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: incidentCreateRequest
+        in: body
+        name: incidentCreateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/handler.incidentCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+      summary: создание инцидента
+      tags:
+      - issue
+  /issue/id/{id}:
+    get:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Incident'
+      summary: получение информации об инцидетне по его идентификатору
+      tags:
+      - issue
+  /issue/recent:
+    get:
+      parameters:
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Incident'
+            type: array
+      summary: получение информации об инцидетнах
+      tags:
+      - issue
   /search/objects:
     get:
       parameters:

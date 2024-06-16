@@ -10,3 +10,6 @@ minio
 grpcio
 grpcio-tools
 python-dotenv
+kafka-python
+numpy==1.26.4
+catboost==1.2.5

@@ -1,9 +1,9 @@
-package repository
+package mongo
 
 import (
 	"context"
 
-	"github.com/EgorTarasov/lct-2024/api/internal/search/models"
+	"github.com/EgorTarasov/lct-2024/api/internal/shared/models"
 	mongoDB "github.com/EgorTarasov/lct-2024/api/pkg/mongo"
 	"github.com/rs/zerolog/log"
 	"go.mongodb.org/mongo-driver/bson"
@@ -107,6 +107,19 @@ func (repo *consumersSearchRepo) SearchWithFilters(ctx context.Context, filters 
 
 	if err = repo.mongo.FindMany(ctx, consumerCollection, filter, &values); err != nil {
 		return nil, err
+	}
+
+	for idx := 0; idx < len(values); idx += 1 {
+		unomFilter := bson.M{"unom": values[idx].ConsumerAddress.Unom}
+		err = repo.mongo.FindMany(ctx, stateConsumerCollection, unomFilter, &values[idx].StateConsumers)
+		if err != nil {
+			log.Info().Err(err).Int64("unom", values[idx].Unom).Msg("no state consumers found")
+		}
+		err = repo.mongo.FindMany(ctx, "mkd", unomFilter, &values[idx].MKDConsumers)
+		if err != nil {
+			log.Info().Err(err).Int64("unom", values[idx].Unom).Msg("no mkd consumers found")
+		}
+
 	}
 
 	return values, nil

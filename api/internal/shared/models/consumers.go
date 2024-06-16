@@ -1,24 +1,5 @@
 package models
 
-type Address struct {
-	// Уникальный номер объекта недвижимости.
-	Unom int64 `json:"unom" bson:"unom" validate:"required max=20000000"`
-	// Полный Адрес в реестре.
-	Address string `json:"address" bson:"address" validate:"required"`
-	// Район округ.
-	MunicipalDistrict string `json:"municipalDistrict" bson:"municipal_district" validate:"required"`
-	// Граница объекта на карте.
-	Polygon interface{} `json:"border" bson:"geo_data"`
-	// Центр объекта на карте.
-	Center Point `json:"center" bson:"geo_center"`
-}
-
-// Point Репрезентация точки в формате geoJson.
-type Point struct {
-	Type        string    `json:"type" bson:"type"`
-	Coordinates []float64 `json:"coordinates" bson:"coordinates"`
-}
-
 // Filter фильтр для поиска по объектам.
 type Filter struct {
 	Name   string   `json:"filterName"`
@@ -26,16 +7,21 @@ type Filter struct {
 }
 
 type HeatingPoint struct {
-	BalanceHolder       string      `bson:"balance_holder" json:"balance_holder"`
-	Address             string      `bson:"heating_point_address" json:"-"`
-	ConsumerAddress     Address     `bson:"consumer_full_address" json:"consumer_full_address"`
-	Source              string      `bson:"heating_point_src" json:"heating_point_src"`
-	Number              string      `bson:"heating_point_number" json:"heating_point_number"`
-	Type                string      `bson:"heating_point_type" json:"heating_point_type"`
-	LocationType        string      `bson:"heating_point_location_type" json:"heating_point_location_type"`
-	District            string      `bson:"municipal_district" json:"municipal_district"`
-	CommissioningDate   interface{} `bson:"commissioning_date" json:"commissioning_date"`
-	HeatingPointAddress Address     `bson:"heating_point_full_address" json:"heating_point_full_address"`
+	BalanceHolder       string          `bson:"balance_holder" json:"balance_holder"`
+	Address             string          `bson:"heating_point_address" json:"-"`
+	ConsumerAddress     Address         `bson:"consumer_full_address" json:"consumer_full_address,omitempty"`
+	Source              string          `bson:"heating_point_src" json:"heating_point_src"`
+	Number              string          `bson:"heating_point_number" json:"heating_point_number"`
+	Type                string          `bson:"heating_point_type" json:"heating_point_type"`
+	LocationType        string          `bson:"heating_point_location_type" json:"heating_point_location_type"`
+	District            string          `bson:"municipal_district" json:"municipal_district"`
+	CommissioningDate   interface{}     `bson:"commissioning_date" json:"commissioning_date"`
+	HeatingPointAddress Address         `bson:"heating_point_full_address" json:"heating_point_full_address"`
+	Unom                int64           `bson:"heating_point_full_address.unom" json:"unom"`
+	Consumers           []Address       `json:"consumers"`
+	StateConsumers      []StateConsumer ` json:"state_consumers"`
+	MKDConsumers        []MKDConsumer   `json:"mkd_consumers"`
+	Priority            int64           `json:"priority"`
 }
 
 // Event событие которое произошло с объектом.
@@ -54,7 +40,6 @@ type Event struct {
 // HeatingPointDTO DTO для объекта теплоснабжения.
 type HeatingPointDTO struct {
 	HeatingPoint
-
 	// models.Address
 }
 
@@ -69,6 +54,7 @@ type StateConsumer struct {
 	PropertyClass     string      `bson:"property_class" json:"propertyClass"`
 	Unom              int64       `bson:"unom" json:"unom"`
 	Events            []Event     `json:"События"`
+	Priority          int         `bson:"priority" json:"priority"`
 }
 
 // MKDConsumer тип потребителя многоквартирного дома (МКД).
@@ -119,19 +105,51 @@ type MKDConsumer struct {
 	TotalNonLivingArea   interface{} `bson:"total_non_living_area" json:"totalNonLivingArea"`
 	TypesOfHousingStock  int64       `bson:"types_of_housing_stock" json:"typesOfHousingStock"`
 	Events               []Event     `json:"События"`
+	Priority             int         `bson:"priority" json:"priority"`
 }
 
 // DispatchServices данные о диспетчерской службе.
 type DispatchServices struct {
 	Address              string  `bson:"address" json:"address"`
-	HeatDispatcherNumber string  `bson:"data" json:"heatDispatcherNumber"`
+	HeatDispatcherNumber string  `bson:"chp" json:"heatDispatcherNumber"`
 	ConsumerName         string  `bson:"consumer" json:"consumer"`
 	ConsumerGroup        string  `bson:"consumer_group" json:"consumerGroup"`
 	Country              string  `bson:"country" json:"country"`
 	DispatchAddress      string  `bson:"dispatch_address" json:"centerAddress"`
 	DispatchNumber       string  `bson:"dispatch_number" json:"dispatchNumber"`
-	ExternalID           string  `bson:"external_id" json:"externalID"`
+	ExternalID           int64   `bson:"external_id" json:"externalID"`
 	Unom                 int64   `bson:"unom" json:"unom"`
 	ConsumerFullAddress  string  `bson:"Полный адрес" json:"consumerFullAddress"`
 	Events               []Event `json:"События"`
+}
+
+// Address godoc
+//
+//	минимальные данные об адресе для отображения на карте
+//
+// Общие данные об адресе.
+type Address struct {
+	// Уникальный номер объекта недвижимости.
+	Unom int64 `json:"unom" bson:"unom"`
+	// Полный Адрес в реестре.
+	Address string `json:"address" bson:"address"`
+	// Район округ.
+	MunicipalDistrict string `json:"municipalDistrict" bson:"municipal_district" validate:"required"`
+	// Граница объекта на карте.
+	Polygon interface{} `json:"border" bson:"geo_data"`
+	// Центр объекта на карте.
+	Center Point `json:"center" bson:"geo_center"`
+}
+
+// Point Репрезентация точки в формате geoJson.
+type Point struct {
+	Type        string    `json:"type" bson:"type"`
+	Coordinates []float64 `json:"coordinates" bson:"coordinates"`
+}
+
+type UnomResult struct {
+	Unom            int64             `json:"unom"`
+	DispatchService *DispatchServices `json:"dispatchService,omitempty"`
+	Consumers       []MKDConsumer     `json:"consumer,omitempty"`
+	HeatingPoint    *HeatingPoint     `json:"heatingPoint,omitempty"`
 }

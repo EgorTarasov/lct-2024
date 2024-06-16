@@ -314,6 +314,103 @@ const docTemplate = `{
                 }
             }
         },
+        "/issue/create": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "issue"
+                ],
+                "summary": "создание инцидента",
+                "parameters": [
+                    {
+                        "description": "incidentCreateRequest",
+                        "name": "incidentCreateRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.incidentCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        },
+        "/issue/id/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "issue"
+                ],
+                "summary": "получение информации об инцидетне по его идентификатору",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Incident"
+                        }
+                    }
+                }
+            }
+        },
+        "/issue/recent": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "issue"
+                ],
+                "summary": "получение информации об инцидетнах",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Incident"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/search/objects": {
             "get": {
                 "produces": [
@@ -650,6 +747,25 @@ const docTemplate = `{
                 }
             }
         },
+        "handler.incidentCreateRequest": {
+            "type": "object",
+            "required": [
+                "priority",
+                "status",
+                "title"
+            ],
+            "properties": {
+                "priority": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "handler.predictionRequest": {
             "type": "object",
             "required": [
@@ -663,9 +779,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "endDate": {
+                    "description": "string in format dd-mm-yyyy",
                     "type": "string"
                 },
                 "startDate": {
+                    "description": "string in format dd-mm-yyyy",
                     "type": "string"
                 },
                 "threshold": {
@@ -705,6 +823,38 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_search_models.Event": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "ended_at": {
+                    "type": "string"
+                },
+                "external_closed_at": {
+                    "type": "string"
+                },
+                "external_created_at": {
+                    "type": "string"
+                },
+                "external_ended_at": {
+                    "type": "string"
+                },
+                "src": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "unom": {
+                    "type": "integer"
+                }
+            }
+        },
         "internal_search_models.Point": {
             "type": "object",
             "properties": {
@@ -740,6 +890,47 @@ const docTemplate = `{
                 }
             }
         },
+        "models.DispatchServices": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "centerAddress": {
+                    "type": "string"
+                },
+                "consumer": {
+                    "type": "string"
+                },
+                "consumerFullAddress": {
+                    "type": "string"
+                },
+                "consumerGroup": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "dispatchNumber": {
+                    "type": "string"
+                },
+                "externalID": {
+                    "type": "string"
+                },
+                "heatDispatcherNumber": {
+                    "type": "string"
+                },
+                "unom": {
+                    "type": "integer"
+                },
+                "События": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_search_models.Event"
+                    }
+                }
+            }
+        },
         "models.Filter": {
             "type": "object",
             "properties": {
@@ -751,6 +942,36 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "models.HeatingPoint": {
+            "type": "object",
+            "properties": {
+                "balance_holder": {
+                    "type": "string"
+                },
+                "commissioning_date": {},
+                "consumer_full_address": {
+                    "$ref": "#/definitions/internal_search_models.Address"
+                },
+                "heating_point_full_address": {
+                    "$ref": "#/definitions/internal_search_models.Address"
+                },
+                "heating_point_location_type": {
+                    "type": "string"
+                },
+                "heating_point_number": {
+                    "type": "string"
+                },
+                "heating_point_src": {
+                    "type": "string"
+                },
+                "heating_point_type": {
+                    "type": "string"
+                },
+                "municipal_district": {
+                    "type": "string"
                 }
             }
         },
@@ -781,6 +1002,120 @@ const docTemplate = `{
                 },
                 "municipal_district": {
                     "type": "string"
+                }
+            }
+        },
+        "models.Incident": {
+            "type": "object",
+            "properties": {
+                "closedAt": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "dispatchServices": {
+                    "$ref": "#/definitions/models.DispatchServices"
+                },
+                "heatingPoint": {
+                    "$ref": "#/definitions/models.HeatingPoint"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "mkdConsumer": {
+                    "$ref": "#/definitions/models.MKDConsumer"
+                },
+                "openedAt": {
+                    "type": "string"
+                },
+                "priority": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "unom": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.MKDConsumer": {
+            "type": "object",
+            "properties": {
+                "PassengerElevator": {
+                    "type": "integer"
+                },
+                "address": {
+                    "type": "string"
+                },
+                "apartments": {
+                    "type": "integer"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "deprecation": {
+                    "type": "number"
+                },
+                "district": {
+                    "type": "string"
+                },
+                "entrances": {
+                    "type": "integer"
+                },
+                "externalID": {
+                    "type": "integer"
+                },
+                "feature": {
+                    "type": "integer"
+                },
+                "floors": {
+                    "type": "integer"
+                },
+                "fullAddress": {
+                    "type": "string"
+                },
+                "projectSeries": {},
+                "roofCleaningSequence": {
+                    "type": "integer"
+                },
+                "roofMaterials": {
+                    "type": "integer"
+                },
+                "serviceElevator": {
+                    "type": "integer"
+                },
+                "state": {
+                    "type": "integer"
+                },
+                "totalArea": {
+                    "type": "number"
+                },
+                "totalLivingArea": {
+                    "type": "number"
+                },
+                "totalNonLivingArea": {},
+                "typesOfHousingStock": {
+                    "type": "integer"
+                },
+                "unom": {
+                    "type": "integer"
+                },
+                "wallMaterial": {
+                    "type": "integer"
+                },
+                "События": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/internal_search_models.Event"
+                    }
                 }
             }
         },

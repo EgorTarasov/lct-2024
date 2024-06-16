@@ -2,10 +2,13 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 
+	shared "github.com/EgorTarasov/lct-2024/api/internal/shared/models"
 	"github.com/EgorTarasov/lct-2024/api/internal/users/models"
+	"github.com/IBM/sarama"
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 	"go.opentelemetry.io/otel/attribute"
@@ -18,6 +21,28 @@ type fileRepo interface {
 	GetUpload(ctx context.Context, id int64) (models.Upload, error)
 	GetAllUploads(ctx context.Context) ([]models.Upload, error)
 	CheckIdempotencyKey(ctx context.Context, idempotencyKey string) (bool, error)
+}
+
+func buildSaramaMessage(uploadID int64, s3Key string) *sarama.ProducerMessage {
+	jsonMessage := shared.UploadMessage{
+		UploadID: uploadID,
+		S3Key:    s3Key,
+	}
+	rawBytes, _ := json.Marshal(jsonMessage)
+
+	messageHeader := sarama.RecordHeader{
+		Key:   []byte("type"),
+		Value: []byte("upload"),
+	}
+	return &sarama.ProducerMessage{
+		Topic:     "",
+		Value:     sarama.ByteEncoder(rawBytes),
+		Partition: -1,
+		Headers: []sarama.RecordHeader{
+			messageHeader,
+		},
+	}
+
 }
 
 // CreateUploads создает запись о новом файле в системе.
@@ -45,6 +70,10 @@ func (s *service) CreateUploads(ctx context.Context, file io.Reader, filename, i
 	if err != nil {
 		return 0, err
 	}
+	msg := buildSaramaMessage(id, s3Key)
+	msg.Topic = s.topic
+
+	s.producer.SendAsyncMessage(msg)
 
 	return id, err
 }

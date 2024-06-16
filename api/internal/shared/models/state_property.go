@@ -1,9 +1,5 @@
 package models
 
-import (
-	"github.com/EgorTarasov/lct-2024/api/internal/shared/models"
-)
-
 // StateProperty  отображение записей в state_property в mongodb.
 type StateProperty struct {
 	Unom              int64       `bson:"unom" `
@@ -18,5 +14,5 @@ type StateProperty struct {
 // StatePropertySearchResult результат поиска с данными для отображения на карте.
 type StatePropertySearchResult struct {
 	StateProperty
-	models.Address
+	Address
 }
