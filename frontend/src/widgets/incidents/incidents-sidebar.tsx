@@ -28,7 +28,7 @@ export const IncidentsContent: FC<{ isMobile?: boolean }> = observer(({ isMobile
           className="bg-background"
           rightIcon={<SearchIcon />}
           onChange={(v) => vm.setSearch(v.target.value)}
-          placeholder="Введите данные UNOM"
+          placeholder="Введите данные УНОМ"
         />
         {!isMobile && (
           <Text.UiMedium className="text-muted-foreground pt-2">Инциденты</Text.UiMedium>
@@ -86,9 +86,10 @@ export const IncidentsSidebarMobile = observer(() => {
       <DrawerTrigger asChild>
         <Button
           variant="outline"
-          size="icon"
-          className="flex md:hidden absolute left-4 top-4 z-10 bg-card">
+          size="lg"
+          className="flex md:hidden absolute left-4 top-4 z-10 bg-card gap-2 px-2">
           <MenuIcon />
+          Список инцидентов
         </Button>
       </DrawerTrigger>
       <DrawerContent className="flex flex-col text-foreground pb-10 max-h-[90%] overflow-hidden">

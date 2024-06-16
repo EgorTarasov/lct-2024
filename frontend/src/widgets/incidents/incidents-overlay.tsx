@@ -15,7 +15,7 @@ export const IncidentsOverlay: FC<{ hasSidebar?: boolean }> = observer((x) => {
     <>
       <div
         className={cn(
-          "absolute top-20 lg:top-4 left-4 ml-4 flex pointer-events-none",
+          "absolute top-4 left-4 ml-4 flex pointer-events-none",
           x.hasSidebar && "md:left-96"
         )}
         style={{ zIndex: ELEVATION.FILTERS }}>
@@ -26,8 +26,9 @@ export const IncidentsOverlay: FC<{ hasSidebar?: boolean }> = observer((x) => {
               buttonVariants({ variant: "secondary" }),
               "hidden md:flex pointer-events-auto"
             )}>
-            <ChevronLeftIcon />
-            Вернуться к карте
+            <ChevronLeftIcon className="hidden lg:flex" />
+            <p className="flex lg:hidden">Карта</p>
+            <p className="hidden lg:flex">Вернуться к карте</p>
           </Link>
         )}
       </div>

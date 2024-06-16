@@ -17,9 +17,13 @@ export const IncidentInfo: FC<{ data: Incident.Item }> = observer((x) => (
     <Separator />
     <Text.H4>Информация об объекте</Text.H4>
     <ul className="space-y-1">
-      {x.data.info.map(([title, info], i) => (
+      <TitleInfo title="Режим работы" info="9:00 - 21:00" />
+      {/* {x.data.info.map(([title, info], i) => (
         <TitleInfo key={i} title={title} info={info} />
-      ))}
+      ))} */}
+      {Object.entries(x.data.info).map(
+        ([title, info], i) => info && <TitleInfo key={i} title={title} info={info} />
+      )}
     </ul>
   </IncidentCardWrapper>
 ));

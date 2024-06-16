@@ -24,7 +24,7 @@ import { Link, Outlet, createFileRoute, useMatches } from "@tanstack/react-route
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDownIcon } from "lucide-react";
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 const transitionProps = {
   initial: { opacity: 0, translateY: 20 },
@@ -68,10 +68,17 @@ const PageBreadcrumbs = () => (
 );
 
 const Page = observer(() => {
+  const ref = useRef<HTMLDivElement>(null);
   const m = useMatches();
   const heatDistributorId = Route.useParams().heatDistributorId;
   // const heatSource = MapStore.heatSourceVm.items.find((v) => v.id.toString() === heatDistributorId);
   const vm = MapStore;
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.scrollTop = 0;
+    }
+  }, [vm.consumersPaged.currentPage]);
 
   return (
     <>
@@ -80,7 +87,7 @@ const Page = observer(() => {
           <Text.UiMedium className="px-4 text-muted-foreground">Реестр объектов</Text.UiMedium>
           <PageBreadcrumbs />
           <PriorityDropdown />
-          <ScrollArea>
+          <ScrollArea ref={ref}>
             {vm.consumersPaged.paginatedItems.map((v) => (
               <React.Fragment key={v.id}>
                 <Link

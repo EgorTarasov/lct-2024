@@ -9,7 +9,12 @@ export namespace MapEndpoint {
     radius: number
     // signal: GenericAbortSignal
   ) =>
-    api.get("/consumers/q", MapDto.Property.array(), {
-      params: { latitude, longitude, radius }
-    });
+    api
+      .get("/consumers/q", MapDto.Property.array(), {
+        params: { latitude, longitude, radius }
+      })
+      .then((v) => {
+        console.log(v[0]);
+        return v;
+      });
 }

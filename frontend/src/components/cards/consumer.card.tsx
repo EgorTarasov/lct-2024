@@ -15,12 +15,14 @@ export const ConsumerCard: FC<{
 }> = (x) => {
   return (
     <div className={cn("flex flex-col px-4 py-3 hover:bg-muted/50 w-full", x.className)}>
-      <div className="flex items-center justify-between w-full flex-wrap gap-3">
+      <div className="flex items-start justify-between w-full gap-3">
         <Text.SubtleMedium className="text-muted-foreground">{x.data.address}</Text.SubtleMedium>
         <PriorityIcon data={x.data.priority} />
       </div>
       <Text.Large className="pb-1">{x.data.name}</Text.Large>
-      <TitleInfo title="Тип потребителя" info={x.data.info.type} className="pb-1" />
+      {x.data.info["Тип потребителя"] && (
+        <TitleInfo title="Тип потребителя" info={x.data.info["Тип потребителя"]} className="pb-1" />
+      )}
       <IssueCard data={x.data.issue} />
     </div>
   );
@@ -31,7 +33,9 @@ export const ConsumerCardReadonly: FC<{ data: Consumer.Item }> = observer((x) =>
     <div className="flex flex-col px-4 w-full pb-3">
       <Text.SubtleMedium className="text-muted-foreground">{x.data.address}</Text.SubtleMedium>
       <Text.Large className="pb-1">{x.data.name}</Text.Large>
-      <TitleInfo title="Тип потребителя" info={x.data.info.type} />
+      {x.data.info["Тип потребителя"] && (
+        <TitleInfo title="Тип потребителя" info={x.data.info["Тип потребителя"]} />
+      )}
       <div className="py-1.5">
         <IssueCard data={x.data.issue} />
       </div>

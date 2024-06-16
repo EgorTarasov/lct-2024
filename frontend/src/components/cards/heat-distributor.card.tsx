@@ -26,7 +26,7 @@ export const HeatDistributorCard: FC<{ data: HeatDistributor.Item; className?: s
       <div className="flex items-center justify-between w-full flex-wrap gap-3">
         <div className="flex gap-2 items-center">
           <Text.SubtleMedium className="text-muted-foreground">{x.data.number}</Text.SubtleMedium>
-          <Text.Subtle className="text-muted-foreground">UNOM: {x.data.unom}</Text.Subtle>
+          <Text.Subtle className="text-muted-foreground">УНОМ: {x.data.unom}</Text.Subtle>
         </div>
         <PriorityIcon data={x.data.priority} />
       </div>

@@ -7,7 +7,7 @@ const vm = IncidentsPageViewModel;
 
 const Page = () => {
   return (
-    <div className="flex items-center justify-center size-full pt-40 flex-col gap-10">
+    <div className="flex items-center justify-center size-full pt-40 flex-col gap-10 appear">
       <Text.H3>Выберите объект из списка</Text.H3>
       <Button className="flex md:hidden" onClick={() => (vm.drawerOpen = true)}>
         Открыть список

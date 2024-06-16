@@ -4,8 +4,33 @@ import { HeatDistributor } from "./heat.type";
 import { Issue } from "./issue.type";
 import { MapFilters } from "./map-filters";
 import { Priority } from "./priority.type";
+import { format } from "date-fns";
 
+/*
+openedAt: Открыто в
+closedAt: Закрыто в
+title: Название
+status: Статус
+priority: Приоритет
+unom: УНОМ
+createdAt: Создано в
+updatedAt: Обновлено в
+mkdConsumer: Потребитель МКД
+dispatchServices: Диспетчерские службы
+*/
 export namespace Incident {
+  export type Info =
+    | "Открыто в"
+    | "Закрыто в"
+    | "Название"
+    | "Статус"
+    | "Приоритет"
+    | "УНОМ"
+    | "Создано в"
+    | "Обновлено в"
+    | "Потребитель МКД"
+    | "Диспетчерские службы";
+
   export interface DependentObjects {
     tps: string;
     heatSource: HeatDistributor.Item | null;
@@ -16,7 +41,7 @@ export namespace Incident {
     number: string;
     priority: Priority;
     address: string;
-    info: [title: string, value: string][];
+    info: Partial<Record<Info, string>>;
     incidentTitle: string;
     incidentIssue: Issue;
     incidentStatus: "active" | "closed";
@@ -54,12 +79,19 @@ export namespace Incident {
       number: dto.id.toString(),
       priority: Priority.HIGH,
       address: dto.relatedObjects.heatingPoint?.heating_point_full_address.address || "",
-      info: [
-        // Add more info based on dto
-      ],
+      info: {
+        "Открыто в": dto.openedAt ? format(dto.openedAt, "dd.MM.yyyy HH:mm") : undefined,
+        "Закрыто в": dto.closedAt ? format(dto.closedAt, "dd.MM.yyyy HH:mm") : undefined,
+        Название: dto.title,
+        Статус: dto.status === "closed" ? "Закрыто" : "Открыто",
+        Приоритет: dto.priority,
+        УНОМ: dto.unom.toString(),
+        "Создано в": dto.createdAt ? format(dto.createdAt, "dd.MM.yyyy HH:mm") : undefined,
+        "Обновлено в": dto.updatedAt ? format(dto.updatedAt, "dd.MM.yyyy HH:mm") : undefined
+      },
       incidentTitle: dto.title,
       incidentIssue: Issue.EMERGENCY,
-      incidentStatus: dto.closedAt ? "closed" : "active",
+      incidentStatus: dto.status === "closed" ? "closed" : "active",
       date: new Date(dto.createdAt),
       comments: [], // Add comments if available
       unom: dto.unom,

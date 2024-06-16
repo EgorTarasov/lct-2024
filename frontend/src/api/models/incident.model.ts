@@ -8,7 +8,7 @@ export namespace IncidentDto {
     openedAt: z.string(),
     closedAt: z.string().nullable(),
     title: z.string(),
-    status: z.string(),
+    status: z.literal("opened").or(z.literal("closed")),
     priority: z.string(),
     unom: z.number(),
     createdAt: z.string(),

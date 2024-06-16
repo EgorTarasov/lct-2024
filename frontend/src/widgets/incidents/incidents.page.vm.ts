@@ -63,6 +63,7 @@ class incidentsPageViewModel {
 
   async select(unom: string) {
     this.selected = this.items.find((i) => i.unom.toString() === unom) || null;
+    this.drawerOpen = false;
   }
 
   async resolve() {

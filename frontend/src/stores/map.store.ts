@@ -10,9 +10,7 @@ import L from "leaflet";
 import "leaflet.vectorgrid";
 import { buildPropertyFeature, buildSlicerLayer } from "@/utils/map";
 import { MapConstants } from "@/constants/map";
-import { MapDto } from "@/api/models/map.model";
-import { cloneDeep, debounce } from "lodash";
-import { ConsumersEndpoint } from "@/api/endpoints/consumers.endpoint";
+import { debounce } from "lodash";
 import { HeatDistributor } from "@/types/heat.type";
 import { Issue } from "@/types/issue.type";
 import { Consumer } from "@/types/consumer.type";
@@ -41,6 +39,36 @@ L.Canvas.Tile.include({
     }
   }
 });
+
+const filterKeys: {
+  getValue: (v: MapConstants.PolygonFeature) => string | null;
+  name: string;
+}[] = [
+  {
+    name: "Районы",
+    getValue: (v) => v.properties.data.municipal_district.split("район ")[1] || null
+  },
+  {
+    name: "Подключение к ТЭЦ",
+    getValue: (v) => v.properties.data.heating_point_src || null
+  },
+  {
+    name: "Тип источника",
+    getValue: (v) => v.properties.data.heating_point_type || null
+  },
+  {
+    name: "Муниципальный район адреса потребителя",
+    getValue: (v) => v.properties.data.consumerAddress.municipalDistrict || null
+  },
+  {
+    name: "Дата ввода в эксплуатацию",
+    getValue: (v) => new Date(v.properties.data.commissioning_date).toLocaleDateString() || null
+  },
+  {
+    name: "Номер теплового пункта",
+    getValue: (v) => v.properties.data.heating_point_number || null
+  }
+];
 
 class mapStore implements DisposableVm {
   navigateFn: NavigateFn | null = null;
@@ -72,47 +100,18 @@ class mapStore implements DisposableVm {
   //#region filters
   filters: Filter<MapConstants.PolygonFeature>[] = [];
   search = "";
-  showPriorityFirst = false;
+  showPriorityFirst = true;
   async init() {
     const res = await MapEndpoint.getProperty(0, 0, 0);
     const polygons: MapConstants.PolygonFeature[] = [];
 
     const filters: Map<string, Set<string>> = new Map();
-    const keys: {
-      getValue: (v: MapConstants.PolygonFeature) => string | null;
-      name: string;
-    }[] = [
-      {
-        name: "Районы",
-        getValue: (v) => v.properties.data.municipal_district.split("район ")[1] || null
-      },
-      {
-        name: "Подключение к ТЭЦ",
-        getValue: (v) => v.properties.data.heating_point_src || null
-      },
-      {
-        name: "Тип источника",
-        getValue: (v) => v.properties.data.heating_point_type || null
-      },
-      {
-        name: "Муниципальный район адреса потребителя",
-        getValue: (v) => v.properties.data.consumerAddress.municipalDistrict || null
-      },
-      {
-        name: "Дата ввода в эксплуатацию",
-        getValue: (v) => new Date(v.properties.data.commissioning_date).toLocaleDateString() || null
-      },
-      {
-        name: "Номер теплового пункта",
-        getValue: (v) => v.properties.data.heating_point_number || null
-      }
-    ];
 
     res.forEach((v) => {
       const feature = buildPropertyFeature(v);
 
       if (feature) {
-        buildFilterKey(feature, keys, filters);
+        buildFilterKey(feature, filterKeys, filters);
         polygons.push(feature);
       }
     });
@@ -120,7 +119,7 @@ class mapStore implements DisposableVm {
     this.consumers = polygons;
     this.filters = Array.from(filters.entries()).map(
       ([name, values]) =>
-        new Filter(name, Array.from(values), keys.find((k) => k.name === name)!.getValue)
+        new Filter(name, Array.from(values), filterKeys.find((k) => k.name === name)!.getValue)
     );
   }
   dateRange: DateRange = {
@@ -205,6 +204,7 @@ class mapStore implements DisposableVm {
             issues: [Issue.EMERGENCY, Issue.REPAIR],
             number: v.properties.data.heating_point_number,
             priority: Priority.HIGH,
+            info: null,
             unom: heatSourceUnom.toString()
           });
         }

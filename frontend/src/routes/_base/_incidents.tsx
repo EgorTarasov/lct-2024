@@ -25,9 +25,7 @@ const Page = observer(() => {
       <IncidentsSidebarMobile />
       <IncidentsSidebar />
       <ScrollArea className="flex-1 pt-[72px] pb-4 h-full">
-        <AnimatePresence mode="popLayout">
-          <AnimatedOutlet key={nextMatch.id} />
-        </AnimatePresence>
+        <Outlet />
       </ScrollArea>
     </main>
   );

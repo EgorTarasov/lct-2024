@@ -46,7 +46,14 @@ const Page = observer(() => {
             <Accordion type="single" collapsible>
               <AccordionItem value="1">
                 <AccordionTrigger className="px-4">Подробнее</AccordionTrigger>
-                <AccordionContent className="px-4">tst</AccordionContent>
+                <AccordionContent className="px-4">
+                  <ul className="space-y-2">
+                    {vm.item.info &&
+                      Object.entries(vm.item.info).map(([key, value]) => (
+                        <TitleInfo key={key} title={key} info={value} />
+                      ))}
+                  </ul>
+                </AccordionContent>
               </AccordionItem>
             </Accordion>
           </Section>
@@ -56,6 +63,7 @@ const Page = observer(() => {
             </Section>
           )}
           <Section
+            withoutSeparator={vm.item.incidentCount === 0}
             title={
               <>
                 <span>Потребители</span>

@@ -8,11 +8,18 @@ import { MapInitializer } from "@/widgets/map/map-initializer";
 import { useEffect, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import { ELEVATION } from "@/constants/elevation";
+import { ConsumerPolygon } from "@/widgets/map/polygon";
+
+const vm = IncidentsPageViewModel;
 
 export const IncidentsMap = observer(() => {
   return (
-    <MapContainer center={[51.505, -0.09]} zoom={13} style={{ height: 450, zIndex: ELEVATION.MAP }}>
+    <MapContainer
+      center={[55.751244, 37.618423]}
+      zoom={13}
+      style={{ height: 450, zIndex: ELEVATION.MAP }}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      {/* <ConsumerPolygon data={vm.selected?.polygon} /> */}
     </MapContainer>
   );
 });

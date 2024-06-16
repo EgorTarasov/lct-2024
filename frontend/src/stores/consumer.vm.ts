@@ -17,6 +17,8 @@ export class ConsumerViewModel {
 
   async init(consumerUnom: string, heatDistributorUnom: string) {
     this.loading = true;
+    this.item = null;
+    MapStore.setHighlightedConsumer(null);
     try {
       const [consumer, heatDistributor] = await Promise.all([
         ConsumersEndpoint.getByUnom(consumerUnom),
@@ -24,7 +26,9 @@ export class ConsumerViewModel {
       ]);
       this.heatDistributor = HeatDistributor.convertDto(heatDistributor);
       this.item = Consumer.convertDto(consumer);
+      this.item.info["Вид ТП"] = heatDistributor.heating_point_type;
 
+      this.loading = false;
       await when(() => MapStore.consumers.length > 0);
       const polygon = MapStore.consumers.find((v) => {
         return v.properties.data.consumerAddress.unom.toString() === consumerUnom;
@@ -32,14 +36,10 @@ export class ConsumerViewModel {
 
       if (polygon) {
         this.item.name = polygon.properties.data.consumerAddress.address;
-        const consumerPolygon = {
+        const consumerPolygon: Consumer.Polygon = {
           id: polygon.properties.data.consumerAddress.unom.toString(),
           position: polygon.geometry.coordinates[0].map((v) => [v[1], v[0]]),
           data: {
-            number: this.item.name,
-            source: this.item.consumerType,
-            balanceHolder: this.item.address,
-            commissioningDate: 0,
             priority: Priority.HIGH
           }
         };
