@@ -46,9 +46,11 @@ const Page = observer(() => {
             <Section
               className="px-0 pb-2"
               title={<span className="px-4">Информация об объекте</span>}>
-              <ul className="space-y-2 px-4">
-                <TitleInfo title="Вид ТП" info={vm.item.info["Вид ТП"]} />
-              </ul>
+              {vm.item.info["Вид ТП"] && (
+                <ul className="space-y-2 px-4">
+                  <TitleInfo title="Вид ТП" info={vm.item.info["Вид ТП"]} />
+                </ul>
+              )}
               <Accordion type="single" collapsible>
                 <AccordionItem value="1">
                   <AccordionTrigger className="px-4">Подробнее</AccordionTrigger>

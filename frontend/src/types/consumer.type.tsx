@@ -35,7 +35,8 @@ export namespace Consumer {
     | "Общая жилая площадь"
     | "Грузовой лифт"
     | "Общая нежилая площадь"
-    | "Виды жилищного фонда";
+    | "Виды жилищного фонда"
+    | "Вид ТП";
 
   export interface Polygon {
     id: string;
@@ -66,7 +67,7 @@ export namespace Consumer {
     name: string;
     priority: Priority;
     issue: Issue;
-    info: Record<Partial<InfoKeys> | string, string>;
+    info: Partial<Record<InfoKeys, string>>;
     incidentCount: number;
     unom: string;
     consumerType: string;
@@ -129,7 +130,7 @@ export namespace Consumer {
           "Вид ТП": "ЦТП",
           Материал: item.material,
           "Муниципальный район": item.municupalDistrict,
-          Площадь: item.area,
+          Площадь: item.area ? item.area : undefined,
           Этажи: item.floors,
           "Класс недвижимости": item.propertyClass,
           УНОМ: item.unom.toString()

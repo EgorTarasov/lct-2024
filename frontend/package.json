@@ -30,7 +30,6 @@
     "@radix-ui/react-tooltip": "^1.0.7",
     "@react-leaflet/core": "^2.1.0",
     "@tanstack/react-router": "^1.16.5",
-    "@tanstack/react-table": "^8.17.3",
     "axios": "^1.6.7",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",

@@ -13,6 +13,10 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { PlusIcon } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/utils/cn";
 
 const invoices = [
   {
@@ -62,7 +66,6 @@ const invoices = [
 export function TableDemo() {
   return (
     <Table>
-      <TableCaption>Готовые отчёты</TableCaption>
       <TableHeader>
         <TableRow className="*:whitespace-nowrap">
           <TableHead className="w-full">Название файла</TableHead>
@@ -79,12 +82,6 @@ export function TableDemo() {
           </TableRow>
         ))}
       </TableBody>
-      <TableFooter>
-        <TableRow>
-          <TableCell colSpan={3}>Total</TableCell>
-          <TableCell className="text-right">$2,500.00</TableCell>
-        </TableRow>
-      </TableFooter>
     </Table>
   );
 }
@@ -94,9 +91,12 @@ const Page = observer(() => {
     <>
       <main className="mx-auto flex flex-col w-full max-w-screen-xl pt-20 h-full overflow-hidden">
         <Text.H4>Загруженные данные</Text.H4>
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1 pt-4">
           <TableDemo />
         </ScrollArea>
+        <div className={cn("relative", buttonVariants({}))}>
+          <input type="file" className="opacity-0 absolute inset-0" />
+        </div>
         <div className="flex flex-col">test</div>
       </main>
     </>

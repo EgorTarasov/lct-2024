@@ -16,7 +16,7 @@ export namespace ConsumersDto {
         municupalDistrict: z.string(),
         purpose: z.string(),
         type: z.string(),
-        area: z.string(),
+        area: z.string().nullable(),
         floors: z.string(),
         propertyClass: z.string(),
         unom: z.number(),
