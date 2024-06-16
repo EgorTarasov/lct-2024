@@ -31,7 +31,8 @@ type Incident struct {
 	CreatedAt time.Time `db:"created_at" json:"createdAt"`
 	UpdatedAt time.Time `db:"updated_at" json:"updatedAt"`
 
-	Consumer         *MKDConsumer      `json:"mkdConsumer,omitempty"`
+	Consumer         []MKDConsumer     `json:"mkdConsumer,omitempty"`
+	StateConsumers   []StateConsumer   `json:"stateConsumers,omitempty"`
 	DispatchServices *DispatchServices `json:"dispatchServices,omitempty"`
 	HeatingPoint     *HeatingPoint     `json:"heatingPoint,omitempty"`
 
@@ -53,4 +54,15 @@ type Measurement struct {
 	MeasurementDate           string    `bson:"measurment_datetime" json:"measurementDate"`
 	MeasuringDeviceHours      float64   `bson:"measuring_device_hours" json:"measuringDeviceHours"`
 	MeasuringDeviceBrand      string    `bson:"metering_device_brand" json:"measuringDeviceBrand"`
+}
+
+// PredictionCalculation - структура для хранения данных о прогнозе (predictions table)
+type PredictionCalculation struct {
+	ID         int64     `db:"id" json:"id"`
+	UserID     null.Int  `db:"user_id" json:"userId"`
+	AdmArea    string    `db:"adm_area" json:"admArea"`
+	CreatedAt  time.Time `db:"created_at" json:"createdAt"`
+	UpdatedAt  time.Time `db:"updated_at" json:"updatedAt"`
+	Calculated int       `db:"calculated" json:"calculated"`
+	Total      int       `db:"total" json:"total"`
 }

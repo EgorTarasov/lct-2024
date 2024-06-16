@@ -19,6 +19,7 @@ type addressRegistry interface {
 	GetByAdmArea(ctx context.Context, admArea string) ([]shared.Address, error)
 	GetGeoDataByUnom(ctx context.Context, unom int64) (result shared.Address, err error)
 	GetAllObjectsByUnom(ctx context.Context, unom int64) (shared.UnomResult, error)
+	GetMkdConsumersByHeatingPoint(ctx context.Context, unom int64) ([]shared.MKDConsumer, error)
 	GetConsumersUnomsByHeatingPoint(ctx context.Context, unom int64) ([]int64, error)
 }
 
@@ -32,6 +33,7 @@ type incidentRepo interface {
 	Create(ctx context.Context, title, status string, priority int, unom int64) (int64, error)
 	GetRecent(ctx context.Context, limit, offset int) ([]shared.Incident, error)
 	GetByConsumerUnom(ctx context.Context, unom int64) ([]shared.Incident, error)
+	CreateCalculationRecord(ctx context.Context, userID int64, admArea string) (int64, error)
 }
 
 type service struct {
@@ -55,19 +57,14 @@ func NewService(ar addressRegistry, ev eventRepo, ir incidentRepo, producer *kaf
 	}
 }
 
-type predictionMessage struct {
-	AdmArea   string    `json:"admArea"`
-	StartDate time.Time `json:"startDate"`
-	EndDate   time.Time `json:"endDate"`
-	Threshold float32   `json:"threshold"`
-}
-
-func buildSaramaMessage(admArea string, startDate, endDate time.Time, threshold float32) (*sarama.ProducerMessage, error) {
-	jsonMessage := predictionMessage{
-		AdmArea:   admArea,
-		StartDate: startDate,
-		EndDate:   endDate,
-		Threshold: threshold,
+func buildSaramaMessage(predictionID int64, unoms []int64, startDate, endDate time.Time, threshold float32, regionName string) (*sarama.ProducerMessage, error) {
+	jsonMessage := shared.PredictionMessage{
+		Unoms:        unoms,
+		StartDate:    startDate,
+		EndDate:      endDate,
+		Threshold:    threshold,
+		RegionName:   regionName,
+		PredictionID: predictionID,
 	}
 
 	rawBytes, err := json.Marshal(jsonMessage)
@@ -75,8 +72,8 @@ func buildSaramaMessage(admArea string, startDate, endDate time.Time, threshold 
 		return nil, err
 	}
 	messageHeader := sarama.RecordHeader{
-		Key:   []byte("prediction"),
-		Value: []byte("emergency"),
+		Key:   []byte("type"),
+		Value: []byte("predict"),
 	}
 
 	return &sarama.ProducerMessage{
@@ -89,7 +86,7 @@ func buildSaramaMessage(admArea string, startDate, endDate time.Time, threshold 
 	}, nil
 }
 
-func (s *service) GetEmergencyPredictions(ctx context.Context, admArea string, startDate, endDate time.Time, threshold float32) error {
+func (s *service) GetEmergencyPredictions(ctx context.Context, userID int64, admArea string, startDate, endDate time.Time, threshold float32) error {
 	_, span := s.tracer.Start(
 		ctx,
 		"data.GetEmergencyPredictions",
@@ -102,15 +99,31 @@ func (s *service) GetEmergencyPredictions(ctx context.Context, admArea string, s
 	)
 	defer span.End()
 
+	addresses, err := s.ar.GetByAdmArea(ctx, admArea)
+	if err != nil {
+		return err
+	}
+	unoms := make([]int64, len(addresses))
+	for idx, value := range addresses {
+		unoms[idx] = value.Unom
+	}
+
 	// create message for prediction service
 	// send message to kafka
-	msg, err := buildSaramaMessage(admArea, startDate, endDate, threshold)
+
+	newID, err := s.ir.CreateCalculationRecord(ctx, userID, admArea)
+	if err != nil {
+		return err
+	}
+
+	msg, err := buildSaramaMessage(newID, unoms, startDate, endDate, threshold, admArea)
 	if err != nil {
 		return err
 	}
 	msg.Topic = s.topic
 
 	s.producer.SendAsyncMessage(msg)
+	// create record about calculations
 
 	return nil
 }
@@ -137,8 +150,8 @@ func (s *service) GetRecentIncidents(ctx context.Context, limit, offset int) ([]
 		if er != nil {
 			log.Error().Err(er).Msg("can't get objects by unom")
 		}
-		if result.Consumer != nil {
-			recent[i].Consumer = result.Consumer
+		if result.Consumers != nil {
+			recent[i].Consumer = result.Consumers
 		} else {
 			recent[i].Consumer = nil
 		}
@@ -253,4 +266,18 @@ func (s *service) GetIncedentsByHeatingPoint(ctx context.Context, unom int64) ([
 	}
 
 	return incidents, nil
+}
+
+// GetPredictions получение статусов текущих вычислений.
+func (s *service) GetPredictions(ctx context.Context, limit, offset int) ([]shared.PredictionCalculation, error) {
+	ctx, span := s.tracer.Start(
+		ctx,
+		"data.GetPredictions",
+		trace.WithAttributes(
+			attribute.Int("limit", limit),
+			attribute.Int("offset", offset),
+		),
+	)
+	defer span.End()
+	return nil, nil
 }

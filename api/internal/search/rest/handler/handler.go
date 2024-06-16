@@ -12,7 +12,7 @@ import (
 type searchEngine interface {
 	SearchStateProperties(ctx context.Context, query string) ([]shared.StatePropertySearchResult, error)
 	ListFilters(ctx context.Context) ([]shared.Filter, error)
-	SearchWithFilters(ctx context.Context, filters []shared.Filter) ([]shared.HeatingPointDTO, error)
+	SearchWithFilters(ctx context.Context, filters []shared.Filter) ([]shared.HeatingPoint, error)
 	GeoDataByUnom(ctx context.Context, unom int64) (shared.Address, error)
 	GeoDataByUnoms(ctx context.Context, unoms []int64) ([]shared.Address, error)
 	GetConsumersInfo(ctx context.Context, unoms []int64) (interface{}, error)

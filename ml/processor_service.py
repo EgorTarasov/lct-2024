@@ -202,7 +202,6 @@ if __name__ == "__main__":
         log.error("MINIO_SECRET_KEY is not set")
         exit(1)
 
-    minio_secure = os.getenv("MINIO_SECURE")
     if minio_secure is None:
         log.error("MINIO_SECURE is not set")
         exit(1)

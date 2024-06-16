@@ -26,7 +26,7 @@ python-create-grpc:
 #.PHONY: docker-publish
 #docker-publish: docker-build docker-push
 
-VERSION := 0.0.1
+VERSION := 0.1
 
 
 .PHONY: docker-build-amd64

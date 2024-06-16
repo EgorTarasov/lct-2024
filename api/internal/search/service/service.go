@@ -98,7 +98,7 @@ func (s *service) ListFilters(ctx context.Context) ([]shared.Filter, error) {
 }
 
 // SearchWithFilters поиск по коллекции consumers с учетом фильтров.
-func (s *service) SearchWithFilters(ctx context.Context, filters []shared.Filter) (response []shared.HeatingPointDTO, err error) {
+func (s *service) SearchWithFilters(ctx context.Context, filters []shared.Filter) (response []shared.HeatingPoint, err error) {
 	ctx, span := s.tr.Start(ctx, "service.SearchWithFilters")
 	defer span.End()
 
@@ -107,12 +107,7 @@ func (s *service) SearchWithFilters(ctx context.Context, filters []shared.Filter
 		return nil, err
 	}
 
-	for _, value := range result {
-		response = append(response, shared.HeatingPointDTO{
-			HeatingPoint: value,
-		})
-	}
-	return response, nil
+	return result, nil
 }
 
 // GeoDataByUnom получение гео данных по уникальному номеру объекта.

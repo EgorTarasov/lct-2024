@@ -60,6 +60,14 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 	app.Use(logger.New(logger.Config{
 		Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
 	}))
+	app.Use(func(c *fiber.Ctx) error {
+		ip := c.Get("X-Real-IP")
+		if ip == "" {
+			ip = c.IP()
+		}
+		log.Info().Str("X-Real-IP", ip).Msg("Request IP")
+		return c.Next()
+	})
 
 	// TODO: make choice for docker.yaml
 	cfg := config.MustNew("config.yaml")
@@ -123,13 +131,18 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 	docs := app.Group("/docs")
 	docs.Get("/*", fiberSwagger.WrapHandler)
 
+	producer, err := kafka.NewProducer(cfg.Kafka.Brokers)
+	if err != nil {
+		return fmt.Errorf("can't create producer: %v", err)
+	}
+
 	// users.
 	tokenRedisClient := redis.New[authModels.UserDao](redisClient)
 	tokenRepo := authRedisRepo.New(ctx, tokenRedisClient, tracer)
 	userRepo := authPgRepo.NewAccountRepo(pg, tracer)
 	dataRepo := authPgRepo.NewDataRepo(pg, tracer)
 
-	authService := auth.New(ctx, cfg, userRepo, dataRepo, tokenRepo, s3, tracer)
+	authService := auth.New(ctx, cfg, userRepo, dataRepo, tokenRepo, s3, producer, cfg.Kafka.Topic, tracer)
 	authHandlers := authHandler.NewAuthController(ctx, authService, tracer)
 
 	if err = authRouter.InitAuthRouter(ctx, app, authHandlers); err != nil {
@@ -137,10 +150,6 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 	}
 
 	// data
-	producer, err := kafka.NewProducer(cfg.Kafka.Brokers)
-	if err != nil {
-		return fmt.Errorf("can't create producer: %v", err)
-	}
 
 	ar := sharedMongo.NewAddressRegistryRepository(mongo, tracer)
 	ev := sharedMongo.NewEventRepo(mongo, tracer)

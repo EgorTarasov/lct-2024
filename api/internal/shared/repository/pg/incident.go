@@ -120,3 +120,27 @@ where unom = $1;
 	}
 	return incidents, nil
 }
+
+func (repo *incidentRepo) CreateCalculationRecord(ctx context.Context, userID int64, admArea string) (int64, error) {
+	ctx, span := repo.tracer.Start(ctx, "data.CreateCalculationRecord")
+	defer span.End()
+
+	const q = `
+insert into predictions(user_id, adm_area) values ($1, $2) returning id;
+`
+	var newID int64
+	if err := repo.pg.Get(ctx, &newID, q, userID, admArea); err != nil {
+		return 0, err
+	}
+	return newID, nil
+}
+
+//func (repo *incidentRepo) CreateCalculation(ctx context.Context, userID int64, admArea string) error {
+//	ctx, span := repo.tracer.Start(ctx, "data.CreateCalculation")
+//	defer span.End()
+//
+//	const q = `
+//insert into predictions(
+//user_id,
+//adm_area,
+//)

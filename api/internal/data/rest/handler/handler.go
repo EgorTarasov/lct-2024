@@ -5,8 +5,10 @@ import (
 	"time"
 
 	models "github.com/EgorTarasov/lct-2024/api/internal/shared/models"
+	"github.com/EgorTarasov/lct-2024/api/internal/users/token"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -15,7 +17,7 @@ type dataService interface {
 	GetIncidentByID(ctx context.Context, id int64) (models.Incident, error)
 	CreateIncident(ctx context.Context, title, status string, priority int, unom int64) (int64, error)
 	GetIncedentsByHeatingPoint(ctx context.Context, unom int64) ([]models.Incident, error)
-	GetEmergencyPredictions(ctx context.Context, admArea string, startDate, endDate time.Time, threshold float32) error
+	GetEmergencyPredictions(ctx context.Context, userID int64, admArea string, startDate, endDate time.Time, threshold float32) error
 }
 
 type dataController struct {
@@ -71,6 +73,10 @@ func (mc *dataController) GetPredictions(c *fiber.Ctx) error {
 	ctx, span := mc.tr.Start(c.Context(), "fiber.GetEmergencyEvents")
 	defer span.End()
 
+	user := c.Locals("userClaims").(*jwt.Token)
+
+	claims := user.Claims.(*token.UserClaims)
+
 	var req predictionRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": err.Error()})
@@ -89,7 +95,7 @@ func (mc *dataController) GetPredictions(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid format for endDate required: dd-mm-YYYY"})
 	}
 
-	err = mc.s.GetEmergencyPredictions(ctx, req.AdmArea, startDate, endDate, req.Threshold)
+	err = mc.s.GetEmergencyPredictions(ctx, claims.UserID, req.AdmArea, startDate, endDate, req.Threshold)
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
@@ -213,4 +219,8 @@ func (mc *dataController) GetByHeatingPoint(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
 	}
 	return c.JSON(issue)
+}
+
+func Upload(c *fiber.Ctx) error {
+	return c.SendString("Upload")
 }

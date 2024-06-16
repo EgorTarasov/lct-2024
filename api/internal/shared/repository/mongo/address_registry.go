@@ -46,10 +46,10 @@ func (r *addressRegistryRepository) GetByAdmArea(ctx context.Context, admArea st
 		},
 	}
 
-	findOptions := options.Find()
-	findOptions.SetLimit(10)
+	//findOptions := options.Find()
+	//findOptions.SetLimit(10)
 
-	err = r.mongo.FindMany(ctx, addressCollectionName, filter, &result, findOptions)
+	err = r.mongo.FindMany(ctx, addressCollectionName, filter, &result) //, findOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -213,6 +213,13 @@ func (r *addressRegistryRepository) GetHetSourceBySrcUnom(ctx context.Context, u
 	if err != nil {
 		return models.HeatingPoint{}, err
 	}
+	consumers, err := r.GetConsumersByHeatingPoint(ctx, unom)
+	if err != nil {
+		return models.HeatingPoint{}, err
+	}
+
+	result.Consumers = consumers
+
 	return result, nil
 }
 
@@ -226,20 +233,34 @@ func (r *addressRegistryRepository) GetAllObjectsByUnom(ctx context.Context, uno
 	model.Unom = unom
 	err := r.mongo.FindOne(ctx, "dispatch_services", filter, &model.DispatchService)
 	if err != nil {
-		log.Info().Err(err).Msg("error during getting related objects dispatch_services")
 		model.DispatchService = nil
 	}
-	err = r.mongo.FindOne(ctx, "mkd", filter, &model.Consumer)
+	err = r.mongo.FindOne(ctx, "mkd", filter, &model.Consumers)
 	if err != nil {
-		log.Info().Err(err).Msg("error during getting related objects mkd")
-		model.Consumer = nil
+
+		model.Consumers = nil
 	}
 	heatPoint, err := r.GetHeatSourceByConsumerUnom(ctx, unom)
 	if err != nil {
-		log.Info().Err(err).Msg("error during getting related objects consumers")
 		model.HeatingPoint = nil
 	} else {
 		model.HeatingPoint = &heatPoint
+	}
+
+	if model.HeatingPoint != nil {
+		consumers, err := r.GetConsumersByHeatingPoint(ctx, model.HeatingPoint.ConsumerAddress.Unom)
+		if err != nil {
+			model.HeatingPoint.Consumers = nil
+		} else {
+			model.HeatingPoint.Consumers = consumers
+		}
+		mkdConsumers, err := r.GetMkdConsumersByHeatingPoint(ctx, unom)
+		if err != nil {
+			model.Consumers = nil
+		} else {
+			model.Consumers = mkdConsumers
+
+		}
 	}
 	return model, nil
 }
@@ -261,4 +282,48 @@ func (r *addressRegistryRepository) GetConsumersUnomsByHeatingPoint(ctx context.
 	}
 
 	return ids, nil
+}
+
+func (r *addressRegistryRepository) GetConsumersByHeatingPoint(ctx context.Context, unom int64) ([]models.Address, error) {
+	ctx, span := r.tracer.Start(ctx, "addressRegistry.GetConsumersUnomsByHeatingPoint", trace.WithAttributes(attribute.Int64("unom", unom)))
+	defer span.End()
+
+	var heatingPoints []models.HeatingPoint
+	filter := bson.M{"heating_point_full_address.unom": unom}
+	err := r.mongo.FindMany(ctx, "consumers", filter, &heatingPoints)
+	if err != nil {
+		return nil, err
+	}
+	consumers := make([]models.Address, len(heatingPoints))
+
+	for i, v := range heatingPoints {
+		consumers[i] = v.ConsumerAddress
+	}
+
+	return consumers, nil
+}
+
+func (r *addressRegistryRepository) GetMkdConsumersByHeatingPoint(ctx context.Context, unom int64) ([]models.MKDConsumer, error) {
+	ctx, span := r.tracer.Start(ctx, "addressRegistry.GetMkdConsumersByHeatingPoint", trace.WithAttributes(attribute.Int64("unom", unom)))
+	defer span.End()
+
+	var result []models.HeatingPoint
+	filter := bson.M{"heating_point_full_address.unom": unom}
+	err := r.mongo.FindMany(ctx, "consumers", filter, &result)
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]int64, len(result))
+	for i, v := range result {
+		ids[i] = v.ConsumerAddress.Unom
+	}
+
+	var mkdConsumers []models.MKDConsumer
+	filter = bson.M{"unom": bson.M{"$in": ids}}
+	err = r.mongo.FindMany(ctx, "mkd", filter, &mkdConsumers)
+	if err != nil {
+		return nil, err
+	}
+
+	return mkdConsumers, nil
 }
