@@ -150,19 +150,20 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 	}
 
 	// data
-
 	ar := sharedMongo.NewAddressRegistryRepository(mongo, tracer)
 	ev := sharedMongo.NewEventRepo(mongo, tracer)
 	ir := dataPg.NewIncidentRepo(pg, tracer)
-	ms := events.NewService(ar, ev, ir, producer, cfg.Kafka.Topic, tracer)
-	mc := eventsHandler.NewDataController(ctx, ms, tracer)
-	eventsRouter.InitRoutes(app, mc)
-
-	// search
 	statePropertyRepo := sharedMongo.NewStatePropertyRepo(mongo, tracer)
 	filterRepo := sharedMongo.NewSearchFilterRepo(mongo, tracer)
 	searchService := search.NewService(ar, statePropertyRepo, filterRepo, tracer)
 	searchController := searchHandler.New(searchService, tracer)
+
+	ms := events.NewService(filterRepo, ar, ev, ir, producer, cfg.Kafka.Topic, tracer)
+	mc := eventsHandler.NewDataController(ctx, ms, tracer)
+	eventsRouter.InitRoutes(app, mc)
+
+	// search
+
 	searchRouter.InitRoutes(app, searchController)
 
 	if err = app.Listen(fmt.Sprintf(":%d", cfg.Server.Port)); err != nil {

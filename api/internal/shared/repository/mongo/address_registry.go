@@ -265,9 +265,9 @@ func (r *addressRegistryRepository) GetAllObjectsByUnom(ctx context.Context, uno
 	return model, nil
 }
 
-// GetConsumersUnomsByHeatingPoint возвращает список уникальных номеров потребителей по уникальному номеру теплового пункта.
-func (r *addressRegistryRepository) GetConsumersUnomsByHeatingPoint(ctx context.Context, unom int64) ([]int64, error) {
-	ctx, span := r.tracer.Start(ctx, "addressRegistry.GetConsumersUnomsByHeatingPoint", trace.WithAttributes(attribute.Int64("unom", unom)))
+// GetStateConsumersUnomsByHeatingPoint возвращает список уникальных номеров потребителей по уникальному номеру теплового пункта.
+func (r *addressRegistryRepository) GetStateConsumersUnomsByHeatingPoint(ctx context.Context, unom int64) ([]int64, error) {
+	ctx, span := r.tracer.Start(ctx, "addressRegistry.GetStateConsumersUnomsByHeatingPoint", trace.WithAttributes(attribute.Int64("unom", unom)))
 	defer span.End()
 
 	var result []models.HeatingPoint
@@ -285,7 +285,7 @@ func (r *addressRegistryRepository) GetConsumersUnomsByHeatingPoint(ctx context.
 }
 
 func (r *addressRegistryRepository) GetConsumersByHeatingPoint(ctx context.Context, unom int64) ([]models.Address, error) {
-	ctx, span := r.tracer.Start(ctx, "addressRegistry.GetConsumersUnomsByHeatingPoint", trace.WithAttributes(attribute.Int64("unom", unom)))
+	ctx, span := r.tracer.Start(ctx, "addressRegistry.GetStateConsumersUnomsByHeatingPoint", trace.WithAttributes(attribute.Int64("unom", unom)))
 	defer span.End()
 
 	var heatingPoints []models.HeatingPoint

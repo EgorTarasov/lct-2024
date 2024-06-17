@@ -79,7 +79,7 @@ ifeq (,$(wildcard .env))
     POSTGRES_PORT := 54000
 else
     # Иначе, подключаем переменные из файла .env
-    include ../configs/.env
+    include .env
     export
 endif
 POSTGRES_SETUP_TEST := user=${POSTGRES_USER} password=${POSTGRES_PASSWORD} dbname=${POSTGRES_DB} host=${POSTGRES_HOST} port=${POSTGRES_PORT} sslmode=disable
@@ -108,24 +108,24 @@ VERSION := 0.0.3
 .PHONY: docker-build-amd64
 docker-build-amd64:
 	docker build \
-		--tag ghcr.io/egortarasov/lct-2024/api:amd64-$(VERSION) \
+		--tag ghcr.io/egortarasov/true-tech/api:amd64-$(VERSION) \
 		--platform linux/amd64 .
 
 .PHONY: docker-build-arm64
 docker-build-arm64:
 	docker build \
-		--tag ghcr.io/egortarasov/lct-2024/api:arm64-$(VERSION) \
+		--tag ghcr.io/egortarasov/true-tech/api:arm64-$(VERSION) \
 		--platform linux/arm64 .
 
 
 
 .PHONY: docker-push-amd64
 docker-push-amd64:
-	docker push ghcr.io/egortarasov/lct-2024/api:amd64-$(VERSION)
+	docker push ghcr.io/egortarasov/true-tech/api:amd64-$(VERSION)
 
 .PHONY: docker-push-arm64
 docker-push-arm64:
-	docker push ghcr.io/egortarasov/lct-2024/api:arm64-$(VERSION)
+	docker push ghcr.io/egortarasov/true-tech/api:arm64-$(VERSION)
 
 .PHONY: docker-publish-amd64
 docker-publish-amd64: docker-build-amd64 docker-push-amd64

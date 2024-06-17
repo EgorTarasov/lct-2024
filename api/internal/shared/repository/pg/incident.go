@@ -47,6 +47,36 @@ limit $1 offset $2;
 	return incidents, nil
 }
 
+// GetRecentV1 возвращает список инцидентов, отсортированных по времени открытия в обратном порядке.
+func (repo *incidentRepo) GetRecentV1(ctx context.Context, limit, offset int) ([]models.IncidentV1, error) {
+	ctx, span := repo.tracer.Start(ctx, "data.GetRecentV1")
+	defer span.End()
+
+	const q = `
+select 
+	id,
+	description,
+	system,
+	external_created,
+	completed,
+	external_completed,
+	region_name,
+	unom,
+	address,
+	kind,
+	predicted_at,
+	prediction_id,
+	upload_id
+from incident 
+order by external_created desc limit $1 offset $2;
+`
+	var incidents []models.IncidentV1
+	if err := repo.pg.Select(ctx, &incidents, q, limit, offset); err != nil {
+		return nil, err
+	}
+	return incidents, nil
+}
+
 // Create создает новый инцидент.
 func (repo *incidentRepo) Create(ctx context.Context, title, status string, priority int, unom int64) (int64, error) {
 	ctx, span := repo.tracer.Start(ctx, "data.Create")

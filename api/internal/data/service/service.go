@@ -19,8 +19,9 @@ type addressRegistry interface {
 	GetByAdmArea(ctx context.Context, admArea string) ([]shared.Address, error)
 	GetGeoDataByUnom(ctx context.Context, unom int64) (result shared.Address, err error)
 	GetAllObjectsByUnom(ctx context.Context, unom int64) (shared.UnomResult, error)
+	GetHeatSourceByConsumerUnom(ctx context.Context, unom int64) (result shared.HeatingPoint, err error)
 	GetMkdConsumersByHeatingPoint(ctx context.Context, unom int64) ([]shared.MKDConsumer, error)
-	GetConsumersUnomsByHeatingPoint(ctx context.Context, unom int64) ([]int64, error)
+	GetStateConsumersUnomsByHeatingPoint(ctx context.Context, unom int64) ([]int64, error)
 }
 
 type eventRepo interface {
@@ -32,22 +33,29 @@ type incidentRepo interface {
 	GetByID(ctx context.Context, id int64) (shared.Incident, error)
 	Create(ctx context.Context, title, status string, priority int, unom int64) (int64, error)
 	GetRecent(ctx context.Context, limit, offset int) ([]shared.Incident, error)
+	GetRecentV1(ctx context.Context, limit, offset int) ([]shared.IncidentV1, error)
 	GetByConsumerUnom(ctx context.Context, unom int64) ([]shared.Incident, error)
 	CreateCalculationRecord(ctx context.Context, userID int64, admArea string) (int64, error)
+}
+
+type consumerRepo interface {
+	GetStateConsumersByUnoms(ctx context.Context, unoms []int64) (consumers []shared.StateConsumer, err error)
 }
 
 type service struct {
 	ar       addressRegistry
 	ev       eventRepo
 	ir       incidentRepo
+	cr       consumerRepo
 	producer *kafka.Producer
 	tracer   trace.Tracer
 	topic    string
 }
 
 // NewService конструктор сервиса для работы с картой.
-func NewService(ar addressRegistry, ev eventRepo, ir incidentRepo, producer *kafka.Producer, kafkaTopic string, tracer trace.Tracer) *service {
+func NewService(cr consumerRepo, ar addressRegistry, ev eventRepo, ir incidentRepo, producer *kafka.Producer, kafkaTopic string, tracer trace.Tracer) *service {
 	return &service{
+		cr:       cr,
 		ar:       ar,
 		ev:       ev,
 		ir:       ir,
@@ -251,7 +259,7 @@ func (s *service) GetIncedentsByHeatingPoint(ctx context.Context, unom int64) ([
 	)
 	defer span.End()
 
-	consumerUnoms, err := s.ar.GetConsumersUnomsByHeatingPoint(ctx, unom)
+	consumerUnoms, err := s.ar.GetStateConsumersUnomsByHeatingPoint(ctx, unom)
 	if err != nil {
 		return nil, err
 	}
@@ -280,4 +288,67 @@ func (s *service) GetPredictions(ctx context.Context, limit, offset int) ([]shar
 	)
 	defer span.End()
 	return nil, nil
+}
+
+// GetHeatingPointsWithIncidents получение точек учета с инцидентами.
+func (s *service) GetHeatingPointsWithIncidentsV1(ctx context.Context, limit, offset int) ([]shared.IncidentV1, error) {
+	ctx, span := s.tracer.Start(
+		ctx,
+		"data.GetHeatingPointsWithIncidentsV1",
+	)
+	defer span.End()
+	recentIncidents, err := s.ir.GetRecentV1(ctx, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	for idx := 0; idx < len(recentIncidents); idx++ {
+
+		objects, err := s.ar.GetAllObjectsByUnom(ctx, recentIncidents[idx].Unom)
+		if err != nil {
+			log.Error().Err(err).Msg("can't get objects by unom")
+		}
+
+		//	 if
+		if objects.HeatingPoint != nil {
+
+			//	следовательно инцидент связан с точкой учета
+			recentIncidents[idx].AddressInEvent = objects.HeatingPoint.Address
+			recentIncidents[idx].Point = objects.HeatingPoint
+			//	 следовательно надо искать потребителей для данной точки
+
+		} else if objects.Consumers != nil && objects.HeatingPoint == nil {
+			//	следовательно инцидент связан с потребителем
+			recentIncidents[idx].AddressInEvent = objects.Consumers[0].Address
+			recentIncidents[idx].Consumers = objects.Consumers
+
+			// получаем точку учета через unom потребителя
+			heatingPoint, err := s.ar.GetHeatSourceByConsumerUnom(ctx, recentIncidents[idx].Unom)
+			if err != nil {
+				log.Error().Err(err).Msg("can't get heating point by consumer unom")
+			}
+			recentIncidents[idx].Point = &heatingPoint
+		} else {
+			continue
+		}
+
+		consumers, err := s.ar.GetMkdConsumersByHeatingPoint(ctx, objects.HeatingPoint.Unom)
+		if err != nil {
+			log.Error().Err(err).Msg("can't get consumers by heating point")
+		}
+		recentIncidents[idx].Consumers = consumers
+
+		stateConsumersUnoms, err := s.ar.GetStateConsumersUnomsByHeatingPoint(ctx, recentIncidents[idx].Unom)
+		if err != nil {
+			log.Error().Err(err).Msg("can't get state consumers by heating point")
+		}
+		stateConsumers, err := s.cr.GetStateConsumersByUnoms(ctx, stateConsumersUnoms)
+		if err != nil {
+			log.Error().Err(err).Msg("can't get state consumers by heating point")
+		}
+		recentIncidents[idx].StateConsumers = stateConsumers
+
+	}
+
+	return recentIncidents, nil
 }

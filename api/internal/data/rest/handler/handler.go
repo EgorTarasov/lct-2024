@@ -18,6 +18,7 @@ type dataService interface {
 	CreateIncident(ctx context.Context, title, status string, priority int, unom int64) (int64, error)
 	GetIncedentsByHeatingPoint(ctx context.Context, unom int64) ([]models.Incident, error)
 	GetEmergencyPredictions(ctx context.Context, userID int64, admArea string, startDate, endDate time.Time, threshold float32) error
+	GetHeatingPointsWithIncidentsV1(ctx context.Context, limit, offset int) ([]models.IncidentV1, error)
 }
 
 type dataController struct {
@@ -223,4 +224,31 @@ func (mc *dataController) GetByHeatingPoint(c *fiber.Ctx) error {
 
 func Upload(c *fiber.Ctx) error {
 	return c.SendString("Upload")
+}
+
+// GetRecentV1 godoc
+//
+// # Получение информации об инцидетнах
+//
+// @Summary получение информации об инцидетнах
+// @Description
+// @Param limit query int false "limit"
+// @Param offset query int false "offset"
+// @Tags issue
+// @Produce  json
+// @Success 200 {object} []models.IncidentV1
+// @Router /issue/list/v1 [get].
+func (mc *dataController) GetRecentV1(c *fiber.Ctx) error {
+	ctx, span := mc.tr.Start(c.Context(), "fiber.GetRecentIncidents")
+	defer span.End()
+
+	limit := c.QueryInt("limit", 10)
+	offset := c.QueryInt("offset", 0)
+
+	result, err := mc.s.GetHeatingPointsWithIncidentsV1(ctx, limit, offset)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(result)
 }

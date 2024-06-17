@@ -41,6 +41,30 @@ type Incident struct {
 	RelatedObjects UnomResult    `json:"relatedObjects"`
 }
 
+// IncidentV1 - структура для хранения данных о инциденте (incidents table)
+type IncidentV1 struct {
+	// data from incedent table
+	ID                int64       `db:"id" json:"id"`
+	Desctiption       string      `db:"description" json:"description"`
+	System            string      `db:"system" json:"system"`
+	ExternalCreated   null.Time   `db:"external_created" json:"externalCreated"`
+	Completed         null.Time   `db:"completed" json:"completed"`
+	ExternalCompleted null.Time   `db:"external_completed" json:"externalCompleted"`
+	RegionName        string      `db:"region_name" json:"regionName"`
+	Unom              int64       `db:"unom" json:"unom"`
+	AddressInEvent    string      `db:"address" json:"addressInEvent"`
+	Kind              null.String `db:"kind" json:"kind"`
+	PredictedAt       null.Time   `db:"predicted_at" json:"predictedAt"`
+	PredictionID      null.Int    `db:"prediction_id" json:"predictionId"`
+	UploadId          null.Int    `db:"upload_id" json:"uploadId"`
+	// data from mongo
+	Point           *HeatingPoint    `json:"heatPoint"`
+	Consumers       []MKDConsumer    `json:"mkdConsumers"`
+	StateConsumers  []StateConsumer  `json:"stateConsumers"`
+	Measurements    []Measurement    `json:"measurements"`
+	DispatchService DispatchServices `json:"dispatchService"`
+}
+
 type Measurement struct {
 	Unom                      int64     `bson:"unom" json:"unom"`
 	EnergyConsumption         float64   `bson:"thermal_energy_consumption" json:"energyConsumption"`

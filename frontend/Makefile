@@ -1,6 +1,4 @@
-VERSION := 0.0.1
-
-
+VERSION := 0.2
 
 .PHONY: docker-build-amd64
 docker-build-amd64:
@@ -13,7 +11,6 @@ docker-build-arm64:
 	docker build \
 		--tag ghcr.io/egortarasov/lct-2024/ui:arm64-$(VERSION) \
 		--platform linux/arm64 .
-
 
 
 .PHONY: docker-push-amd64
