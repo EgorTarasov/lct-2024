@@ -8,21 +8,23 @@ export namespace ConsumersDto {
     })
     .array();
 
+  export const StateHeat = z.object({
+    admDistrict: z.string(),
+    material: z.string(),
+    municupalDistrict: z.string(),
+    purpose: z.string(),
+    type: z.string(),
+    area: z.string().nullable(),
+    floors: z.string(),
+    propertyClass: z.string(),
+    unom: z.number(),
+    События: EventDto.Item.array().nullable(),
+    priority: z.number()
+  });
+  export type StateHeat = z.infer<typeof StateHeat>;
+
   export const Item = z.object({
-    stateHeatConsumers: z
-      .object({
-        admDistrict: z.string(),
-        material: z.string(),
-        municupalDistrict: z.string(),
-        purpose: z.string(),
-        type: z.string(),
-        area: z.string().nullable(),
-        floors: z.string(),
-        propertyClass: z.string(),
-        unom: z.number(),
-        События: EventDto.Item.array().nullable()
-      })
-      .array(),
+    stateHeatConsumers: StateHeat.array(),
     mkdConsumers: z
       .object({
         deprecation: z.number(),

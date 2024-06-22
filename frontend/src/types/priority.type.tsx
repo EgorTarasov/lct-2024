@@ -6,9 +6,9 @@ import PriorityMediumAlternateIcon from "@/assets/priority-alternate-medium.svg"
 import PriorityLowAlternateIcon from "@/assets/priority-alternate-low.svg";
 
 export enum Priority {
-  HIGH = 1,
-  MEDIUM = 0,
-  LOW = -1
+  HIGH = 3,
+  MEDIUM = 2,
+  LOW = 1
 }
 
 export const PriorityLocaleMap = {

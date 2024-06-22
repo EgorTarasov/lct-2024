@@ -145,7 +145,6 @@ export const MainSidebarViewMobile = observer(() => {
           <DrawerTrigger asChild>
             <Button size="lg" className="px-4 gap-2">
               <ListIcon className="size-4" />
-              Объекты
             </Button>
           </DrawerTrigger>
           <DrawerContent className="h-[80vh] overflow-hidden text-foreground">

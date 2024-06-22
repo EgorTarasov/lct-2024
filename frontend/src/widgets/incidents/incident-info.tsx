@@ -11,7 +11,7 @@ export const IncidentInfo: FC<{ data: Incident.Item }> = observer((x) => (
   <IncidentCardWrapper className="gap-2">
     <div className="flex gap-4">
       <Text.SubtleMedium className="text-muted-foreground">{x.data.number}</Text.SubtleMedium>
-      <PriorityCard data={x.data.priority} />
+      {x.data.type !== "unknown" && <PriorityCard data={x.data.data.priority} />}
     </div>
     <Text.H3>{x.data.address}</Text.H3>
     <Separator />

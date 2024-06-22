@@ -51,8 +51,6 @@ export const MobileNav = observer(() => {
     });
   };
 
-  console.log(activePage);
-
   return (
     <div
       className="flex lg:hidden gap-2 absolute top-4 right-4"

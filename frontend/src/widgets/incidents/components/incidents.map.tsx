@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import { ELEVATION } from "@/constants/elevation";
 import { ConsumerPolygon } from "@/widgets/map/polygon";
+import { Priority, PriorityLocaleMap } from "@/types/priority.type";
 
 const vm = IncidentsPageViewModel;
 
@@ -19,7 +20,19 @@ export const IncidentsMap = observer(() => {
       zoom={13}
       style={{ height: 450, zIndex: ELEVATION.MAP }}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      {/* <ConsumerPolygon data={vm.selected?.polygon} /> */}
+      {vm.selected?.heatPolygon && (
+        <ConsumerPolygon
+          noPadding
+          data={{
+            id: "1",
+            position: vm.selected.heatPolygon[0].map((v) => [v[1], v[0]]),
+            data: {
+              priority: vm.selected.data?.priority ?? Priority.LOW
+            }
+          }}
+          color={PriorityLocaleMap[vm.selected.data?.priority ?? Priority.LOW].color}
+        />
+      )}
     </MapContainer>
   );
 });

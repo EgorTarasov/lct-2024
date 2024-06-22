@@ -16,10 +16,6 @@ const Page = observer(() => {
   const nextMatchIndex = matches.findIndex((d) => d.id === match.id) + 1;
   const nextMatch = matches[nextMatchIndex];
 
-  useEffect(() => {
-    vm.init();
-  }, []);
-
   return (
     <main className="size-full flex">
       <IncidentsSidebarMobile />

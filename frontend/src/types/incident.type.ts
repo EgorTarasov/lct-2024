@@ -19,18 +19,6 @@ mkdConsumer: Потребитель МКД
 dispatchServices: Диспетчерские службы
 */
 export namespace Incident {
-  export type Info =
-    | "Открыто в"
-    | "Закрыто в"
-    | "Название"
-    | "Статус"
-    | "Приоритет"
-    | "УНОМ"
-    | "Создано в"
-    | "Обновлено в"
-    | "Потребитель МКД"
-    | "Диспетчерские службы";
-
   export interface DependentObjects {
     tps: string;
     heatSource: HeatDistributor.Item | null;
@@ -39,16 +27,16 @@ export namespace Incident {
 
   export interface BaseProps {
     number: string;
-    priority: Priority;
     address: string;
-    info: Partial<Record<Info, string>>;
-    incidentTitle: string;
+    info: Record<string, string | undefined>;
     incidentIssue: Issue;
     incidentStatus: "active" | "closed";
+    issueText: string;
     date: Date;
     comments: string[];
     unom: number;
     dependentObjects: DependentObjects;
+    heatPolygon?: [[number, number][]];
   }
 
   export interface HeatItem extends BaseProps {
@@ -77,51 +65,127 @@ export namespace Incident {
 
     const baseProps: Incident.BaseProps = {
       number: dto.id.toString(),
-      priority: Priority.HIGH,
-      address: dto.relatedObjects.heatingPoint?.heating_point_full_address.address || "",
+      address: dto.addressInEvent,
       info: {
-        "Открыто в": dto.openedAt ? format(dto.openedAt, "dd.MM.yyyy HH:mm") : undefined,
-        "Закрыто в": dto.closedAt ? format(dto.closedAt, "dd.MM.yyyy HH:mm") : undefined,
-        Название: dto.title,
-        Статус: dto.status === "closed" ? "Закрыто" : "Открыто",
-        Приоритет: dto.priority,
+        "Открыто в": format(dto.externalCreated, "dd.MM.yyyy HH:mm"),
         УНОМ: dto.unom.toString(),
-        "Создано в": dto.createdAt ? format(dto.createdAt, "dd.MM.yyyy HH:mm") : undefined,
-        "Обновлено в": dto.updatedAt ? format(dto.updatedAt, "dd.MM.yyyy HH:mm") : undefined
+        "Вид ТП": dto.heatPoint?.heating_point_type ?? undefined,
+        "Дата ввода в эксплуатацию": dto.heatPoint?.commissioning_date.toString(),
+        "Источник отопления": dto.heatPoint?.heating_point_src,
+        "Номер точки отопления": dto.heatPoint?.heating_point_number,
+        "Тип точки отопления": dto.heatPoint?.heating_point_type,
+        "Тип расположения точки отопления": dto.heatPoint?.heating_point_location_type,
+        "Муниципальный район": dto.heatPoint?.municipal_district,
+        "Полный адрес потребителя": dto.heatPoint?.consumer_full_address.address,
+        "Полный адрес точки отопления": dto.heatPoint?.heating_point_full_address.address
       },
-      incidentTitle: dto.title,
-      incidentIssue: Issue.EMERGENCY,
-      incidentStatus: dto.status === "closed" ? "closed" : "active",
-      date: new Date(dto.createdAt),
+      incidentIssue: dto.system === "ml" ? Issue.PREDICTION : Issue.EMERGENCY,
+      incidentStatus: dto.completed ? "closed" : "active",
+      date: new Date(dto.externalCreated),
+      heatPolygon: dto.heatPoint?.heating_point_full_address.border?.find(
+        (v) => v.Key === "coordinates"
+      )?.Value,
       comments: [], // Add comments if available
       unom: dto.unom,
+      issueText: dto.stateConsumers?.at(0)?.События?.at(0)?.title ?? "Аварийная ситуация",
       dependentObjects: {
-        tps: dto.heatingPoint?.heating_point_src ?? "ТЭЦ-21",
-        heatSource: dto.heatingPoint ? HeatDistributor.convertDto(dto.heatingPoint) : null,
-        consumers: []
+        tps: dto.heatPoint?.heating_point_src ?? "ТЭЦ-21",
+        heatSource: dto.heatPoint
+          ? HeatDistributor.convertDto(
+              { ...dto.heatPoint, consumers: [] },
+              dto.system === "ml",
+              dto.heatPoint.priority ?? Priority.LOW
+            )
+          : null,
+        consumers:
+          dto.heatPoint?.consumers?.map((v) => ({
+            address: v.address,
+            consumerType: dto.heatPoint?.heating_point_location_type ?? "",
+            id: v.unom,
+            incidentCount: 0,
+            info: {},
+            issue: dto.system === "ml" ? Issue.PREDICTION : Issue.EMERGENCY,
+            name: v.municipalDistrict,
+            priority: dto.heatPoint?.priority ?? Priority.LOW,
+            unom: v.unom.toString()
+          })) ?? []
         // consumers: dto.relatedObjects.heatingPoint ? dto.relatedObjects.heatingPoint.consumers?.map(v =)
       }
     };
 
     // Assuming we need to determine the type based on some DTO fields
-    if (dto.heatingPoint) {
+    if (dto.heatPoint?.heating_point_full_address.unom === baseProps.unom) {
       return {
         ...baseProps,
         type: "heat-source",
-        data: HeatDistributor.convertDto(dto.heatingPoint)
-      } as Incident.HeatItem;
-    } else if (dto.mkdConsumer) {
-      return {
-        ...baseProps,
-        type: "consumer",
-        data: dto.mkdConsumer // Assuming first consumer for simplicity
-      } as Incident.ConsumerItem;
-    } else {
-      return {
-        ...baseProps,
-        type: "unknown",
-        data: null
+        data: HeatDistributor.convertDto(
+          { ...dto.heatPoint, consumers: [] },
+          dto.system === "ml",
+          dto.heatPoint.priority ?? Priority.LOW
+        )
       };
     }
+
+    if (dto.heatPoint?.consumer_full_address.unom === baseProps.unom) {
+      return {
+        ...baseProps,
+        type: "heat-source",
+        data: HeatDistributor.convertDto(
+          { ...dto.heatPoint, consumers: [] },
+          dto.system === "ml",
+          dto.heatPoint.priority ?? Priority.LOW
+        )
+      };
+    }
+
+    dto.stateConsumers?.forEach((v) => {
+      if (v.unom === baseProps.unom) {
+        return {
+          ...baseProps,
+          type: "consumer",
+          data: {
+            id: v.unom,
+            address: v.admDistrict,
+            name: v.municupalDistrict,
+            priority: Priority.LOW,
+            issue: dto.system === "ml" ? Issue.PREDICTION : Issue.EMERGENCY,
+            incidentCount: v.События?.length ?? 0,
+            unom: v.unom.toString(),
+            consumerType: v.material,
+            info: {
+              "Тип потребителя": v.purpose,
+              "Административный округ": v.admDistrict,
+              "Вид ТП": "ЦТП",
+              Материал: v.material,
+              "Муниципальный район": v.municupalDistrict,
+              Площадь: v.area ? v.area : undefined,
+              Этажи: v.floors,
+              "Класс недвижимости": v.propertyClass,
+              УНОМ: v.unom.toString()
+            }
+          }
+        };
+      }
+    });
+
+    return {
+      ...baseProps,
+      type: "unknown",
+      data: null
+    };
+
+    // } else if (dto.stateConsumers) {
+    //   return {
+    //     ...baseProps,
+    //     type: "consumer",
+    //     data: dto.mkdConsumer // Assuming first consumer for simplicity
+    //   } as Incident.ConsumerItem;
+    // } else {
+    //   return {
+    //     ...baseProps,
+    //     type: "unknown",
+    //     data: null
+    //   };
+    // }
   };
 }

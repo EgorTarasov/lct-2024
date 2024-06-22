@@ -1,7 +1,9 @@
 import { Issue, IssueLocaleMap } from "@/types/issue.type";
 import { pluralizeIncident } from "@/utils/pluralize/incident";
+import { IncidentsPageViewModel } from "@/widgets/incidents/incidents.page.vm";
 import { Link } from "@tanstack/react-router";
 import { ChevronRightIcon } from "lucide-react";
+import { observer } from "mobx-react-lite";
 import { FC } from "react";
 
 export const IssueCard: FC<{ data: Issue; text?: string }> = (x) => {
@@ -28,10 +30,13 @@ export const IssueIcon = ({ data, className }: { data: Issue; className?: string
   );
 };
 
-export const IssueLink: FC<{ unom: string; count: number }> = (x) => (
+export const IssueLink: FC<{ unom: string; count: number }> = observer((x) => (
   <Link
     className="border px-4 py-3 rounded-xl hover:bg-background text-sm space-y-2 group transition-colors"
     to="/incidents/$unom"
+    onClick={() => {
+      IncidentsPageViewModel.search = x.unom;
+    }}
     params={{ unom: x.unom }}>
     <p>
       Имеется информация о {x.count} {pluralizeIncident(x.count)}, связанных с этим объектом
@@ -40,4 +45,4 @@ export const IssueLink: FC<{ unom: string; count: number }> = (x) => (
       Перейти к инцидентам <ChevronRightIcon className="size-5" />
     </div>
   </Link>
-);
+));

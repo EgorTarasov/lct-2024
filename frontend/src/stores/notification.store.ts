@@ -6,30 +6,8 @@ import { makeAutoObservable } from "mobx";
 import { toast } from "sonner";
 
 class notificationStore {
-  ws: WebSocket = new WebSocket('wss://push.larek.tech/stream?token="CqYaYW-WeaviCpP"');
-
   constructor() {
     makeAutoObservable(this);
-    this.ws.onopen = () => {
-      console.log("Connected to Gotify WebSocket");
-    };
-
-    this.ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      toast(message.message);
-      console.log("New message:", JSON.stringify(message));
-    };
-
-    this.ws.onerror = (error) => {
-      toast.error("WebSocket error", {
-        description: JSON.stringify(error)
-      });
-      console.error("WebSocket error:", error);
-    };
-
-    this.ws.onclose = () => {
-      console.log("WebSocket connection closed");
-    };
   }
 
   _notifications: Notification[] = [

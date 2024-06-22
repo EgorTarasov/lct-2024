@@ -41,12 +41,16 @@ export namespace HeatDistributor {
     unom: string;
   }
 
-  export const convertDto = (v: MapDto.Property): HeatDistributor.Item => ({
+  export const convertDto = (
+    v: MapDto.Property,
+    isMl?: boolean,
+    priority?: number
+  ): HeatDistributor.Item => ({
     id: v.consumer_full_address.unom,
     number: v.heating_point_number,
     address: v.heating_point_full_address.address,
-    issue: Issue.EMERGENCY,
-    priority: Priority.HIGH,
+    issue: isMl ? Issue.PREDICTION : Issue.EMERGENCY,
+    priority: priority ?? Priority.HIGH,
     consumerCount: 1,
     issues: [Issue.EMERGENCY, Issue.REPAIR],
     incidentCount: 0,

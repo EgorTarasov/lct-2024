@@ -38,13 +38,15 @@ export const IssueSelect: FC<{
               <Text.Subtle className="flex-1">Все типы инцидентов</Text.Subtle>
             </Button>
           </DropdownMenuItem>
-          {Object.entries(IssueLocaleMap).map(([key, v], i) => (
+          {[IssueLocaleMap.PREDICTION, IssueLocaleMap.EMERGENCY].map((v, i) => (
             <DropdownMenuItem key={i} asChild>
               <Button
                 variant="ghost"
                 className="flex gap-2 w-full text-left dark:opacity-80"
-                style={{ color: IssueLocaleMap[key as Issue].color }}
-                onClick={() => onChange?.(key as Issue)}>
+                style={{ color: v.color }}
+                onClick={() =>
+                  onChange?.(v.color === "#EF4444" ? Issue.EMERGENCY : Issue.PREDICTION)
+                }>
                 <span className="*:size-4">{v.icon}</span>
                 <Text.Subtle className="flex-1">{v.locale}</Text.Subtle>
               </Button>

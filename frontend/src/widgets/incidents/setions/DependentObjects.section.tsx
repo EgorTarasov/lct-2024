@@ -20,7 +20,7 @@ const Arrow = () => (
 
 export const DependentObjectsSection: FC<{ data: Incident.Item; selectedUnom: string }> = (x) => {
   return (
-    <div className="flex flex-col flex-1 gap-3 max-h-[450px]">
+    <div className="flex flex-col flex-1 gap-3 max-h-[450px] overflow-auto">
       <div className="flex relative items-center pl-12">
         <Dot className="bg-muted-foreground" />
         <Arrow />
@@ -67,6 +67,16 @@ export const DependentObjectsSection: FC<{ data: Incident.Item; selectedUnom: st
           </IncidentCardWrapper>
         </div>
       ))}
+      {x.data.dependentObjects.consumers.length === 0 && (
+        <div className="flex relative items-center pl-12">
+          <Dot className="bg-sky-500 dark:bg-sky-500/70" />
+          <IncidentCardWrapper className={cn("flex gap-3 items-start flex-row px-3 w-full")}>
+            <div className="space-y-1">
+              <p>Потребители</p>
+            </div>
+          </IncidentCardWrapper>
+        </div>
+      )}
     </div>
   );
 };
