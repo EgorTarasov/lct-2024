@@ -13,8 +13,8 @@ export default defineConfig({
     svgr({
       exportAsDefault: true,
       svgrOptions: {
-        exportType: "default"
-      }
+        exportType: "default",
+      },
     }),
     VitePWA({
       registerType: "autoUpdate",
@@ -22,12 +22,11 @@ export default defineConfig({
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\.lct\.larek\.tech\/consumers\/q$/,
-            handler: 'NetworkFirst',
+            handler: "CacheFirst",
             options: {
-              cacheName: 'api-cache',
+              cacheName: "api-cache",
               expiration: {
-                maxEntries: 50, // Number of entries to store in cache
-                maxAgeSeconds: 24 * 60 * 60, // Cache for 1 day
+                maxEntries: 1, // Keep only one entry
               },
               cacheableResponse: {
                 statuses: [0, 200], // Cache successful responses and opaque responses
@@ -35,20 +34,20 @@ export default defineConfig({
             },
           },
         ],
-      }
-    })
+      },
+    }),
     // basicSsl()
   ],
   build: {
-    target: "esnext"
+    target: "esnext",
   },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      api: path.resolve(__dirname, "./src/api")
-    }
+      api: path.resolve(__dirname, "./src/api"),
+    },
   },
   server: {
-    proxy: {}
-  }
+    proxy: {},
+  },
 });
