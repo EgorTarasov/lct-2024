@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { IncidentDto } from "../models/incident.model";
 import api from "../utils/api";
-import mock from "@/constants/mock-issue.json";
 
 export namespace IncidentsEndpoint {
   export const getRecents = (offset: number, limit: number) => {
