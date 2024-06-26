@@ -137,6 +137,68 @@ class Controller:
         self.dsn = dsn
         self.s3 = s3
 
+    def __dict_to_tuple(self, record: dict, prediction_id: int) -> tuple:
+        # ['P1 <= 0', 'P2 <= 0', 'T1 < min', 'T1 > max', 'Нет',
+        #    'Отсутствие отопления в доме', 'Протечка труб в подъезде',
+        #    'Сильная течь в системе отопления',
+        #    'Температура в квартире ниже нормативной',
+        #    'Температура в помещении общего пользования ниже нормативной',
+        #    'Течь в системе отопления']
+        return (
+            record["unom"],
+            record["date"],
+            prediction_id,
+            record["P1 <= 0"],
+            record["P2 <= 0"],
+            record["T1 < min"],
+            record["T1 > max"],
+            record["Нет"],
+            record["Отсутствие отопления в доме"],
+            record["Протечка труб в подъезде"],
+            record["Сильная течь в системе отопления"],
+            record["Температура в квартире ниже нормативной"],
+            record["Температура в помещении общего пользования ниже нормативной"],
+            record["Течь в системе отопления"],
+        )
+
+    def __save_results_v2(self, results: list[dict], prediction_id: int):
+        query = """
+
+insert into prediction_records(
+    unom,
+    prediction_date,
+    prediction_id,
+    p1_less_than_or_equal_to_0,
+    p2_less_than_or_equal_to_0,
+    t1_less_than_min,
+    t1_greater_than_max,
+    no,
+    lack_of_heating_in_the_house,
+    pipe_leak_in_the_entrance,
+    strong_leak_in_the_heating_system,
+    temperature_in_the_apartment_below_the_standard,
+    temperature_in_public_areas_below_the_standard,
+    leak_in_the_heating_system
+)
+values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+"""
+
+        with psycopg.connect(self.dsn) as conn:
+            with conn.cursor() as cur:
+                logger.info(f"uploading results")
+                for index, record in enumerate(results):
+                    if index % 200 == 0:
+                        conn.commit()
+                    logger.info(f"uploading results {index}/{len(results)}")
+                    # map the keys to the new keys and place them in right order according to the query
+                    cur.execute(
+                        query,
+                        self.__dict_to_tuple(record, prediction_id),
+                    )
+
+            conn.commit()
+            logger.info("saved results")
+
     def __save_results(self, results: dict, region_name: str):
         table_name = "incident"
 
@@ -323,7 +385,11 @@ update predictions set calculated = %s, updated_at = %s, total = %s where id = %
                 prediction = self.model.predict(
                     unom_chunk, dates, prediction_msg["threshold"]
                 )
-                self.__save_results(prediction, prediction_msg["region_name"])
+                # self.__save_results(prediction, prediction_msg["region_name"])
+                self.__save_results_v2(
+                    prediction,
+                    prediction_msg["prediction_id"],
+                )
                 logger.info(
                     f"Prediction: {len(prediction)} in {idx}/{len(unom_splits)}"
                 )

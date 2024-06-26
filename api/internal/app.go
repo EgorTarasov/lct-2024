@@ -12,6 +12,7 @@ import (
 	eventsHandler "github.com/EgorTarasov/lct-2024/api/internal/data/rest/handler"
 	eventsRouter "github.com/EgorTarasov/lct-2024/api/internal/data/rest/router"
 	events "github.com/EgorTarasov/lct-2024/api/internal/data/service"
+	"github.com/EgorTarasov/lct-2024/api/internal/reports"
 	searchHandler "github.com/EgorTarasov/lct-2024/api/internal/search/rest/handler"
 	searchRouter "github.com/EgorTarasov/lct-2024/api/internal/search/rest/router"
 	search "github.com/EgorTarasov/lct-2024/api/internal/search/service"
@@ -149,8 +150,13 @@ func Run(ctx context.Context, _ *sync.WaitGroup) error {
 		return err
 	}
 
-	// data
+	// reports
+	reportRepo := reports.NewReportRepo(pg, tracer)
+	reportService := reports.NewService(reportRepo, s3, tracer)
+	reportHandlers := reports.NewHandler(reportService, tracer)
+	reports.InitReportRouter(app, reportHandlers)
 
+	// data
 	ar := sharedMongo.NewAddressRegistryRepository(mongo, tracer)
 	ev := sharedMongo.NewEventRepo(mongo, tracer)
 	ir := dataPg.NewIncidentRepo(pg, tracer)

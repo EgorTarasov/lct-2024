@@ -74,7 +74,7 @@ definitions:
     - startDate
     - threshold
     type: object
-  internal_search_models.Address:
+  models.Address:
     properties:
       address:
         description: Полный Адрес в реестре.
@@ -83,7 +83,7 @@ definitions:
         description: Граница объекта на карте.
       center:
         allOf:
-        - $ref: '#/definitions/internal_search_models.Point'
+        - $ref: '#/definitions/models.Point'
         description: Центр объекта на карте.
       municipalDistrict:
         description: Район округ.
@@ -92,38 +92,7 @@ definitions:
         description: Уникальный номер объекта недвижимости.
         type: integer
     required:
-    - address
     - municipalDistrict
-    type: object
-  internal_search_models.Event:
-    properties:
-      address:
-        type: string
-      country:
-        type: string
-      ended_at:
-        type: string
-      external_closed_at:
-        type: string
-      external_created_at:
-        type: string
-      external_ended_at:
-        type: string
-      src:
-        type: string
-      title:
-        type: string
-      unom:
-        type: integer
-    type: object
-  internal_search_models.Point:
-    properties:
-      coordinates:
-        items:
-          type: number
-        type: array
-      type:
-        type: string
     type: object
   models.DisconnectionDTO:
     properties:
@@ -157,15 +126,36 @@ definitions:
       dispatchNumber:
         type: string
       externalID:
-        type: string
+        type: integer
       heatDispatcherNumber:
         type: string
       unom:
         type: integer
       События:
         items:
-          $ref: '#/definitions/internal_search_models.Event'
+          $ref: '#/definitions/models.Event'
         type: array
+    type: object
+  models.Event:
+    properties:
+      address:
+        type: string
+      country:
+        type: string
+      ended_at:
+        type: string
+      external_closed_at:
+        type: string
+      external_created_at:
+        type: string
+      external_ended_at:
+        type: string
+      src:
+        type: string
+      title:
+        type: string
+      unom:
+        type: integer
     type: object
   models.Filter:
     properties:
@@ -176,15 +166,36 @@ definitions:
           type: string
         type: array
     type: object
+  models.Graph:
+    properties:
+      name:
+        type: string
+      values:
+        items:
+          $ref: '#/definitions/models.GraphDataPoint'
+        type: array
+    type: object
+  models.GraphDataPoint:
+    properties:
+      temp:
+        type: number
+      time:
+        description: время (1 час, 3 часа и т.п.)
+        type: integer
+    type: object
   models.HeatingPoint:
     properties:
       balance_holder:
         type: string
       commissioning_date: {}
       consumer_full_address:
-        $ref: '#/definitions/internal_search_models.Address'
+        $ref: '#/definitions/models.Address'
+      consumers:
+        items:
+          $ref: '#/definitions/models.Address'
+        type: array
       heating_point_full_address:
-        $ref: '#/definitions/internal_search_models.Address'
+        $ref: '#/definitions/models.Address'
       heating_point_location_type:
         type: string
       heating_point_number:
@@ -193,8 +204,20 @@ definitions:
         type: string
       heating_point_type:
         type: string
+      mkd_consumers:
+        items:
+          $ref: '#/definitions/models.MKDConsumer'
+        type: array
       municipal_district:
         type: string
+      priority:
+        type: integer
+      state_consumers:
+        items:
+          $ref: '#/definitions/models.StateConsumer'
+        type: array
+      unom:
+        type: integer
     type: object
   models.HeatingPointDTO:
     properties:
@@ -202,9 +225,13 @@ definitions:
         type: string
       commissioning_date: {}
       consumer_full_address:
-        $ref: '#/definitions/internal_search_models.Address'
+        $ref: '#/definitions/models.Address'
+      consumers:
+        items:
+          $ref: '#/definitions/models.Address'
+        type: array
       heating_point_full_address:
-        $ref: '#/definitions/internal_search_models.Address'
+        $ref: '#/definitions/models.Address'
       heating_point_location_type:
         type: string
       heating_point_number:
@@ -213,8 +240,20 @@ definitions:
         type: string
       heating_point_type:
         type: string
+      mkd_consumers:
+        items:
+          $ref: '#/definitions/models.MKDConsumer'
+        type: array
       municipal_district:
         type: string
+      priority:
+        type: integer
+      state_consumers:
+        items:
+          $ref: '#/definitions/models.StateConsumer'
+        type: array
+      unom:
+        type: integer
     type: object
   models.Incident:
     properties:
@@ -224,16 +263,30 @@ definitions:
         type: string
       dispatchServices:
         $ref: '#/definitions/models.DispatchServices'
+      graph:
+        $ref: '#/definitions/models.Graph'
       heatingPoint:
         $ref: '#/definitions/models.HeatingPoint'
       id:
         type: integer
+      measurements:
+        items:
+          $ref: '#/definitions/models.Measurement'
+        type: array
       mkdConsumer:
-        $ref: '#/definitions/models.MKDConsumer'
+        items:
+          $ref: '#/definitions/models.MKDConsumer'
+        type: array
       openedAt:
         type: string
       priority:
         type: string
+      relatedObjects:
+        $ref: '#/definitions/models.UnomResult'
+      stateConsumers:
+        items:
+          $ref: '#/definitions/models.StateConsumer'
+        type: array
       status:
         type: string
       title:
@@ -267,6 +320,8 @@ definitions:
         type: integer
       fullAddress:
         type: string
+      priority:
+        type: integer
       projectSeries: {}
       roofCleaningSequence:
         type: integer
@@ -289,8 +344,36 @@ definitions:
         type: integer
       События:
         items:
-          $ref: '#/definitions/internal_search_models.Event'
+          $ref: '#/definitions/models.Event'
         type: array
+    type: object
+  models.Measurement:
+    properties:
+      address:
+        type: string
+      consumer:
+        description: Бюджет / МКД
+        type: string
+      coolantInput:
+        type: number
+      coolantOutput:
+        type: number
+      coolantSuppliedDifferenceLeakage:
+        type: number
+      datetime:
+        type: string
+      energyConsumption:
+        type: number
+      heatingPoint:
+        type: string
+      measurementDate:
+        type: string
+      measuringDeviceBrand:
+        type: string
+      measuringDeviceHours:
+        type: number
+      unom:
+        type: integer
     type: object
   models.MoekDTO:
     properties:
@@ -311,6 +394,15 @@ definitions:
       type:
         type: string
     type: object
+  models.Point:
+    properties:
+      coordinates:
+        items:
+          type: number
+        type: array
+      type:
+        type: string
+    type: object
   models.PropertyDTO:
     properties:
       disconnections:
@@ -322,6 +414,31 @@ definitions:
       point: {}
       polygon: {}
     type: object
+  models.StateConsumer:
+    properties:
+      admDistrict:
+        type: string
+      area: {}
+      floors: {}
+      material:
+        type: string
+      municupalDistrict:
+        type: string
+      priority:
+        type: integer
+      propertyClass:
+        type: string
+      purpose:
+        type: string
+      type:
+        type: string
+      unom:
+        type: integer
+      События:
+        items:
+          $ref: '#/definitions/models.Event'
+        type: array
+    type: object
   models.StatePropertySearchResult:
     properties:
       address:
@@ -332,7 +449,7 @@ definitions:
         description: Граница объекта на карте.
       center:
         allOf:
-        - $ref: '#/definitions/internal_search_models.Point'
+        - $ref: '#/definitions/models.Point'
         description: Центр объекта на карте.
       class:
         type: string
@@ -350,8 +467,20 @@ definitions:
         description: Уникальный номер объекта недвижимости.
         type: integer
     required:
-    - address
     - municipalDistrict
+    type: object
+  models.UnomResult:
+    properties:
+      consumer:
+        items:
+          $ref: '#/definitions/models.MKDConsumer'
+        type: array
+      dispatchService:
+        $ref: '#/definitions/models.DispatchServices'
+      heatingPoint:
+        $ref: '#/definitions/models.HeatingPoint'
+      unom:
+        type: integer
     type: object
   models.Upload:
     properties:
@@ -368,6 +497,46 @@ definitions:
       userID:
         type: integer
     type: object
+  reports.CreateReport:
+    properties:
+      endDate:
+        type: string
+      startDate:
+        type: string
+      title:
+        type: string
+    type: object
+  reports.Report:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        type: string
+      endDate:
+        type: string
+      id:
+        type: integer
+      s3Key:
+        type: string
+      startDate:
+        type: string
+      status:
+        $ref: '#/definitions/reports.ReportState'
+      title:
+        type: string
+      updatedAt:
+        type: string
+      userID:
+        type: integer
+    type: object
+  reports.ReportState:
+    enum:
+    - in_progress
+    - ready
+    type: string
+    x-enum-varnames:
+    - ReportStateInProgress
+    - ReportStateReady
   token.UserPayload:
     properties:
       auth_type:
@@ -601,6 +770,26 @@ paths:
       summary: создание инцидента
       tags:
       - issue
+  /issue/heating-point/{unom}:
+    get:
+      parameters:
+      - description: unom
+        in: path
+        name: unom
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Incident'
+            type: array
+      summary: получение информации об инцидетнах по уникальному номеру объекта
+      tags:
+      - issue
   /issue/id/{id}:
     get:
       parameters:
@@ -619,7 +808,7 @@ paths:
       summary: получение информации об инцидетне по его идентификатору
       tags:
       - issue
-  /issue/recent:
+  /issue/list:
     get:
       parameters:
       - description: limit
@@ -642,6 +831,75 @@ paths:
       summary: получение информации об инцидетнах
       tags:
       - issue
+  /reports/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Получение отчета
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/reports.Report'
+      summary: Получение отчета
+      tags:
+      - reports
+  /reports/create:
+    post:
+      consumes:
+      - application/json
+      description: Создание отчета
+      parameters:
+      - description: reportCreate
+        in: body
+        name: reportCreate
+        required: true
+        schema:
+          $ref: '#/definitions/reports.CreateReport'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+      summary: Создание отчета
+      tags:
+      - reports
+  /reports/my:
+    get:
+      consumes:
+      - application/json
+      description: Получение списка отчетов
+      parameters:
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/reports.Report'
+            type: array
+      summary: Получение списка отчетов
+      tags:
+      - reports
   /search/objects:
     get:
       parameters:
@@ -664,6 +922,24 @@ paths:
       summary: поиск по объектам (потребителям) тепло энергии
       tags:
       - search
+  /source/q/:unom:
+    get:
+      parameters:
+      - description: уникальные номера объектов
+        in: query
+        name: unoms
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Address'
+      summary: получение данных о ТП по уникальным номерам
+      tags:
+      - search consumers
   /users/file/list:
     get:
       description: list uploads

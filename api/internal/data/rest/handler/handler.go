@@ -82,15 +82,16 @@ func (mc *dataController) GetPredictions(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	if err := mc.v.Struct(req); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
-	}
+	//if err := mc.v.Struct(req); err != nil {
+	//	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+	//}
 
-	startDate, err := time.Parse("01-02-2006", req.StartDate)
+	startDate, err := time.Parse("02-01-2006", req.StartDate)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid format for startDate required: dd-mm-YYYY"})
 	}
-	endDate, err := time.Parse("01-02-2006", req.EndDate)
+	// parse data as dd-mm-YYYY
+	endDate, err := time.Parse("02-01-2006", req.EndDate)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid format for endDate required: dd-mm-YYYY"})
 	}

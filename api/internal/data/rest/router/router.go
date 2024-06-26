@@ -16,7 +16,7 @@ type handler interface {
 func InitRoutes(app *fiber.App, h handler) {
 	dataRouter := app.Group("/data")
 
-	dataRouter.Get("/predict", middleware.UserClaimsMiddleware, h.GetPredictions)
+	dataRouter.Post("/predict", middleware.UserClaimsMiddleware, h.GetPredictions)
 
 	issueRouter := app.Group("/issue")
 	issueRouter.Get("/recent", middleware.UserClaimsMiddleware, h.GetRecent)
