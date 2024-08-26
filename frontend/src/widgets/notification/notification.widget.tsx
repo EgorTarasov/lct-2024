@@ -1,4 +1,4 @@
-import { Text } from "@/components/typography/Text";
+import { Text } from "@/components/ui/typography/Text";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";

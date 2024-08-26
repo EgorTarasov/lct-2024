@@ -1,4 +1,4 @@
-import { Text } from "@/components/typography/Text";
+import { Text } from "@/components/ui/typography/Text";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,

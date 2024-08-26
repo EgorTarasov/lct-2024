@@ -1,5 +1,5 @@
 import { ConsumerCard } from "@/components/cards/consumer.card";
-import { Text } from "@/components/typography/Text";
+import { Text } from "@/components/ui/typography/Text";
 import {
   Breadcrumb,
   BreadcrumbItem,

@@ -1,4 +1,4 @@
-import { Text } from "@/components/typography/Text";
+import { Text } from "@/components/ui/typography/Text";
 import { Incident } from "@/types/incident.type";
 import { FC } from "react";
 import { IncidentCardWrapper } from "./incident-card-wrapper";

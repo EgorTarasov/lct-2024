@@ -2,7 +2,7 @@ import { Section } from "@/components/cards/Section";
 import { HeatDistributorCardReadonly } from "@/components/cards/heat-distributor.card";
 import { IssueLink } from "@/components/cards/issue.card";
 import { TitleInfo } from "@/components/cards/title-info";
-import { Text } from "@/components/typography/Text";
+import { Text } from "@/components/ui/typography/Text";
 import {
   Accordion,
   AccordionItem,

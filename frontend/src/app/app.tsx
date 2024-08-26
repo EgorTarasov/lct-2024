@@ -5,7 +5,9 @@ import "./globals.css";
 import { configure } from "mobx";
 import { registerSW } from "virtual:pwa-register";
 
-registerSW({ immediate: true });
+registerSW({
+  immediate: true,
+});
 
 configure({
   enforceActions: "never",

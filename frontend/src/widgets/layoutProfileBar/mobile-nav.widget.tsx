@@ -1,5 +1,5 @@
 import { useTheme } from "@/components/hoc/theme-provider";
-import { Text } from "@/components/typography/Text";
+import { Text } from "@/components/ui/typography/Text";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,

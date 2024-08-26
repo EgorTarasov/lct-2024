@@ -4,7 +4,7 @@ import { FC } from "react";
 import { IncidentCardWrapper } from "../components/incident-card-wrapper";
 import { ChevronDown } from "lucide-react";
 import { PriorityIcon } from "@/components/cards/priority-icon";
-import { Text } from "@/components/typography/Text";
+import { Text } from "@/components/ui/typography/Text";
 import { TitleInfo } from "@/components/cards/title-info";
 
 const Dot: FC<{ className?: string }> = (x) => (

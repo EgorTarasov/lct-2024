@@ -1,5 +1,5 @@
 import { HeatDistributorCard } from "@/components/cards/heat-distributor.card";
-import { Text } from "@/components/typography/Text";
+import { Text } from "@/components/ui/typography/Text";
 import {
   Breadcrumb,
   BreadcrumbItem,

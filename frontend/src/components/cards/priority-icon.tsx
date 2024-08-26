@@ -2,7 +2,7 @@ import { Priority, PriorityLocaleMap } from "@/types/priority.type";
 import { FC } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
-import { Text } from "../typography/Text";
+import { Text } from "../ui/typography/Text";
 import { cn } from "@/utils/cn";
 
 export const PriorityCard: FC<{ data: Priority }> = (x) => {

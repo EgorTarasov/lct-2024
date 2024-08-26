@@ -1,4 +1,4 @@
-import { Text } from "@/components/typography/Text";
+import { Text } from "@/components/ui/typography/Text";
 import { Button } from "@/components/ui/button";
 import { IncidentsPageViewModel } from "@/widgets/incidents/incidents.page.vm";
 import { createFileRoute } from "@tanstack/react-router";

@@ -10,6 +10,6 @@ export namespace EventDto {
     title: z.string(),
     unom: z.number(),
     external_created_at: z.string(),
-    external_ended_at: z.string()
+    external_ended_at: z.string(),
   });
 }

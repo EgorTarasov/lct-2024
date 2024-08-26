@@ -280,10 +280,14 @@ class mapStore implements DisposableVm {
   buildFeatureLayer() {
     if (this.lowPriorityLayer) {
       this.lowPriorityLayer.remove();
+      this.mediumPriorityLayer?.remove();
+      this.highPriorityLayer?.remove();
     }
 
     if (!this.filteredConsumersPolygons?.length) {
       this.lowPriorityLayer?.remove();
+      this.mediumPriorityLayer?.remove();
+      this.highPriorityLayer?.remove();
       return;
     }
 
@@ -330,10 +334,6 @@ class mapStore implements DisposableVm {
     );
 
     if (this.map) {
-      this.lowPriorityLayer?.remove();
-      this.mediumPriorityLayer?.remove();
-      this.highPriorityLayer?.remove();
-
       this.lowPriorityLayer.addTo(this.map);
       this.mediumPriorityLayer.addTo(this.map);
       this.highPriorityLayer.addTo(this.map);

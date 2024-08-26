@@ -1,5 +1,5 @@
 import { IssueCard } from "@/components/cards/issue.card";
-import { Text } from "@/components/typography/Text";
+import { Text } from "@/components/ui/typography/Text";
 import {
   Accordion,
   AccordionContent,

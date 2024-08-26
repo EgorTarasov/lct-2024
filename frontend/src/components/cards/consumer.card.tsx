@@ -1,7 +1,7 @@
 import { Consumer } from "@/types/consumer.type";
 import { Link } from "@tanstack/react-router";
 import { FC } from "react";
-import { Text } from "../typography/Text";
+import { Text } from "../ui/typography/Text";
 import { PriorityCard, PriorityIcon } from "./priority-icon";
 import { IssueCard } from "./issue.card";
 import { TitleInfo } from "./title-info";

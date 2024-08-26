@@ -1,4 +1,4 @@
-import { Text } from "@/components/typography/Text";
+import { Text } from "@/components/ui/typography/Text";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { AuthService } from "@/stores/auth.service";
 import { isLoggedIn } from "@/utils/auth";

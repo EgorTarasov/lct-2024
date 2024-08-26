@@ -16,15 +16,18 @@ export namespace HeatDistributorDto {
         .array(
           z.object({
             Key: z.string(),
-            Value: z.string().or(z.number().array().length(2).array().array()).or(z.any())
-          })
+            Value: z
+              .string()
+              .or(z.number().array().length(2).array().array())
+              .or(z.any()),
+          }),
         )
         .nullable(),
       municipalDistrict: z.string(),
       center: z.object({
         type: z.string(),
-        coordinates: z.array(z.number()).nullable()
-      })
+        coordinates: z.array(z.number()).nullable(),
+      }),
     }),
     heating_point_full_address: z.object({
       unom: z.number(),
@@ -34,15 +37,18 @@ export namespace HeatDistributorDto {
         .array(
           z.object({
             Key: z.string(),
-            Value: z.string().or(z.number().array().length(2).array().array()).or(z.any())
-          })
+            Value: z
+              .string()
+              .or(z.number().array().length(2).array().array())
+              .or(z.any()),
+          }),
         )
         .nullable(),
       center: z.object({
         type: z.string(),
-        coordinates: z.array(z.number()).nullable()
-      })
-    })
+        coordinates: z.array(z.number()).nullable(),
+      }),
+    }),
   });
   export type Item = z.infer<typeof Item>;
 }

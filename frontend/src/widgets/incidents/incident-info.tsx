@@ -3,7 +3,7 @@ import { observer } from "mobx-react-lite";
 import { FC } from "react";
 import { IncidentCardWrapper } from "./components/incident-card-wrapper";
 import { PriorityCard } from "@/components/cards/priority-icon";
-import { Text } from "@/components/typography/Text";
+import { Text } from "@/components/ui/typography/Text";
 import { Separator } from "@/components/ui/separator";
 import { TitleInfo } from "@/components/cards/title-info";
 

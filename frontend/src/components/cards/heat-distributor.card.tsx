@@ -1,6 +1,6 @@
 import { HeatDistributor } from "@/types/heat.type";
 import { FC } from "react";
-import { Text } from "../typography/Text";
+import { Text } from "../ui/typography/Text";
 import { IssueCard, IssueIcon } from "./issue.card";
 import { Link } from "@tanstack/react-router";
 import { PriorityCard, PriorityIcon } from "./priority-icon";

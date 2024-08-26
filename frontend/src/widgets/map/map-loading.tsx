@@ -1,4 +1,4 @@
-import { Text } from "@/components/typography/Text";
+import { Text } from "@/components/ui/typography/Text";
 import { LoadingWrapper } from "@/components/ui/loaders/LoadingWrapper";
 
 export const MapLoading = () => {

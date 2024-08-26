@@ -3,7 +3,7 @@ import { FC } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Button } from "../ui/button";
 import { Clock4Icon, XIcon } from "lucide-react";
-import { Text } from "../typography/Text";
+import { Text } from "../ui/typography/Text";
 import { getTimeDifference } from "@/utils/time";
 import { PriorityLocaleMap } from "@/types/priority.type";
 

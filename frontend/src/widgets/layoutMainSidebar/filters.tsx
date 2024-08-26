@@ -1,5 +1,5 @@
 import DropdownMultiple from "@/components/DropdownMultiple";
-import { Text } from "@/components/typography/Text";
+import { Text } from "@/components/ui/typography/Text";
 import { Button } from "@/components/ui/button";
 import { MapStore } from "@/stores/map.store";
 import { observer } from "mobx-react-lite";

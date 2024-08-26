@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
 import { ElementRef, FC, lazy, useEffect, useId, useRef, useState } from "react";
 import { IncidentCardWrapper } from "./incident-card-wrapper";
-import { Text } from "@/components/typography/Text";
+import { Text } from "@/components/ui/typography/Text";
 import {
   ColorRule,
   DataAsArray,
